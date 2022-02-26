@@ -44,6 +44,9 @@ dependencies:
   dio: ^4.0.4
   flutter_polyline_points: ^1.0.0
   custom_info_window: ^1.0.1
+  flutter_svg: ^1.0.3
+  font_awesome_flutter: ^9.2.0
+  flutter_rating_bar: ^4.0.0
   
   
   
@@ -101,6 +104,10 @@ flutter:
     -  assets/icon/
     - assets/images/
     - assets/markers/
+    - assets/Coffee/coffeeicon.svg
+    - assets/Coffee/milkicon.svg
+    -  assets/icons/
+    -  assets/hotel/
     
  
 

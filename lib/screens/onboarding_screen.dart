@@ -252,7 +252,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                     Navigator.pushNamed(context, '/SignInScreen');
+                    },
                     child: Center(
                       child: Padding(
                         padding: EdgeInsets.only(

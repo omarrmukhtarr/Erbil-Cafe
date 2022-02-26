@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:erbilcafe/screens/detail_page.dart';
 
 class PopularScreen extends StatelessWidget {
   static var screenHeight;
@@ -41,8 +42,8 @@ class PopularScreen extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        // Navigator.of(context)
-        //     .push(MaterialPageRoute(builder: (context) => DetailPage()));
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => DetailPage()));
       },
       child: Container(
         width: screenWidth * 0.4 + 10,
@@ -300,6 +301,212 @@ class PopularScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    buildSingleItem(
+                      context: context,
+                      images: "assets/Coffee/coffee1.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Oat Milk",
+                      price: 4.20,
+                      rating: 4.5,
+                    ),
+                    buildSingleItem(
+                      context: context,
+                      images: "assets/Coffee/coffee8.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Chocolate",
+                      price: 3.14,
+                      rating: 4.5,
+                    ),
+                    buildSingleItem(
+                      context: context,
+                      images: "assets/Coffee/coffee2.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Chocolate",
+                      price: 3.14,
+                      rating: 4.5,
+                    ),
+                    buildSingleItem(
+                      images: "assets/Coffee/coffee4.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Chocolate",
+                      price: 3.14,
+                      rating: 4.5,
+                    ),
+                    buildSingleItem(
+                      context: context,
+                      images: "assets/Coffee/coffee5.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Chocolate",
+                      price: 3.14,
+                      rating: 4.5,
+                    ),
+                    buildSingleItem(
+                      context: context,
+                      images: "assets/Coffee/coffee6.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Chocolate",
+                      price: 3.14,
+                      rating: 4.5,
+                    ),
+                    buildSingleItem(
+                      context: context,
+                      images: "assets/Coffee/coffee7.jpeg",
+                      title: "Cappuccino",
+                      subTitle: "With Chocolate",
+                      price: 3.14,
+                      rating: 4.5,
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 5),
+                child: ListTile(
+                  leading: Text(
+                    "Special for you",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ),
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12.0),
+                    margin: EdgeInsets.symmetric(horizontal: 15),
+                    height: screenHeight * 0.2 - 20,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Color(0xff171b22),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 2.0,
+                                  spreadRadius: 1.0,
+                                  color: Color(0xff30221f),
+                                ),
+                              ],
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: AssetImage(
+                                  "assets/Coffee/coffee3.jpeg",
+                                ),
+                              ),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20.0,
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "5 Coffee Beans you\n Must Try!",
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              Text(
+                                "With Oat Milk",
+                                style: TextStyle(
+                                  color: Color(0xffaeaeae),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "\$\t",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xffd17842),
+                                        ),
+                                      ),
+                                      Text(
+                                        "4.20",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffd17842),
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Icon(Icons.add,
+                                        size: 30, color: Colors.white),
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(right: 15),
+                    height: 25.0,
+                    width: 50.0,
+                    decoration: BoxDecoration(
+                      color: Color(0xff231715),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(20.0),
+                        bottomLeft: Radius.circular(20.0),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Icon(
+                          Icons.star,
+                          size: 15,
+                          color: Color(0xffd17842),
+                        ),
+                        Text(
+                          "4.5",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 40,
               ),
               SingleChildScrollView(
                 physics: BouncingScrollPhysics(),

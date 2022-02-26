@@ -1,4 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:erbilcafe/profile/profile_screen.dart';
 import 'package:erbilcafe/screens/Location_Screen.dart';
 import 'package:erbilcafe/screens/Popular_Screen.dart';
 import 'package:erbilcafe/screens/Profile_Screen.dart';
@@ -8,6 +9,8 @@ import 'package:hexcolor/hexcolor.dart';
 
 class BottomNavigationHelper extends StatefulWidget {
   const BottomNavigationHelper({Key? key}) : super(key: key);
+
+  
 
   @override
   BottomNavigationHelperState createState() => BottomNavigationHelperState();

@@ -1,513 +1,625 @@
+import 'package:erbilcafe/screens/hotel_app_theme.dart';
+import 'package:erbilcafe/screens/hotel_list_data.dart';
+import 'package:erbilcafe/screens/hotel_list_view.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 
-class ShopScreen extends StatelessWidget {
-  static var screenHeight;
-  static var screenWidth;
+class ShopScreen extends StatefulWidget {
+  const ShopScreen({Key? key}) : super(key: key);
 
-  Widget buildCoffeeCategory({categoryName, isSelected}) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20),
-      child: Column(
-        children: [
-          Text(
-            categoryName,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Color(0xffd17842) : Color(0xff52555a),
-            ),
-          ),
-          isSelected
-              ? Text(
-                  "⬤",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xffd17842),
-                  ),
-                )
-              : Text(""),
-        ],
-      ),
-    );
+  @override
+  _ShopScreenState createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
+  AnimationController? animationController;
+  List<HotelListData> hotelList = HotelListData.hotelList;
+  final ScrollController _scrollController = ScrollController();
+
+  DateTime startDate = DateTime.now();
+  DateTime endDate = DateTime.now().add(const Duration(days: 5));
+
+  @override
+  void initState() {
+    animationController = AnimationController(
+        duration: const Duration(milliseconds: 1000), vsync: this);
+    super.initState();
   }
 
-  Widget buildSingleItem({
-    images,
-    title,
-    subTitle,
-    price,
-    context,
-    rating,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        // Navigator.of(context)
-        //     .push(MaterialPageRoute(builder: (context) => DetailPage()));
-      },
-      child: Container(
-        width: screenWidth * 0.4 + 10,
-        height: screenHeight * 0.3,
-        margin: EdgeInsets.all(15.0),
-        padding: EdgeInsets.all(10.0),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Color(0xff17191f),
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        child: Stack(
-          alignment: Alignment.topRight,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 2.0,
-                          spreadRadius: 1.0,
-                          color: Color(0xff30221f),
-                        ),
-                      ],
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: AssetImage(images),
-                      ),
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 3,
-                      ),
-                      Text(
-                        subTitle,
-                        style: TextStyle(
-                          color: Color(0xffaeaeae),
-                          fontSize: 10,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                "\$\t",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xffd17842)),
-                              ),
-                              Text(
-                                "$price",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Color(0xffd17842),
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: Icon(
-                              Icons.add,
-                              size: 25,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              height: 20.0,
-              width: 55.0,
-              decoration: BoxDecoration(
-                color: Color(0xff231715),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.0),
-                  bottomLeft: Radius.circular(15.0),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(
-                    Icons.star,
-                    size: 12,
-                    color: Color(0xffd17842),
-                  ),
-                  Text(
-                    "$rating",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  Future<bool> getData() async {
+    await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+    return true;
+  }
+
+  @override
+  void dispose() {
+    animationController?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      backgroundColor: HexColor('#E6CCB2'),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: Color(0xff141921),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Icon(
-                        Icons.grid_view_rounded,
-                        color: Color(0xff4d4f52),
-                        size: 20,
-                      ),
-                    ),
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                          color: Color(0xff141921),
-                          borderRadius: BorderRadius.circular(15.0),
-                          image: DecorationImage(
-                            image: AssetImage("assets/Coffee/profile.png"),
-                          )),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+    return Theme(
+      data: HotelAppTheme.buildLightTheme(),
+      child: Container(
+        child: Scaffold(
+          backgroundColor: HexColor('#E6CCB2'),
+          body: Stack(
+            children: <Widget>[
+              InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                onTap: () {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                },
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      "Find the best",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      "coffee for you",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                  children: <Widget>[
+                    getAppBarUI(),
+                    Expanded(
+                      child: NestedScrollView(
+                        controller: _scrollController,
+                        headerSliverBuilder:
+                            (BuildContext context, bool innerBoxIsScrolled) {
+                          return <Widget>[
+                            SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                  (BuildContext context, int index) {
+                                return Column(
+                                  children: <Widget>[
+                                    getSearchBarUI(),
+                                    getTimeDateUI(),
+                                  ],
+                                );
+                              }, childCount: 1),
+                            ),
+                            SliverPersistentHeader(
+                              pinned: true,
+                              floating: true,
+                              delegate: ContestTabHeader(
+                                getFilterBarUI(),
+                              ),
+                            ),
+                          ];
+                        },
+                        body: Container(
+                          color:
+                              HotelAppTheme.buildLightTheme().backgroundColor,
+                          child: ListView.builder(
+                            itemCount: hotelList.length,
+                            padding: const EdgeInsets.only(top: 8),
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (BuildContext context, int index) {
+                              final int count =
+                                  hotelList.length > 10 ? 10 : hotelList.length;
+                              final Animation<double> animation =
+                                  Tween<double>(begin: 0.0, end: 1.0).animate(
+                                      CurvedAnimation(
+                                          parent: animationController!,
+                                          curve: Interval(
+                                              (1 / count) * index, 1.0,
+                                              curve: Curves.fastOutSlowIn)));
+                              animationController?.forward();
+                              return HotelListView(
+                                callback: () {},
+                                hotelData: hotelList[index],
+                                animation: animation,
+                                animationController: animationController!,
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     )
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 30,
-                ),
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Color(0xff52555a),
-                      ),
-                      hintText: "Find Your Coffee...",
-                      hintStyle: TextStyle(
-                        color: Color(0xff52555a),
-                      ),
-                      fillColor: Color(0xff141921),
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(10.0),
-                      )),
-                ),
-              ),
-              SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    buildCoffeeCategory(
-                      categoryName: "Cappuccino",
-                      isSelected: true,
-                    ),
-                    buildCoffeeCategory(
-                      categoryName: "Espresso",
-                      isSelected: false,
-                    ),
-                    buildCoffeeCategory(
-                      categoryName: "Latte",
-                      isSelected: false,
-                    ),
-                    buildCoffeeCategory(
-                      categoryName: "Espresso",
-                      isSelected: false,
-                    ),
-                    buildCoffeeCategory(
-                      categoryName: "Cappuccino",
-                      isSelected: false,
-                    ),
-                  ],
-                ),
-              ),
-              SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    buildSingleItem(
-                      context: context,
-                      images: "assets/Coffee/coffee1.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Oat Milk",
-                      price: 4.20,
-                      rating: 4.5,
-                    ),
-                    buildSingleItem(
-                      context: context,
-                      images: "assets/Coffee/coffee8.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Chocolate",
-                      price: 3.14,
-                      rating: 4.5,
-                    ),
-                    buildSingleItem(
-                      context: context,
-                      images: "assets/Coffee/coffee2.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Chocolate",
-                      price: 3.14,
-                      rating: 4.5,
-                    ),
-                    buildSingleItem(
-                      images: "assets/Coffee/coffee4.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Chocolate",
-                      price: 3.14,
-                      rating: 4.5,
-                    ),
-                    buildSingleItem(
-                      context: context,
-                      images: "assets/Coffee/coffee5.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Chocolate",
-                      price: 3.14,
-                      rating: 4.5,
-                    ),
-                    buildSingleItem(
-                      context: context,
-                      images: "assets/Coffee/coffee6.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Chocolate",
-                      price: 3.14,
-                      rating: 4.5,
-                    ),
-                    buildSingleItem(
-                      context: context,
-                      images: "assets/Coffee/coffee7.jpeg",
-                      title: "Cappuccino",
-                      subTitle: "With Chocolate",
-                      price: 3.14,
-                      rating: 4.5,
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 5),
-                child: ListTile(
-                  leading: Text(
-                    "Special for you",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              ),
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(12.0),
-                    margin: EdgeInsets.symmetric(horizontal: 15),
-                    height: screenHeight * 0.2 - 20,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Color(0xff171b22),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  blurRadius: 2.0,
-                                  spreadRadius: 1.0,
-                                  color: Color(0xff30221f),
-                                ),
-                              ],
-                              image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: AssetImage(
-                                  "assets/Coffee/coffee3.jpeg",
-                                ),
-                              ),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "5 Coffee Beans you\n Must Try!",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              Text(
-                                "With Oat Milk",
-                                style: TextStyle(
-                                  color: Color(0xffaeaeae),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "\$\t",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xffd17842),
-                                        ),
-                                      ),
-                                      Text(
-                                        "4.20",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffd17842),
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    child: Icon(Icons.add,
-                                        size: 30, color: Colors.white),
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(right: 15),
-                    height: 25.0,
-                    width: 50.0,
-                    decoration: BoxDecoration(
-                      color: Color(0xff231715),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(20.0),
-                        bottomLeft: Radius.circular(20.0),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 15,
-                          color: Color(0xffd17842),
-                        ),
-                        Text(
-                          "4.5",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              )
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget getListUI() {
+    return Container(
+      decoration: BoxDecoration(
+        color: HotelAppTheme.buildLightTheme().backgroundColor,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              offset: const Offset(0, -2),
+              blurRadius: 8.0),
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Container(
+            height: MediaQuery.of(context).size.height - 156 - 50,
+            child: FutureBuilder<bool>(
+              future: getData(),
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox();
+                } else {
+                  return ListView.builder(
+                    itemCount: hotelList.length,
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (BuildContext context, int index) {
+                      final int count =
+                          hotelList.length > 10 ? 10 : hotelList.length;
+                      final Animation<double> animation =
+                          Tween<double>(begin: 0.0, end: 1.0).animate(
+                              CurvedAnimation(
+                                  parent: animationController!,
+                                  curve: Interval((1 / count) * index, 1.0,
+                                      curve: Curves.fastOutSlowIn)));
+                      animationController?.forward();
+
+                      return HotelListView(
+                        callback: () {},
+                        hotelData: hotelList[index],
+                        animation: animation,
+                        animationController: animationController!,
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget getHotelViewList() {
+    final List<Widget> hotelListViews = <Widget>[];
+    for (int i = 0; i < hotelList.length; i++) {
+      final int count = hotelList.length;
+      final Animation<double> animation =
+          Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: animationController!,
+          curve: Interval((1 / count) * i, 1.0, curve: Curves.fastOutSlowIn),
+        ),
+      );
+      hotelListViews.add(
+        HotelListView(
+          callback: () {},
+          hotelData: hotelList[i],
+          animation: animation,
+          animationController: animationController!,
+        ),
+      );
+    }
+    animationController?.forward();
+    return Column(
+      children: hotelListViews,
+    );
+  }
+
+  Widget getTimeDateUI() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 18, bottom: 16),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Row(
+              children: <Widget>[
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    focusColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.grey.withOpacity(0.2),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(4.0),
+                    ),
+                    onTap: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      // setState(() {
+                      //   isDatePopupOpen = true;
+                      // });
+                      // showDemoDialog(context: context);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 8, right: 8, top: 4, bottom: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Choose date',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w100,
+                                fontSize: 16,
+                                color: Colors.grey.withOpacity(0.8)),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          // Text(
+                          //   '${DateFormat("dd, MMM").format(startDate)} - ${DateFormat("dd, MMM").format(endDate)}',
+                          //   style: TextStyle(
+                          //     fontWeight: FontWeight.w100,
+                          //     fontSize: 16,
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Container(
+              width: 1,
+              height: 42,
+              color: Colors.grey.withOpacity(0.8),
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: <Widget>[
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    focusColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.grey.withOpacity(0.2),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(4.0),
+                    ),
+                    onTap: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 8, right: 8, top: 4, bottom: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Number of Rooms',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w100,
+                                fontSize: 16,
+                                color: Colors.grey.withOpacity(0.8)),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            '1 Room - 2 Adults',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w100,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget getSearchBarUI() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: HotelAppTheme.buildLightTheme().backgroundColor,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(38.0),
+                  ),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        offset: const Offset(0, 2),
+                        blurRadius: 8.0),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 16, right: 16, top: 4, bottom: 4),
+                  child: TextField(
+                    onChanged: (String txt) {},
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                    cursorColor: HotelAppTheme.buildLightTheme().primaryColor,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'London...',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: HotelAppTheme.buildLightTheme().primaryColor,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(38.0),
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                    color: Colors.grey.withOpacity(0.4),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8.0),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(32.0),
+                ),
+                onTap: () {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Icon(FontAwesomeIcons.search,
+                      size: 20,
+                      color: HotelAppTheme.buildLightTheme().backgroundColor),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget getFilterBarUI() {
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 24,
+            decoration: BoxDecoration(
+              color: HotelAppTheme.buildLightTheme().backgroundColor,
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    offset: const Offset(0, -2),
+                    blurRadius: 8.0),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          color: HotelAppTheme.buildLightTheme().backgroundColor,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 4),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '530 hotels found',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w100,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    focusColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.grey.withOpacity(0.2),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(4.0),
+                    ),
+                    onTap: () {
+                      // FocusScope.of(context).requestFocus(FocusNode());
+                      // Navigator.push<dynamic>(
+                      //   context,
+                      //   MaterialPageRoute<dynamic>(
+                      //       builder: (BuildContext context) => FiltersScreen(),
+                      //       fullscreenDialog: true),
+                      // );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Row(
+                        children: <Widget>[
+                          Text(
+                            'Filter',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w100,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.sort,
+                                color: HotelAppTheme.buildLightTheme()
+                                    .primaryColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Divider(
+            height: 1,
+          ),
+        )
+      ],
+    );
+  }
+
+  // void showDemoDialog({BuildContext? context}) {
+  //   showDialog<dynamic>(
+  //     context: context!,
+  //     builder: (BuildContext context) => CalendarPopupView(
+  //       barrierDismissible: true,
+  //       minimumDate: DateTime.now(),
+  //       //  maximumDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day + 10),
+  //       initialEndDate: endDate,
+  //       initialStartDate: startDate,
+  //       onApplyClick: (DateTime startData, DateTime endData) {
+  //         setState(() {
+  //           startDate = startData;
+  //           endDate = endData;
+  //         });
+  //       },
+  //       onCancelClick: () {},
+  //     ),
+  //   );
+  // }
+
+  Widget getAppBarUI() {
+    return Container(
+      decoration: BoxDecoration(
+        color: HotelAppTheme.buildLightTheme().backgroundColor,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              offset: const Offset(0, 2),
+              blurRadius: 8.0),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top, left: 8, right: 8),
+        child: Row(
+          children: <Widget>[
+            Container(
+              alignment: Alignment.centerLeft,
+              width: AppBar().preferredSize.height + 40,
+              height: AppBar().preferredSize.height,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(32.0),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.arrow_back),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'Explore',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 22,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: AppBar().preferredSize.height + 40,
+              height: AppBar().preferredSize.height,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(32.0),
+                      ),
+                      onTap: () {},
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.favorite_border),
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(32.0),
+                      ),
+                      onTap: () {},
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(FontAwesomeIcons.mapMarkerAlt),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ContestTabHeader extends SliverPersistentHeaderDelegate {
+  ContestTabHeader(
+    this.searchUI,
+  );
+  final Widget searchUI;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return searchUI;
+  }
+
+  @override
+  double get maxExtent => 52.0;
+
+  @override
+  double get minExtent => 52.0;
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
+    return false;
   }
 }
