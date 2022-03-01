@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:erbilcafe/utilities/styles.dart';
+
+import 'package:erbilcafe/OnboardScreen/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -131,6 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             Text(
                               'ئەپلیکەیشنی ئەربیل کافێ ناساندنێکی گشتگیری کافێیەکانی هەولێرە',
                               style: kSubtitleStyle,
+                              textDirection: TextDirection.rtl,
                             ),
                           ],
                         ),
@@ -253,7 +255,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   FlatButton(
                     onPressed: () {
-                     Navigator.pushNamed(context, '/SignInScreen');
+                      Navigator.pushNamed(context, '/SignInScreen');
                     },
                     child: Center(
                       child: Padding(

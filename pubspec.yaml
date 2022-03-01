@@ -102,12 +102,12 @@ flutter:
     -  assets/lottie/
     -  assets/Coffee/
     -  assets/icon/
-    - assets/images/
-    - assets/markers/
-    - assets/Coffee/coffeeicon.svg
-    - assets/Coffee/milkicon.svg
+    -  assets/images/
+    -  assets/markers/
+    -  assets/Coffee/coffeeicon.svg
+    -  assets/Coffee/milkicon.svg
     -  assets/icons/
-    -  assets/hotel/
+    -  assets/shop/
     
  
 

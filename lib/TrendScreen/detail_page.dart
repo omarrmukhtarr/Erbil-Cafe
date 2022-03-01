@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:erbilcafe/screens/BottomNavigationHelper.dart';
-import 'package:erbilcafe/screens/Popular_Screen.dart';
+
+import 'package:erbilcafe/Navbar/BottomNavigationHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -136,7 +136,7 @@ class DetailPage extends StatelessWidget {
                                                               .spaceEvenly,
                                                       children: [
                                                         SvgPicture.asset(
-                                                          "assets/coffee/coffeeicon.svg",
+                                                          "assets/Coffee/coffeeicon.svg",
                                                           height: 20,
                                                           color:
                                                               Color(0xffd17842),
@@ -168,7 +168,7 @@ class DetailPage extends StatelessWidget {
                                                               .spaceEvenly,
                                                       children: [
                                                         SvgPicture.asset(
-                                                          'assets/coffee/milkicon.svg',
+                                                          'assets/Coffee/milkicon.svg',
                                                           height: 20,
                                                           color:
                                                               Color(0xffd17842),

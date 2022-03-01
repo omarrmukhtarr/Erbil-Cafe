@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:erbilcafe/size_config.dart';
-import 'package:hexcolor/hexcolor.dart';
+
 
 const kPrimaryColor = Color(0xFFE6CCB2);
 // E6CCB2

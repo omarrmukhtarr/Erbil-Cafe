@@ -1,9 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:erbilcafe/Location.dart/Location_Screen.dart';
+import 'package:erbilcafe/ShopScreen/Shop_Screen.dart';
+import 'package:erbilcafe/TrendScreen/Popular_Screen.dart';
 import 'package:erbilcafe/profile/profile_screen.dart';
-import 'package:erbilcafe/screens/Location_Screen.dart';
-import 'package:erbilcafe/screens/Popular_Screen.dart';
-import 'package:erbilcafe/screens/Profile_Screen.dart';
-import 'package:erbilcafe/screens/Shop_Screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 

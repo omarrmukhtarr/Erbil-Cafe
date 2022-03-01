@@ -1,6 +1,7 @@
+import 'package:erbilcafe/TrendScreen/detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:erbilcafe/screens/detail_page.dart';
+
 
 class PopularScreen extends StatelessWidget {
   static var screenHeight;
@@ -62,7 +63,7 @@ class PopularScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       boxShadow: [

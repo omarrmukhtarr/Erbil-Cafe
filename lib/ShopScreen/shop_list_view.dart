@@ -1,5 +1,7 @@
-import 'package:erbilcafe/screens/hotel_app_theme.dart';
-import 'package:erbilcafe/screens/hotel_list_data.dart';
+
+import 'package:erbilcafe/Registration/sign_up/sign_up_screen.dart';
+import 'package:erbilcafe/ShopScreen/shop_list_data.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -35,7 +37,11 @@ class HotelListView extends StatelessWidget {
               child: InkWell(
                 splashColor: Colors.black,
                 onTap: () {
-                  Navigator.pushNamed(context, '/Home');
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => SignUpScreen(),
+                    ),
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -83,7 +89,7 @@ class HotelListView extends StatelessWidget {
                                               hotelData!.titleTxt,
                                               textAlign: TextAlign.left,
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
+                                                  fontWeight: FontWeight.w700,
                                                   fontSize: 22,
                                                   color: HexColor('#E6CCB2')),
                                             ),
@@ -104,12 +110,10 @@ class HotelListView extends StatelessWidget {
                                                   width: 4,
                                                 ),
                                                 Icon(
-                                                  FontAwesomeIcons.mapMarkerAlt,
-                                                  size: 12,
-                                                  color: HotelAppTheme
-                                                          .buildLightTheme()
-                                                      .primaryColor,
-                                                ),
+                                                    FontAwesomeIcons
+                                                        .mapMarkerAlt,
+                                                    size: 12,
+                                                    color: HexColor('#d17842')),
                                                 Expanded(
                                                   child: Text(
                                                     '${hotelData!.dist.toStringAsFixed(1)} km to city',
@@ -138,24 +142,20 @@ class HotelListView extends StatelessWidget {
                                                     itemSize: 24,
                                                     ratingWidget: RatingWidget(
                                                       full: Icon(
-                                                        Icons.star_rate_rounded,
-                                                        color: HotelAppTheme
-                                                                .buildLightTheme()
-                                                            .primaryColor,
-                                                      ),
+                                                          Icons
+                                                              .star_rate_rounded,
+                                                          color: HexColor(
+                                                              '#d17842')),
                                                       half: Icon(
-                                                        Icons.star_half_rounded,
-                                                        color: HotelAppTheme
-                                                                .buildLightTheme()
-                                                            .primaryColor,
-                                                      ),
+                                                          Icons
+                                                              .star_half_rounded,
+                                                          color: HexColor(
+                                                              '#d17842')),
                                                       empty: Icon(
-                                                        Icons
-                                                            .star_border_rounded,
-                                                        color: HotelAppTheme
-                                                                .buildLightTheme()
-                                                            .primaryColor,
-                                                      ),
+                                                          Icons
+                                                              .star_border_rounded,
+                                                          color: HexColor(
+                                                              '#d17842')),
                                                     ),
                                                     itemPadding:
                                                         EdgeInsets.zero,
@@ -178,32 +178,6 @@ class HotelListView extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 16, top: 8),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      // children: <Widget>[
-                                      //   Text(
-                                      //     '\$${hotelData!.perNight}',
-                                      //     textAlign: TextAlign.left,
-                                      //     style: TextStyle(
-                                      //         fontWeight: FontWeight.w600,
-                                      //         fontSize: 22,
-                                      //         color: HexColor('#E6CCB2')),
-                                      //   ),
-                                      //   // Text(
-                                      //   //   '/per night',
-                                      //   //   style: TextStyle(
-                                      //   //       fontSize: 14,
-                                      //   //       color: HexColor('#E6CCB2')),
-                                      //   // ),
-                                      // ],
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -221,11 +195,12 @@ class HotelListView extends StatelessWidget {
                               onTap: () {},
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.favorite_border,
-                                  color: HotelAppTheme.buildLightTheme()
-                                      .primaryColor,
-                                ),
+                                child: Icon(Icons.favorite_border,
+                                    color: HexColor('#d17842')
+
+                                    //  HotelAppTheme.buildLightTheme()
+                                    // .primaryColor,
+                                    ),
                               ),
                             ),
                           ),

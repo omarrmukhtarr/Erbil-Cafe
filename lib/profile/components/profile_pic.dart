@@ -9,14 +9,12 @@ class ProfilePic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 115,
-      width: 115,
+      height: 150,
+      width: 150,
       child: Stack(
         fit: StackFit.expand,
         clipBehavior: Clip.none,
-        
         children: [
-          
           CircleAvatar(
             backgroundImage: AssetImage("assets/images/ProfileImage.png"),
           ),
@@ -24,8 +22,8 @@ class ProfilePic extends StatelessWidget {
             right: -16,
             bottom: 0,
             child: SizedBox(
-              height: 46,
-              width: 46,
+              height: 45,
+              width: 45,
               child: TextButton(
                 style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -33,10 +31,13 @@ class ProfilePic extends StatelessWidget {
                     side: BorderSide(color: Colors.white),
                   ),
                   primary: Colors.white,
-                  backgroundColor: Color(0xFFF5F6F9),
+                  backgroundColor: Colors.black,
                 ),
                 onPressed: () {},
-                child: SvgPicture.asset("assets/icons/Camera Icon.svg"),
+                child: SvgPicture.asset(
+                  "assets/icons/Camera Icon.svg",
+                  color: Colors.white,
+                ),
               ),
             ),
           )

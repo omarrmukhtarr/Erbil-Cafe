@@ -13,6 +13,7 @@ final kSubtitleStyle = TextStyle(
   color: HexColor('#E6CCB2'),
   fontSize: 17.0,
   height: 1.2,
+  
 );
 
 final kTitleStyle2 = TextStyle(
