@@ -16,6 +16,9 @@ class Body extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                SizedBox(
+                  height: 10,
+                ),
                 SizedBox(height: SizeConfig.screenHeight * 0.04),
                 Text(
                   "Welcome Back",
@@ -45,6 +48,10 @@ class Body extends StatelessWidget {
                     ),
                     SocalCard(
                       icon: "assets/icons/twitter.svg",
+                      press: () {},
+                    ),
+                    SocalCard(
+                      icon: "assets/icons/apple.svg",
                       press: () {},
                     ),
                   ],

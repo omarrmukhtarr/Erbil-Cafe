@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-
 const kPrimaryColor = Color(0xFFE6CCB2);
 // E6CCB2
+const kPrimaryColor2 = Color(0xFF141921);
 const kPrimaryLightColor = Color(0xFFFFECDF);
 const kPrimaryGradientColor = LinearGradient(
   begin: Alignment.topLeft,
@@ -36,8 +36,7 @@ const String kPhoneNumberNullError = "Please Enter your phone number";
 const String kAddressNullError = "Please Enter your address";
 
 final otpInputDecoration = InputDecoration(
-  contentPadding:
-      EdgeInsets.symmetric(vertical: (15)),
+  contentPadding: EdgeInsets.symmetric(vertical: (15)),
   border: outlineInputBorder(),
   focusedBorder: outlineInputBorder(),
   enabledBorder: outlineInputBorder(),

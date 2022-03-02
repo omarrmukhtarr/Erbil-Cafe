@@ -1,8 +1,11 @@
+import 'package:erbilcafe/components/no_account_text.dart';
+import 'package:erbilcafe/profile/profile_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:erbilcafe/components/custom_surfix_icon.dart';
 import 'package:erbilcafe/components/default_button.dart';
 import 'package:erbilcafe/components/form_error.dart';
-import 'package:erbilcafe/components/no_account_text.dart';
+
 import 'package:erbilcafe/size_config.dart';
 
 import '../../../constants.dart';
@@ -102,6 +105,7 @@ class _ForgotPassFormState extends State<ForgotPassForm> {
             press: () {
               if (_formKey.currentState!.validate()) {
                 // Do what you want to do
+                Navigator.pushNamed(context, '/Home');
               }
             },
           ),

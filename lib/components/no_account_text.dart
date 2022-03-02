@@ -1,8 +1,6 @@
-import 'package:erbilcafe/Registration/sign_up/sign_up_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 
-
-import '../constants.dart';
 import '../size_config.dart';
 
 class NoAccountText extends StatelessWidget {
@@ -17,18 +15,21 @@ class NoAccountText extends StatelessWidget {
       children: [
         Text(
           "Don’t have an account? ",
-          style: TextStyle(fontSize: getProportionateScreenWidth(16)),
+          style: TextStyle(fontSize: getProportionateScreenWidth(15)),
         ),
         GestureDetector(
-          onTap: () => Navigator.pushNamed(context, SignUpScreen.routeName),
+          onTap: () => Navigator.pushNamed(context, '/SignUpScreen'),
           child: Text(
             "Sign Up",
             style: TextStyle(
-                fontSize: getProportionateScreenWidth(16),
-                color: kPrimaryColor),
+                fontSize: getProportionateScreenWidth(18),
+                color: HexColor('#d17842'),
+                fontWeight: FontWeight.w600),
           ),
         ),
       ],
     );
   }
 }
+
+// HexColor('#d17842')

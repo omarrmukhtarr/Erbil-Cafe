@@ -41,6 +41,10 @@ class Body extends StatelessWidget {
                       icon: "assets/icons/twitter.svg",
                       press: () {},
                     ),
+                    SocalCard(
+                      icon: "assets/icons/apple.svg",
+                      press: () {},
+                    ),
                   ],
                 ),
                 SizedBox(height: getProportionateScreenHeight(20)),

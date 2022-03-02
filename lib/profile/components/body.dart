@@ -54,7 +54,7 @@ class Body extends StatelessWidget {
             text: "My Account",
             icon: "assets/icons/User Icon.svg",
             press: () {
-              Navigator.pushNamed(context, '/SignUpScreen');
+              Navigator.pushNamed(context, '/SignInScreen');
             },
           ),
           ProfileMenu(
@@ -77,9 +77,18 @@ class Body extends StatelessWidget {
             press: () {},
           ),
           ProfileMenu(
+            text: "Log In",
+            icon: "assets/icons/Log In.svg",
+            press: () {
+              Navigator.pushNamed(context, '/');
+            },
+          ),
+          ProfileMenu(
             text: "Log Out",
             icon: "assets/icons/Log out.svg",
-            press: () {},
+            press: () {
+              Navigator.pushNamed(context, '/');
+            },
           ),
         ],
       ),

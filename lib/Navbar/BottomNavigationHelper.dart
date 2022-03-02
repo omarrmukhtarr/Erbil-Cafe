@@ -3,14 +3,13 @@ import 'package:erbilcafe/Location.dart/Location_Screen.dart';
 import 'package:erbilcafe/ShopScreen/Shop_Screen.dart';
 import 'package:erbilcafe/TrendScreen/Popular_Screen.dart';
 import 'package:erbilcafe/profile/profile_screen.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
+
 import 'package:hexcolor/hexcolor.dart';
 
 class BottomNavigationHelper extends StatefulWidget {
   const BottomNavigationHelper({Key? key}) : super(key: key);
-
-  
 
   @override
   BottomNavigationHelperState createState() => BottomNavigationHelperState();
@@ -29,10 +28,10 @@ class BottomNavigationHelperState extends State<BottomNavigationHelper> {
     return Scaffold(
         bottomNavigationBar: CurvedNavigationBar(
           color: Color(0xff141921),
-          backgroundColor: HexColor('#E6CCB2'),      
+          backgroundColor: HexColor('#E6CCB2'),
           items: <Widget>[
             Icon(
-              Icons.coffee,
+              Icons.coffee_sharp,
               size: 30,
               color: HexColor('#E6CCB2'),
             ),

@@ -1,4 +1,7 @@
-
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:erbilcafe/Location.dart/map_style.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,11 +19,11 @@ class _LocationScreenState extends State<LocationScreen> {
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(36.191111, 44.009167),
-    zoom: 14.4746,
+    zoom: 12.4746,
   );
 
-  final Map<String, Marker> _markers = {};
-  Map<CircleId, Circle> circles = <CircleId, Circle>{};
+  final Map<String, Marker> _markerss = {};
+  final Set<Marker> _markers = {};
 
   CircleId? selectedCircle;
   final CustomInfoWindowController _customInfoWindowController =
@@ -65,6 +68,103 @@ class _LocationScreenState extends State<LocationScreen> {
     }
   ];
 
+  final List<dynamic> _contacts = [
+    {
+      "name": "Barbera Cafe",
+      "position": const LatLng(36.209343827860685, 43.98132179774751),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Alreef Cafe",
+      "position": const LatLng(36.21079786775087, 43.98922925542067),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Deja Vu",
+      "position": const LatLng(36.230321276792715, 44.00360319774803),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Nazdar Hairan",
+      "position": const LatLng(36.18393144923375, 44.02792375356401),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Machko Cafe & Qallay Derin",
+      "position": const LatLng(36.18967315791056, 44.009653641929866),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "TCHE TCHE",
+      "position": const LatLng(36.19679414216088, 43.965404913093394),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Figures",
+      "position": const LatLng(36.209600170533285, 43.980942524728334),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Laventana",
+      "position": const LatLng(36.212357094938355, 43.975670240074614),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Shalyar Cafe",
+      "position": const LatLng(36.20310151406001, 44.00106465303082),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Huqqabaz",
+      "position": const LatLng(36.202553386902984, 43.97160849774736),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Bus Cafe",
+      "position": const LatLng(36.22059913400668, 43.98957772658449),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "M Cafe",
+      "position": const LatLng(36.22162907483412, 43.98899064193072),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Rose Above Cafe",
+      "position": const LatLng(36.21271069423419, 43.99304828425729),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Splendor Cafe",
+      "position": const LatLng(36.18704426775368, 43.96235865542013),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+    {
+      "name": "Top Organic Cafe",
+      "position": const LatLng(36.193905273241334, 43.96696954007408),
+      "marker": 'assets/markers/cafe.png',
+      "locate": '60M'
+    },
+  ];
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   void dispose() {
     _customInfoWindowController.dispose();
@@ -73,6 +173,7 @@ class _LocationScreenState extends State<LocationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    createMarkers(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -81,8 +182,7 @@ class _LocationScreenState extends State<LocationScreen> {
               myLocationButtonEnabled: false,
               mapType: MapType.normal,
               zoomControlsEnabled: true,
-              markers: _markers.values.toSet(),
-              circles: circles.values.toSet(),
+              markers: _markers,
               onTap: (LatLng latLng) {
                 Marker marker = Marker(
                   draggable: true,
@@ -173,7 +273,7 @@ class _LocationScreenState extends State<LocationScreen> {
 
                 setState(
                   () {
-                    _markers[latLng.toString()] = marker;
+                    _markerss[latLng.toString()] = marker;
                   },
                 );
               },
@@ -183,6 +283,7 @@ class _LocationScreenState extends State<LocationScreen> {
               onMapCreated: (GoogleMapController controller) {
                 _controller = controller;
                 _customInfoWindowController.googleMapController = controller;
+                controller.setMapStyle(MapStyle().retro);
               }),
           CustomInfoWindow(
             controller: _customInfoWindowController,
@@ -305,5 +406,46 @@ class _LocationScreenState extends State<LocationScreen> {
         ],
       ),
     );
+  }
+
+  createMarkers(BuildContext context) {
+    Marker marker;
+
+    _contacts.forEach((contact) async {
+      marker = Marker(
+        markerId: MarkerId(contact['name']),
+        position: contact['position'],
+        icon: await _getAssetIcon(context, contact['marker'])
+            .then((value) => value),
+        infoWindow: InfoWindow(
+          title: contact['name'],
+          snippet: contact['locate'],
+        ),
+      );
+
+      setState(() {
+        _markers.add(marker);
+      });
+    });
+  }
+
+  Future<BitmapDescriptor> _getAssetIcon(
+      BuildContext context, String icon) async {
+    final Completer<BitmapDescriptor> bitmapIcon =
+        Completer<BitmapDescriptor>();
+    final ImageConfiguration config =
+        createLocalImageConfiguration(context, size: const Size(5, 5));
+
+    AssetImage(icon)
+        .resolve(config)
+        .addListener(ImageStreamListener((ImageInfo image, bool sync) async {
+      final ByteData? bytes =
+          await image.image.toByteData(format: ImageByteFormat.png);
+      final BitmapDescriptor bitmap =
+          BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
+      bitmapIcon.complete(bitmap);
+    }));
+
+    return await bitmapIcon.future;
   }
 }
