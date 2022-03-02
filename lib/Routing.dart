@@ -1,19 +1,18 @@
 
-import 'package:erbilcafe/OnboardScreen/onboarding_screen.dart';
-import 'package:erbilcafe/Registration/complete_profile/complete_profile_screen.dart';
-import 'package:erbilcafe/Registration/complete_profile/components/complete_profile_form.dart';
-import 'package:erbilcafe/Registration/forgot_password/forgot_password_screen.dart';
-import 'package:erbilcafe/Registration/login_success/login_success_screen.dart';
-import 'package:erbilcafe/Registration/otp/otp_screen.dart';
-import 'package:erbilcafe/Registration/sign_in/sign_in_screen.dart';
-import 'package:erbilcafe/Registration/sign_up/sign_up_screen.dart';
-import 'package:erbilcafe/ShopScreen/Shop_Screen.dart';
-import 'package:erbilcafe/profile/profile_screen.dart';
-
+import 'package:erbilcafe/src/Navbar/BottomNavigationHelper.dart';
+import 'package:erbilcafe/src/OnboardScreen/onboarding_screen.dart';
+import 'package:erbilcafe/src/Registration/complete_profile/complete_profile_screen.dart';
+import 'package:erbilcafe/src/Registration/forgot_password/forgot_password_screen.dart';
+import 'package:erbilcafe/src/Registration/login_success/login_success_screen.dart';
+import 'package:erbilcafe/src/Registration/otp/otp_screen.dart';
+import 'package:erbilcafe/src/Registration/sign_in/sign_in_screen.dart';
+import 'package:erbilcafe/src/Registration/sign_up/sign_up_screen.dart';
+import 'package:erbilcafe/src/ShopScreen/Shop_Screen.dart';
+import 'package:erbilcafe/src/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 
-import 'Navbar/BottomNavigationHelper.dart';
+
 
 class Routing extends StatelessWidget {
   const Routing({Key? key}) : super(key: key);
