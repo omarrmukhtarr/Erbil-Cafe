@@ -129,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                             SizedBox(height: 15.0),
                             Text(
-                              'ئەپلیکەیشنی ئەربیل کافێ ناساندنێکی گشتگیری کافێیەکانی هەولێرە',
+                              'ئەپلیکەیشنی ئەربیل کافێ\nناساندنێکی گشتگیری کافێیەکانی هەولێرە',
                               style: kSubtitleStyle3,
                               textDirection: TextDirection.rtl,
                             ),
