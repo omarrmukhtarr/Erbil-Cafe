@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-
-
 import 'package:erbilcafe/src/Navbar/BottomNavigationHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -279,14 +277,14 @@ class DetailPage extends StatelessWidget {
                       Text(
                         "Description",
                         style: TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 24.0,
                           color: Color(0xffaeaeae),
                         ),
                       ),
                       Column(
                         children: [
                           Text(
-                            "A cappuccino is a coffee -bassed drink made",
+                            "کاپوچینۆ خواردنەوەیەکی قاوەیە کە خواردنەوەی قاوەیی دروست کردووە کە لە نەمسا دروست بووە لەگەڵ پەرەسەندنی دواتر لە ئیتالیا، و بە کەفی شیری هەڵمی ئامادەکراوەبە شێوەیەکی سەرەتایی لە ئیسپرێسۆ و شیر. ",
                             style: TextStyle(
                               color: Colors.white,
                             ),
@@ -297,125 +295,120 @@ class DetailPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                "primrily from espresso and milk",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
                                 "...Read more",
                                 style: TextStyle(
                                   color: Color(0xffb25e2b),
                                 ),
+                                textDirection: TextDirection.rtl,
                               ),
                             ],
                           )
                         ],
                       ),
-                      Text(
-                        "Size",
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          color: Color(0xffaeaeae),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          MaterialButton(
-                            onPressed: () {},
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              side: BorderSide(
-                                color: Color(0xffb25e2b),
-                              ),
-                            ),
-                            child: Text(
-                              "S",
-                              style: TextStyle(
-                                color: Color(0xffb86b3c),
-                              ),
-                            ),
-                          ),
-                          MaterialButton(
-                            onPressed: () {},
-                            color: Color(0xff141921),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Text(
-                              "M",
-                              style: TextStyle(
-                                color: Color(0xffb86b3c),
-                              ),
-                            ),
-                          ),
-                          MaterialButton(
-                            onPressed: () {},
-                            color: Color(0xff141921),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Text(
-                              "L",
-                              style: TextStyle(
-                                color: Color(0xffb86b3c),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                "Price",
-                                style: TextStyle(
-                                  color: Color(0xffaeaeae),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "\$\t",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xffd17842),
-                                    ),
-                                  ),
-                                  Text(
-                                    "4.20",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                          MaterialButton(
-                            onPressed: () {},
-                            height: 55,
-                            minWidth: 200,
-                            color: Color(0xffd17842),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Text(
-                              "Buy Now",
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          )
-                        ],
-                      )
+                      // Text(
+                      //   "Size",
+                      //   style: TextStyle(
+                      //     fontSize: 20.0,
+                      //     color: Color(0xffaeaeae),
+                      //   ),
+                      // ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     MaterialButton(
+                      //       onPressed: () {},
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(10.0),
+                      //         side: BorderSide(
+                      //           color: Color(0xffb25e2b),
+                      //         ),
+                      //       ),
+                      //       child: Text(
+                      //         "S",
+                      //         style: TextStyle(
+                      //           color: Color(0xffb86b3c),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     MaterialButton(
+                      //       onPressed: () {},
+                      //       color: Color(0xff141921),
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(10.0),
+                      //       ),
+                      //       child: Text(
+                      //         "M",
+                      //         style: TextStyle(
+                      //           color: Color(0xffb86b3c),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     MaterialButton(
+                      //       onPressed: () {},
+                      //       color: Color(0xff141921),
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(10.0),
+                      //       ),
+                      //       child: Text(
+                      //         "L",
+                      //         style: TextStyle(
+                      //           color: Color(0xffb86b3c),
+                      //         ),
+                      //       ),
+                      //     )
+                      //   ],
+                      // ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     Column(
+                      //       children: [
+                      //         Text(
+                      //           "Price",
+                      //           style: TextStyle(
+                      //             color: Color(0xffaeaeae),
+                      //           ),
+                      //         ),
+                      //         SizedBox(
+                      //           height: 3,
+                      //         ),
+                      //         Row(
+                      //           children: [
+                      //             Text(
+                      //               "\$\t",
+                      //               style: TextStyle(
+                      //                 fontWeight: FontWeight.bold,
+                      //                 color: Color(0xffd17842),
+                      //               ),
+                      //             ),
+                      //             Text(
+                      //               "4.20",
+                      //               style: TextStyle(
+                      //                 color: Colors.white,
+                      //                 fontWeight: FontWeight.bold,
+                      //               ),
+                      //             )
+                      //           ],
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     MaterialButton(
+                      //       onPressed: () {},
+                      //       height: 55,
+                      //       minWidth: 200,
+                      //       color: Color(0xffd17842),
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(20.0),
+                      //       ),
+                      //       child: Text(
+                      //         "Buy Now",
+                      //         style: TextStyle(
+                      //           color: Colors.white,
+                      //         ),
+                      //       ),
+                      //     )
+                      //   ],
+                      // )
                     ],
                   ),
                 ),

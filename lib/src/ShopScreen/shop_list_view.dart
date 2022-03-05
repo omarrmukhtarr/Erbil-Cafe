@@ -1,12 +1,16 @@
+import 'dart:ui';
 
+import 'package:erbilcafe/src/ShopScreen/StorePart/BarberaCafe/menu.dart';
+import 'package:erbilcafe/src/ShopScreen/StorePart/NazdarhairanCafe/NazdarhairanCafe.dart';
+import 'package:erbilcafe/src/ShopScreen/StorePart/alreef/Alreef_Cafe.dart';
 
-
-import 'package:erbilcafe/src/Registration/sign_up/sign_up_screen.dart';
 import 'package:erbilcafe/src/ShopScreen/shop_list_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+
+import 'StorePart/BarberaCafe/Barbera_Cafe.dart';
 
 class HotelListView extends StatelessWidget {
   const HotelListView(
@@ -38,11 +42,27 @@ class HotelListView extends StatelessWidget {
               child: InkWell(
                 splashColor: Colors.black,
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => SignUpScreen(),
-                    ),
-                  );
+                  if (hotelData!.titleTxt == 'Barbera Cafe')
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            BarberaCafe("assets/shop/barbera/shop2.jpg"),
+                      ),
+                    );
+                  else if (hotelData!.titleTxt == 'Nazdar Heyran Cafe')
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            NazdarHairan("assets/shop/nazdar/n1.jpg"),
+                      ),
+                    );
+                  else if (hotelData!.titleTxt == 'Alreef Cafe')
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AlreefCafe("assets/shop/alreef/a2.jpg"),
+                      ),
+                    );
                 },
                 child: Container(
                   decoration: BoxDecoration(

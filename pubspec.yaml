@@ -47,7 +47,10 @@ dependencies:
   flutter_svg: ^1.0.3
   font_awesome_flutter: ^9.2.0
   flutter_rating_bar: ^4.0.0
-  geolocator: ^8.2.0
+  card_swiper : ^2.0.1
+  scaffold_gradient_background: ^1.0.3+1
+  url_launcher: ^6.0.20
+  
   
   
   
@@ -109,7 +112,10 @@ flutter:
     -  assets/Coffee/coffeeicon.svg
     -  assets/Coffee/milkicon.svg
     -  assets/icons/
-    -  assets/shop/
+    -  assets/shop/barbera/
+    -  assets/shop/nazdar/
+    -  assets/shop/menu/
+    -  assets/shop/alreef/
     
  
 

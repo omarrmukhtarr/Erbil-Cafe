@@ -26,6 +26,17 @@ class _LocationScreenState extends State<LocationScreen> {
   final Map<String, Marker> _markerss = {};
   final Set<Marker> _markers = {};
 
+  @override
+  void dispose() {
+    _customInfoWindowController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   CircleId? selectedCircle;
   final CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
@@ -100,77 +111,67 @@ class _LocationScreenState extends State<LocationScreen> {
       "marker": 'assets/markers/cafe.png',
       "locate": '60M'
     },
-    {
-      "name": "TCHE TCHE",
-      "position": const LatLng(36.19679414216088, 43.965404913093394),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "Figures",
-      "position": const LatLng(36.209600170533285, 43.980942524728334),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "Laventana",
-      "position": const LatLng(36.212357094938355, 43.975670240074614),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "Shalyar Cafe",
-      "position": const LatLng(36.20310151406001, 44.00106465303082),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
+    // {
+    //   "name": "TCHE TCHE",
+    //   "position": const LatLng(36.19679414216088, 43.965404913093394),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "Figures",
+    //   "position": const LatLng(36.209600170533285, 43.980942524728334),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "Laventana",
+    //   "position": const LatLng(36.212357094938355, 43.975670240074614),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "Shalyar Cafe",
+    //   "position": const LatLng(36.20310151406001, 44.00106465303082),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
     {
       "name": "Huqqabaz",
       "position": const LatLng(36.202553386902984, 43.97160849774736),
       "marker": 'assets/markers/cafe.png',
       "locate": '60M'
     },
-    {
-      "name": "Bus Cafe",
-      "position": const LatLng(36.22059913400668, 43.98957772658449),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "M Cafe",
-      "position": const LatLng(36.22162907483412, 43.98899064193072),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "Rose Above Cafe",
-      "position": const LatLng(36.21271069423419, 43.99304828425729),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "Splendor Cafe",
-      "position": const LatLng(36.18704426775368, 43.96235865542013),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
-    {
-      "name": "Top Organic Cafe",
-      "position": const LatLng(36.193905273241334, 43.96696954007408),
-      "marker": 'assets/markers/cafe.png',
-      "locate": '60M'
-    },
+    // {
+    //   "name": "Bus Cafe",
+    //   "position": const LatLng(36.22059913400668, 43.98957772658449),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "M Cafe",
+    //   "position": const LatLng(36.22162907483412, 43.98899064193072),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "Rose Above Cafe",
+    //   "position": const LatLng(36.21271069423419, 43.99304828425729),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "Splendor Cafe",
+    //   "position": const LatLng(36.18704426775368, 43.96235865542013),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
+    // {
+    //   "name": "Top Organic Cafe",
+    //   "position": const LatLng(36.193905273241334, 43.96696954007408),
+    //   "marker": 'assets/markers/cafe.png',
+    //   "locate": '60M'
+    // },
   ];
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _customInfoWindowController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

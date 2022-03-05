@@ -19,7 +19,7 @@ class HotelListData {
 
   static List<HotelListData> hotelList = <HotelListData>[
     HotelListData(
-      imagePath: 'assets/shop/shop1.jpg',
+      imagePath: 'assets/shop/barbera/shop1.jpg',
       titleTxt: 'Barbera Cafe',
       subTxt: 'Kurdistan, Erbil',
       dist: 2.0,
@@ -28,7 +28,7 @@ class HotelListData {
       perNight: 180,
     ),
     HotelListData(
-      imagePath: 'assets/shop/shop2.jpg',
+      imagePath: 'assets/shop/alreef/a1.jpg',
       titleTxt: 'Alreef Cafe',
       subTxt: 'Kurdistan, Erbil',
       dist: 2.0,
@@ -37,7 +37,16 @@ class HotelListData {
       perNight: 180,
     ),
     HotelListData(
-      imagePath: 'assets/shop/shop2.jpg',
+      imagePath: 'assets/shop/nazdar/n1.jpg',
+      titleTxt: 'Nazdar Heyran Cafe',
+      subTxt: 'Kurdistan, Erbil',
+      dist: 2.0,
+      reviews: 80,
+      rating: 4.4,
+      perNight: 180,
+    ),
+    HotelListData(
+      imagePath: 'assets/shop/barbera/shop3.jpg',
       titleTxt: 'Barbera Cafe',
       subTxt: 'Kurdistan, Erbil',
       dist: 2.0,

@@ -1,9 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 import 'detail_page.dart';
-
 
 class PopularScreen extends StatelessWidget {
   static var screenHeight;
@@ -114,7 +112,7 @@ class PopularScreen extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                "\$\t",
+                                "\IQD\t",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xffd17842)),
@@ -130,13 +128,12 @@ class PopularScreen extends StatelessWidget {
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              color: Color(0xffd17842),
                               borderRadius: BorderRadius.circular(7),
                             ),
                             child: Icon(
-                              Icons.add,
+                              Icons.favorite,
                               size: 25,
-                              color: Colors.white,
+                              color: Color(0xffd17842),
                             ),
                           ),
                         ],
@@ -147,7 +144,7 @@ class PopularScreen extends StatelessWidget {
               ],
             ),
             Container(
-              height: 20.0,
+              height: 23.0,
               width: 55.0,
               decoration: BoxDecoration(
                 color: Color(0xff231715),
@@ -214,13 +211,13 @@ class PopularScreen extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      height: 40,
-                      width: 40,
+                      height: 50,
+                      width: 50,
                       decoration: BoxDecoration(
-                          color: Color(0xff141921),
+                          // color: Color(0xff141921),
                           borderRadius: BorderRadius.circular(15.0),
                           image: DecorationImage(
-                            image: AssetImage("assets/Coffee/profile.png"),
+                            image: AssetImage("assets/images/ProfileImage.png"),
                           )),
                     ),
                   ],
@@ -238,16 +235,16 @@ class PopularScreen extends StatelessWidget {
                       "Find the best",
                       style: TextStyle(
                         fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black,
                       ),
                     ),
                     Text(
                       "coffee for you",
                       style: TextStyle(
                         fontSize: 25,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.orange[900],
                       ),
                     )
                   ],
@@ -315,7 +312,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee1.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Oat Milk",
-                      price: 4.20,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -323,7 +320,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee8.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -331,14 +328,14 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee2.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
                       images: "assets/Coffee/coffee4.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -346,7 +343,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee5.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -354,7 +351,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee6.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -362,7 +359,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee7.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                   ],
@@ -425,7 +422,7 @@ class PopularScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "5 Coffee Beans you\n Must Try!",
+                                "Latee Coffee Beans you\n Must Try!",
                                 style: TextStyle(
                                   fontSize: 17,
                                   color: Colors.white,
@@ -445,14 +442,14 @@ class PopularScreen extends StatelessWidget {
                                   Row(
                                     children: [
                                       Text(
-                                        "\$\t",
+                                        "\IQD\t",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xffd17842),
                                         ),
                                       ),
                                       Text(
-                                        "4.20",
+                                        "5000",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -462,11 +459,11 @@ class PopularScreen extends StatelessWidget {
                                   ),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Color(0xffd17842),
+                                      // color: Colors.white,
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
-                                    child: Icon(Icons.add,
-                                        size: 30, color: Colors.white),
+                                    child: Icon(Icons.favorite,
+                                        size: 40, color: Color(0xffd17842)),
                                   )
                                 ],
                               )
@@ -521,7 +518,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee1.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Oat Milk",
-                      price: 4.20,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -529,7 +526,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee8.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -537,14 +534,14 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee2.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
                       images: "assets/Coffee/coffee4.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -552,7 +549,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee5.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -560,7 +557,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee6.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                     buildSingleItem(
@@ -568,7 +565,7 @@ class PopularScreen extends StatelessWidget {
                       images: "assets/Coffee/coffee7.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
-                      price: 3.14,
+                      price: 6000,
                       rating: 4.5,
                     ),
                   ],
@@ -631,7 +628,7 @@ class PopularScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "5 Coffee Beans you\n Must Try!",
+                                "latee Coffee Beans you\n Must Try!",
                                 style: TextStyle(
                                   fontSize: 17,
                                   color: Colors.white,
@@ -651,14 +648,14 @@ class PopularScreen extends StatelessWidget {
                                   Row(
                                     children: [
                                       Text(
-                                        "\$\t",
+                                        "\IQD\t",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xffd17842),
                                         ),
                                       ),
                                       Text(
-                                        "4.20",
+                                        "5000",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -668,11 +665,11 @@ class PopularScreen extends StatelessWidget {
                                   ),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Color(0xffd17842),
+                                      // color: Colors.white,
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
-                                    child: Icon(Icons.add,
-                                        size: 30, color: Colors.white),
+                                    child: Icon(Icons.favorite,
+                                        size: 40, color: Color(0xffd17842)),
                                   )
                                 ],
                               )
