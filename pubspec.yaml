@@ -131,6 +131,12 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
+    - family: RalewaySemi
+      fonts:
+        - asset: assets/fonts/RalewaySemi.ttf
+    - family: kurdish
+      fonts:
+        - asset: assets/fonts/kurdish.ttf
     - family: Montserrat
       fonts:
         - asset: assets/fonts/Montserrat-Regular.ttf

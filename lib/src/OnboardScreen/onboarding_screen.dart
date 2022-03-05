@@ -1,7 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-
-
 import 'package:erbilcafe/src/OnboardScreen/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -132,7 +130,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             SizedBox(height: 15.0),
                             Text(
                               'ئەپلیکەیشنی ئەربیل کافێ ناساندنێکی گشتگیری کافێیەکانی هەولێرە',
-                              style: kSubtitleStyle,
+                              style: kSubtitleStyle3,
                               textDirection: TextDirection.rtl,
                             ),
                           ],
@@ -224,15 +222,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   Text(
                                     'Next',
                                     style: TextStyle(
-                                      color: HexColor('#141921'),
-                                      fontSize: 25.0,
-                                    ),
+                                        color: HexColor('#141921'),
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                   SizedBox(width: 10.0),
                                   Icon(
                                     Icons.arrow_forward,
                                     color: HexColor('#141921'),
-                                    size: 25.0,
+                                    size: 20.0,
                                   ),
                                 ],
                               ),

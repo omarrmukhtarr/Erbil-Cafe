@@ -153,22 +153,24 @@ class BarberaCafePage extends StatelessWidget {
                                     color: Colors.white54),
                               ),
                               SizedBox(height: 10),
-                              Padding(
-                                padding: const EdgeInsets.all(0.8),
-                                child: SizedBox(
-                                  width: 56,
-                                  height: getProportionateScreenHeight(56),
-                                  child: IconButton(
-                                    icon: FaIcon(
-                                      FontAwesomeIcons.instagram,
-                                      size: 40,
-                                      color: Colors.orange[900],
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(0.8),
+                                  child: SizedBox(
+                                    width: 56,
+                                    height: getProportionateScreenHeight(56),
+                                    child: IconButton(
+                                      icon: FaIcon(
+                                        FontAwesomeIcons.instagram,
+                                        size: 45,
+                                        color: Colors.orange[900],
+                                      ),
+                                      onPressed: () {
+                                        const url =
+                                            'https://www.instagram.com/cafebarberaerbil/';
+                                        launchURL(url);
+                                      },
                                     ),
-                                    onPressed: () {
-                                      const url =
-                                          'https://www.instagram.com/cafebarberaerbil/';
-                                      launchURL(url);
-                                    },
                                   ),
                                 ),
                               ),

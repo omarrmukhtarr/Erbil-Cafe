@@ -90,7 +90,7 @@ class Body extends StatelessWidget {
             text: "Notifications",
             icon: "assets/icons/Bell.svg",
             press: () {
-              Navigator.pushNamed(context, '/OtpScreen');
+              Navigator.pushNamed(context, '/Notifications');
             },
           ),
           ProfileMenu(

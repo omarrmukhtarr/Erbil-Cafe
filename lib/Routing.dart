@@ -1,3 +1,5 @@
+
+
 import 'package:erbilcafe/src/Navbar/BottomNavigationHelper.dart';
 import 'package:erbilcafe/src/OnboardScreen/onboarding_screen.dart';
 
@@ -9,6 +11,7 @@ import 'package:erbilcafe/src/complete_profile/complete_profile_screen.dart';
 import 'package:erbilcafe/src/forgot_password/forgot_password_screen.dart';
 import 'package:erbilcafe/src/login_success/login_success_screen.dart';
 import 'package:erbilcafe/src/otp/otp_screen.dart';
+import 'package:erbilcafe/src/profile/components/Notification.dart';
 import 'package:erbilcafe/src/profile/components/aboutUs.dart';
 import 'package:erbilcafe/src/profile/profile_screen.dart';
 import 'package:erbilcafe/src/sign_in/sign_in_screen.dart';
@@ -21,6 +24,7 @@ class Routing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        theme: ThemeData(fontFamily: "RalewaySemi"),
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
@@ -38,6 +42,7 @@ class Routing extends StatelessWidget {
           // '/Destination': (context) => Destination(),
           '/MenuBarberaCafe': (context) => MenuBarberaCafe(),
           '/Aboutus': (context) => Aboutus(),
+          '/Notifications': (context) => Notifications(),
         });
   }
 }

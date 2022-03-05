@@ -155,22 +155,24 @@ class NazdarHairanPage extends StatelessWidget {
                                     textDirection: TextDirection.rtl,
                                   )),
                               SizedBox(height: 10),
-                              Padding(
-                                padding: const EdgeInsets.all(0.8),
-                                child: SizedBox(
-                                  width: 56,
-                                  height: getProportionateScreenHeight(56),
-                                  child: IconButton(
-                                    icon: FaIcon(
-                                      FontAwesomeIcons.instagram,
-                                      size: 40,
-                                      color: Colors.orange[900],
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(0.8),
+                                  child: SizedBox(
+                                    width: 56,
+                                    height: getProportionateScreenHeight(56),
+                                    child: IconButton(
+                                      icon: FaIcon(
+                                        FontAwesomeIcons.instagram,
+                                        size: 45,
+                                        color: Colors.orange[900],
+                                      ),
+                                      onPressed: () {
+                                        const url =
+                                            'https://www.instagram.com/nazdarheyran/';
+                                        launchURL(url);
+                                      },
                                     ),
-                                    onPressed: () {
-                                      const url =
-                                          'https://www.instagram.com/nazdarheyran/';
-                                      launchURL(url);
-                                    },
                                   ),
                                 ),
                               ),

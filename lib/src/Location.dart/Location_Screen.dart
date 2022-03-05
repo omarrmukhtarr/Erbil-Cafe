@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:erbilcafe/src/Location.dart/map_style.dart';
@@ -25,11 +26,10 @@ class _LocationScreenState extends State<LocationScreen> {
 
   final Map<String, Marker> _markerss = {};
   final Set<Marker> _markers = {};
-  BitmapDescriptor? bitmapIcon;
   @override
   void dispose() {
     _customInfoWindowController.dispose();
- 
+
     // _markers.removeAll(_markers);
     super.dispose();
   }
@@ -181,10 +181,9 @@ class _LocationScreenState extends State<LocationScreen> {
       body: Stack(
         children: [
           FutureBuilder(
-              future: _getAssetIcon(context)
-                  .then((value) => createMarkers(icon: value)),
+              future: createMarkers(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (!snapshot.hasData) {
                   return LinearProgressIndicator();
                 }
 
@@ -425,8 +424,6 @@ class _LocationScreenState extends State<LocationScreen> {
     );
   }
 
-
-
   Future<BitmapDescriptor> _getAssetIcon(BuildContext context) async {
     final Completer<BitmapDescriptor> bitmapIcon =
         Completer<BitmapDescriptor>();
@@ -446,15 +443,17 @@ class _LocationScreenState extends State<LocationScreen> {
     return bitmapIcon.future;
   }
 
-    String? createMarkers({required BitmapDescriptor icon}) {
+  Future<bool> createMarkers() async {
+    var _bitmapIcon = await _getAssetIcon(context);
+
     Marker marker;
-    String? theValue; 
+    bool theValue = false;
     final ImageConfiguration config =
         createLocalImageConfiguration(context, size: const Size(5, 5));
-    _contacts.forEach((contact) async {
+    _contacts.forEach((contact) {
       marker = Marker(
         markerId: MarkerId(contact['name']),
-        icon: bitmapIcon ?? BitmapDescriptor.defaultMarker,
+        icon: _bitmapIcon ?? BitmapDescriptor.defaultMarker,
         position: contact['position'],
         infoWindow: InfoWindow(
           title: contact['name'],
@@ -465,8 +464,7 @@ class _LocationScreenState extends State<LocationScreen> {
       setState(() {
         _markers.add(marker);
       });
-      theValue = 'dfas';
-      
+      theValue = true;
     });
     return theValue;
   }

@@ -13,7 +13,6 @@ final kSubtitleStyle = TextStyle(
   color: HexColor('#E6CCB2'),
   fontSize: 17.0,
   height: 1.2,
-  
 );
 
 final kTitleStyle2 = TextStyle(
@@ -36,4 +35,11 @@ final kSubtitleStyle2 = TextStyle(
   color: HexColor('#E6CCB2'),
   fontSize: 22.0,
   height: 1.2,
+);
+final kSubtitleStyle3 = TextStyle(
+  color: HexColor('#E6CCB2'),
+  fontSize: 17.0,
+  height: 1.2,
+  fontFamily: 'kurdish',
+  letterSpacing: 5,
 );

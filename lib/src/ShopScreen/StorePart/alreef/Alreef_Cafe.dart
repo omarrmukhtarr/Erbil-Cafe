@@ -131,29 +131,32 @@ class AlreefCafePage extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.only(left: 10),
                                 child: PrimaryText(
-                                    text:
-                                        'Saj Al Reef Group. Is an Iraqi chain of restaurants owned by Saj Al Reef Group which runs a well known number of brands of restaurants serving a wide variety of food that the customer can choose starting from our spatiality “Saj” and “Pizza” to all the international dishes through our brands\nSaj Al Reef\nSnack Al Reef\nShawarma corner',
-                                    size: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white54),
+                                  text:
+                                      'Saj Al Reef Group. Is an Iraqi chain of restaurants owned by Saj Al Reef Group which runs a well known number of brands of restaurants serving a wide variety of food that the customer can choose starting from our spatiality “Saj” and “Pizza” to all the international dishes through our brands\nSaj Al Reef\nSnack Al Reef\nShawarma corner',
+                                  size: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white54,
+                                ),
                               ),
                               SizedBox(height: 10),
-                              Padding(
-                                padding: const EdgeInsets.all(0.8),
-                                child: SizedBox(
-                                  width: 56,
-                                  height: getProportionateScreenHeight(56),
-                                  child: IconButton(
-                                    icon: FaIcon(
-                                      FontAwesomeIcons.instagram,
-                                      size: 40,
-                                      color: Colors.orange[900],
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(0.8),
+                                  child: SizedBox(
+                                    width: 56,
+                                    height: getProportionateScreenHeight(56),
+                                    child: IconButton(
+                                      icon: FaIcon(
+                                        FontAwesomeIcons.instagram,
+                                        size: 45,
+                                        color: Colors.orange[900],
+                                      ),
+                                      onPressed: () {
+                                        const url =
+                                            'https://www.instagram.com/alreefcafeerbil/';
+                                        launchURL(url);
+                                      },
                                     ),
-                                    onPressed: () {
-                                      const url =
-                                          'https://www.instagram.com/alreefcafeerbil/';
-                                      launchURL(url);
-                                    },
                                   ),
                                 ),
                               ),
@@ -345,8 +348,10 @@ class AlreefCafePage extends StatelessWidget {
     if (await canLaunch(url)) {
       await launch(
         url,
-        forceWebView: true,
+        forceWebView: false,
         universalLinksOnly: true,
+        enableJavaScript: false,
+        
       );
     } else {
       throw 'Could not launch $url';
