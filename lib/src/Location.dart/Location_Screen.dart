@@ -25,10 +25,12 @@ class _LocationScreenState extends State<LocationScreen> {
 
   final Map<String, Marker> _markerss = {};
   final Set<Marker> _markers = {};
-
+  BitmapDescriptor? bitmapIcon;
   @override
   void dispose() {
     _customInfoWindowController.dispose();
+ 
+    // _markers.removeAll(_markers);
     super.dispose();
   }
 
@@ -175,117 +177,130 @@ class _LocationScreenState extends State<LocationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    createMarkers(context);
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-              initialCameraPosition: _kGooglePlex,
-              myLocationButtonEnabled: false,
-              mapType: MapType.normal,
-              zoomControlsEnabled: true,
-              markers: _markers,
-              onTap: (LatLng latLng) {
-                Marker marker = Marker(
-                  draggable: true,
-                  markerId: MarkerId(latLng.toString()),
-                  position: latLng,
-                  onTap: () {
-                    _customInfoWindowController.addInfoWindow!(
-                      Stack(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(15.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15.0),
-                              color: Colors.white,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+          FutureBuilder(
+              future: _getAssetIcon(context)
+                  .then((value) => createMarkers(icon: value)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return LinearProgressIndicator();
+                }
+
+                return GoogleMap(
+                    initialCameraPosition: _kGooglePlex,
+                    myLocationButtonEnabled: false,
+                    mapType: MapType.normal,
+                    zoomControlsEnabled: true,
+                    markers: _markers,
+                    onTap: (LatLng latLng) {
+                      Marker marker = Marker(
+                        draggable: true,
+                        markerId: MarkerId(latLng.toString()),
+                        position: latLng,
+                        onTap: () {
+                          _customInfoWindowController.addInfoWindow!(
+                            Stack(
                               children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 130,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    child: Image.network(
-                                      'https://images.unsplash.com/photo-1606089397043-89c1758008e0?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEyMHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                                      fit: BoxFit.cover,
+                                Container(
+                                  padding: const EdgeInsets.all(15.0),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    color: Colors.white,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: double.infinity,
+                                        height: 130,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            'https://images.unsplash.com/photo-1606089397043-89c1758008e0?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEyMHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
+                                      const Text(
+                                        "Grand Teton National Park",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14),
+                                      ),
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(
+                                        "Grand Teton National Park on the east side of the Teton Range is renowned for great hiking trails with stunning views of the Teton Range.",
+                                        style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 12),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      MaterialButton(
+                                        onPressed: () {},
+                                        elevation: 0,
+                                        height: 40,
+                                        minWidth: double.infinity,
+                                        color: Colors.grey.shade200,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        child: const Text(
+                                          "See details",
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 5.0,
+                                  left: 5.0,
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
                                     ),
+                                    onPressed: () {
+                                      _customInfoWindowController
+                                          .hideInfoWindow!();
+                                    },
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                const Text(
-                                  "Grand Teton National Park",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  "Grand Teton National Park on the east side of the Teton Range is renowned for great hiking trails with stunning views of the Teton Range.",
-                                  style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 12),
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                MaterialButton(
-                                  onPressed: () {},
-                                  elevation: 0,
-                                  height: 40,
-                                  minWidth: double.infinity,
-                                  color: Colors.grey.shade200,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  child: const Text(
-                                    "See details",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                )
                               ],
                             ),
-                          ),
-                          Positioned(
-                            top: 5.0,
-                            left: 5.0,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {
-                                _customInfoWindowController.hideInfoWindow!();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      latLng,
-                    );
-                  },
-                );
+                            latLng,
+                          );
+                        },
+                      );
 
-                setState(
-                  () {
-                    _markerss[latLng.toString()] = marker;
-                  },
-                );
-              },
-              onCameraMove: (position) {
-                _customInfoWindowController.onCameraMove!();
-              },
-              onMapCreated: (GoogleMapController controller) {
-                _controller = controller;
-                _customInfoWindowController.googleMapController = controller;
-                controller.setMapStyle(MapStyle().retro);
+                      setState(
+                        () {
+                          _markerss[latLng.toString()] = marker;
+                        },
+                      );
+                    },
+                    onCameraMove: (position) {
+                      _customInfoWindowController.onCameraMove!();
+                    },
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller = controller;
+                      _customInfoWindowController.googleMapController =
+                          controller;
+                      controller.setMapStyle(MapStyle().retro);
+                    });
               }),
           CustomInfoWindow(
             controller: _customInfoWindowController,
@@ -410,35 +425,15 @@ class _LocationScreenState extends State<LocationScreen> {
     );
   }
 
-  createMarkers(BuildContext context) {
-    Marker marker;
 
-    _contacts.forEach((contact) async {
-      marker = Marker(
-        markerId: MarkerId(contact['name']),
-        position: contact['position'],
-        icon: await _getAssetIcon(context, contact['marker'])
-            .then((value) => value),
-        infoWindow: InfoWindow(
-          title: contact['name'],
-          snippet: contact['locate'],
-        ),
-      );
 
-      setState(() {
-        _markers.add(marker);
-      });
-    });
-  }
-
-  Future<BitmapDescriptor> _getAssetIcon(
-      BuildContext context, String icon) async {
+  Future<BitmapDescriptor> _getAssetIcon(BuildContext context) async {
     final Completer<BitmapDescriptor> bitmapIcon =
         Completer<BitmapDescriptor>();
     final ImageConfiguration config =
         createLocalImageConfiguration(context, size: const Size(5, 5));
 
-    AssetImage(icon)
+    AssetImage("assets/markers/cafe.png")
         .resolve(config)
         .addListener(ImageStreamListener((ImageInfo image, bool sync) async {
       final ByteData? bytes =
@@ -448,6 +443,31 @@ class _LocationScreenState extends State<LocationScreen> {
       bitmapIcon.complete(bitmap);
     }));
 
-    return await bitmapIcon.future;
+    return bitmapIcon.future;
+  }
+
+    String? createMarkers({required BitmapDescriptor icon}) {
+    Marker marker;
+    String? theValue; 
+    final ImageConfiguration config =
+        createLocalImageConfiguration(context, size: const Size(5, 5));
+    _contacts.forEach((contact) async {
+      marker = Marker(
+        markerId: MarkerId(contact['name']),
+        icon: bitmapIcon ?? BitmapDescriptor.defaultMarker,
+        position: contact['position'],
+        infoWindow: InfoWindow(
+          title: contact['name'],
+          snippet: contact['locate'],
+        ),
+      );
+
+      setState(() {
+        _markers.add(marker);
+      });
+      theValue = 'dfas';
+      
+    });
+    return theValue;
   }
 }
