@@ -1,5 +1,3 @@
-
-
 import 'package:erbilcafe/src/ShopScreen/shop_app_theme.dart';
 import 'package:erbilcafe/src/ShopScreen/shop_list_data.dart';
 import 'package:erbilcafe/src/ShopScreen/shop_list_view.dart';
@@ -29,7 +27,6 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   AnimationController? animationController;
   List<HotelListData> hotelList = HotelListData.hotelList;
   final ScrollController _scrollController = ScrollController();
-
 
   @override
   void initState() {
@@ -112,9 +109,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                               );
                             },
                           ),
-                        )
-                        
-                        ),
+                        )),
                   ),
                 ],
               ),

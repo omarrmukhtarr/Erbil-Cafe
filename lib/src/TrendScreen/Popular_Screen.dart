@@ -372,8 +372,8 @@ class PopularScreen extends StatelessWidget {
                     "Special for you",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -578,8 +578,8 @@ class PopularScreen extends StatelessWidget {
                     "Special for you",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
