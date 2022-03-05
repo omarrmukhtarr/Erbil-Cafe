@@ -2,8 +2,10 @@ import 'package:erbilcafe/src/ShopScreen/StorePart/NazdarhairanCafe/Nazdar_Booki
 
 import 'package:erbilcafe/src/ShopScreen/StorePart/NazdarhairanCafe/menu.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:hexcolor/hexcolor.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../size_config.dart';
 
@@ -59,6 +61,7 @@ class NazdarHairanPage extends StatelessWidget {
     return Hero(
       tag: imagePath,
       child: Scaffold(
+          backgroundColor: Colors.black,
           // backgroundColor: Colors.transparent,
           // floatingActionButton: ButtonTheme(
           //   minWidth: MediaQuery.of(context).size.width - 60,
@@ -151,7 +154,26 @@ class NazdarHairanPage extends StatelessWidget {
                                     ),
                                     textDirection: TextDirection.rtl,
                                   )),
-                              SizedBox(height: 40),
+                              SizedBox(height: 10),
+                              Padding(
+                                padding: const EdgeInsets.all(0.8),
+                                child: SizedBox(
+                                  width: 56,
+                                  height: getProportionateScreenHeight(56),
+                                  child: IconButton(
+                                    icon: FaIcon(
+                                      FontAwesomeIcons.instagram,
+                                      size: 40,
+                                      color: Colors.orange[900],
+                                    ),
+                                    onPressed: () {
+                                      const url =
+                                          'https://www.instagram.com/nazdarheyran/';
+                                      launchURL(url);
+                                    },
+                                  ),
+                                ),
+                              ),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
@@ -328,6 +350,18 @@ class NazdarHairanPage extends StatelessWidget {
         ),
       ]),
     );
+  }
+
+  launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceWebView: true,
+        universalLinksOnly: true,
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 

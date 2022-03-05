@@ -3,8 +3,10 @@ import 'package:erbilcafe/src/ShopScreen/StorePart/alreef/menu.dart';
 
 import 'package:erbilcafe/src/ShopScreen/style.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:hexcolor/hexcolor.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../size_config.dart';
 
@@ -60,6 +62,7 @@ class AlreefCafePage extends StatelessWidget {
     return Hero(
       tag: imagePath,
       child: Scaffold(
+          backgroundColor: Colors.black,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
           body: ListView(
@@ -133,6 +136,26 @@ class AlreefCafePage extends StatelessWidget {
                                     size: 15,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white54),
+                              ),
+                              SizedBox(height: 10),
+                              Padding(
+                                padding: const EdgeInsets.all(0.8),
+                                child: SizedBox(
+                                  width: 56,
+                                  height: getProportionateScreenHeight(56),
+                                  child: IconButton(
+                                    icon: FaIcon(
+                                      FontAwesomeIcons.instagram,
+                                      size: 40,
+                                      color: Colors.orange[900],
+                                    ),
+                                    onPressed: () {
+                                      const url =
+                                          'https://www.instagram.com/alreefcafeerbil/';
+                                      launchURL(url);
+                                    },
+                                  ),
+                                ),
                               ),
                               SizedBox(height: 40),
                               Row(
@@ -316,6 +339,18 @@ class AlreefCafePage extends StatelessWidget {
         ),
       ]),
     );
+  }
+
+  launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceWebView: true,
+        universalLinksOnly: true,
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 
