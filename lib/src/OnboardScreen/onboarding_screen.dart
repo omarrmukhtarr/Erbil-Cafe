@@ -110,29 +110,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.all(40),
+                        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Center(
-                              child: Image(
-                                image: AssetImage(
-                                  'assets/img/img1.png',
+                            Container(
+                              width: 400,
+                              height: 550,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image: AssetImage("assets/img/img1.png"),
                                 ),
-                                height: 500.0,
-                                width: 500.0,
                               ),
                             ),
                             Text(
                               'Erbil Cafe',
                               style: kTitleStyle,
                             ),
-                            SizedBox(height: 15.0),
+                            SizedBox(height: 20.0),
                             Text(
-                              'ئەپلیکەیشنی ئەربیل کافێ\nناساندنێکی گشتگیری کافێیەکانی هەولێرە',
+                              "ئەپڵیکەیشنی ئەربیل کافێ\nناساندنێکی گشتگیری کافێکانی هەولێرە",
                               style: kSubtitleStyle3,
                               textDirection: TextDirection.rtl,
                             ),
+                         
                           ],
                         ),
                       ),

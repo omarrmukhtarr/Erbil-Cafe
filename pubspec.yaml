@@ -30,7 +30,11 @@ dependencies:
   flutter:
     sdk: flutter
   lottie: ^1.2.1
-  
+
+  firebase_core: ^1.13.1
+  firebase_auth: ^3.3.9
+  cloud_firestore: ^3.1.10
+  firebase_analytics: ^9.1.2
   curved_navigation_bar: ^1.0.3
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -50,10 +54,7 @@ dependencies:
   card_swiper : ^2.0.1
   scaffold_gradient_background: ^1.0.3+1
   url_launcher: ^6.0.20
-  
-  
-  
-  
+ 
   
 
 dev_dependencies:
