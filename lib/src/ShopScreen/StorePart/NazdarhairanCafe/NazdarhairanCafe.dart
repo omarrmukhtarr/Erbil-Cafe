@@ -150,7 +150,8 @@ class NazdarHairanPage extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
-                                      color: Colors.white54,
+                                      color: Colors.white70,
+                                      fontFamily: "kurdish",
                                     ),
                                     textDirection: TextDirection.rtl,
                                   )),

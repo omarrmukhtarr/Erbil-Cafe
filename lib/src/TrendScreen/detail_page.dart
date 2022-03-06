@@ -287,6 +287,7 @@ class DetailPage extends StatelessWidget {
                             "کاپوچینۆ خواردنەوەیەکی قاوەیە کە خواردنەوەی قاوەیی دروست کردووە کە لە نەمسا دروست بووە لەگەڵ پەرەسەندنی دواتر لە ئیتالیا، و بە کەفی شیری هەڵمی ئامادەکراوەبە شێوەیەکی سەرەتایی لە ئیسپرێسۆ و شیر. ",
                             style: TextStyle(
                               color: Colors.white,
+                              fontFamily: "kurdish",
                             ),
                           ),
                           SizedBox(
