@@ -29,14 +29,18 @@ class Body extends StatelessWidget {
                   Text(
                     "Omer Mukhtar Saeed",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   SizedBox(
                     height: 5,
                   ),
-                  Text("OmerMukhtar@gmail.com"),
+                  Text("OmerMukhtar55@gmail.com"),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text("07514490547"),
                 ],
               )
             ],
@@ -82,21 +86,19 @@ class Body extends StatelessWidget {
           ProfileMenu(
             text: "Settings",
             icon: "assets/icons/Settings.svg",
-            press: () {
-              Navigator.pushNamed(context, '/SignInScreen');
-            },
+            press: () {},
           ),
           ProfileMenu(
             text: "Notifications",
             icon: "assets/icons/Bell.svg",
-            press: () {
-              Navigator.pushNamed(context, '/Notifications');
-            },
+            press: () {},
           ),
           ProfileMenu(
             text: "About Us",
             icon: "assets/icons/Question mark.svg",
-            press: () {},
+            press: () {
+              Navigator.pushNamed(context, "/Aboutus");
+            },
           ),
         ],
       ),
