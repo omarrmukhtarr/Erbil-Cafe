@@ -1,3 +1,4 @@
+import 'package:erbilcafe/src/Service/Auth.dart';
 import 'package:erbilcafe/src/components/custom_surfix_icon.dart';
 import 'package:erbilcafe/src/components/default_button.dart';
 import 'package:erbilcafe/src/components/form_error.dart';
@@ -7,13 +8,14 @@ import 'package:flutter/material.dart';
 import '../../../../constants.dart';
 import '../../../../size_config.dart';
 
-
 class SignForm extends StatefulWidget {
   @override
   _SignFormState createState() => _SignFormState();
 }
 
 class _SignFormState extends State<SignForm> {
+  final AuthServise _auth = AuthServise();
+
   final _formKey = GlobalKey<FormState>();
   String? email;
   String? password;
@@ -73,11 +75,19 @@ class _SignFormState extends State<SignForm> {
           SizedBox(height: getProportionateScreenHeight(20)),
           DefaultButton(
             text: "Continue",
-            press: () {
+            press: () async {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
                 // if all are valid then go to success screen
+
                 KeyboardUtil.hideKeyboard(context);
+                dynamic result = await _auth.signInAnon();
+                if (result == null) {
+                  print("error sign in");
+                } else {
+                  print("sign in");
+                  print(result);
+                }
                 Navigator.pushNamed(context, '/LoginSuccessScreen');
               }
             },

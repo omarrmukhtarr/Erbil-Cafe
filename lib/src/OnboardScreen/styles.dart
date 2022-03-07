@@ -41,5 +41,5 @@ final kSubtitleStyle3 = TextStyle(
   fontSize: 17.0,
   height: 1.5,
   fontFamily: 'kurdish',
-  letterSpacing: 2,
+  letterSpacing: 1,
 );
