@@ -45,22 +45,9 @@ Another Sample
 <img src="https://user-images.githubusercontent.com/81375773/157632183-150e451b-365b-40a5-bfeb-7ba78f62b2a8.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632189-4dec8bd9-b16d-4c47-a902-38334abe51a1.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632199-7c9c227c-c3e2-4100-a77a-c92c0e92ff7a.PNG" width="300" height="600">
 
 
-<img src="https://user-images.githubusercontent.com/81375773/157632203-488b6257-42d4-4557-a489-14895f444a11.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632219-9f882534-79b1-437a-afc0-c86769296a48.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632229-480b6d6a-d521-4147-a2b2-96b8a7572cd0.PNG" width="300" height="600">
+<img src="https://user-images.githubusercontent.com/81375773/157632203-488b6257-42d4-4557-a489-14895f444a11.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632219-9f882534-79b1-437a-afc0-c86769296a48.PNG" width="300" height="600"> | 
 
 
-
-![IMG_7097](https://user-images.githubusercontent.com/81375773/157632137-1e8838e9-4df3-479f-9240-a0285f9bb2c4.PNG)
-![IMG_7096](https://user-images.githubusercontent.com/81375773/157632161-88ecdf27-8aa6-463e-940a-b5edffc51fca.PNG)
-![IMG_7095](https://user-images.githubusercontent.com/81375773/157632175-3906599f-067f-4b62-8c60-ecf3fb187f8d.PNG)
-![IMG_7094](https://user-images.githubusercontent.com/81375773/157632183-150e451b-365b-40a5-bfeb-7ba78f62b2a8.PNG)
-
-![IMG_7093](https://user-images.githubusercontent.com/81375773/157632189-4dec8bd9-b16d-4c47-a902-38334abe51a1.PNG)
-
-![IMG_7091](https://user-images.githubusercontent.com/81375773/157632199-7c9c227c-c3e2-4100-a77a-c92c0e92ff7a.PNG)
-
-![IMG_7090](https://user-images.githubusercontent.com/81375773/157632203-488b6257-42d4-4557-a489-14895f444a11.PNG)
-![IMG_7089](https://user-images.githubusercontent.com/81375773/157632219-9f882534-79b1-437a-afc0-c86769296a48.PNG)
-![IMG_7088](https://user-images.githubusercontent.com/81375773/157632229-480b6d6a-d521-4147-a2b2-96b8a7572cd0.PNG)
 
 
 
