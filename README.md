@@ -20,6 +20,21 @@ Because the application contains the same information and features:
 
 4- The list of foods and drinks of cafes is valuable so that the user is clear about the type of food and drinks and their prices
 
+
+
+
+### demo video
+
+
+
+https://user-images.githubusercontent.com/91552974/157659540-7ef9494c-8f60-4934-9b52-98c833ab5fa6.mp4
+
+
+
+
+
+
+
 ## Some Screenshot Of my Project
 
 Onboarding Screen
@@ -50,13 +65,6 @@ Another Sample
 <img src="https://user-images.githubusercontent.com/81375773/157632175-3906599f-067f-4b62-8c60-ecf3fb187f8d.PNG" width="300" height="600">  | <img src="https://user-images.githubusercontent.com/81375773/157632161-88ecdf27-8aa6-463e-940a-b5edffc51fca.PNG" width="300" height="600"> |   <img src="https://user-images.githubusercontent.com/81375773/157632137-1e8838e9-4df3-479f-9240-a0285f9bb2c4.PNG" width="300" height="600">
 
 
-
-
-### demo video
-
-
-
-https://user-images.githubusercontent.com/91552974/157659540-7ef9494c-8f60-4934-9b52-98c833ab5fa6.mp4
 
 
 
