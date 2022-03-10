@@ -28,6 +28,19 @@ Onboarding Screen
 
 
 
+Sign in Or Sign Up
+
+
+<img src="https://user-images.githubusercontent.com/81375773/157630750-b7dcc73f-092b-4818-bfc3-aab99ffb0cee.PNG> | <img src="https://user-images.githubusercontent.com/81375773/157630771-5cd72601-e946-4372-8912-092269361484.PNG" width="300" height="600"> |  <img src="https://user-images.githubusercontent.com/81375773/157630778-cb22268b-83bf-4f14-b613-c60debbac5f8.PNG" width="300" height="600">
+
+
+![IMG_7088](https://user-images.githubusercontent.com/81375773/157630750-b7dcc73f-092b-4818-bfc3-aab99ffb0cee.PNG)
+![IMG_7087](https://user-images.githubusercontent.com/81375773/157630771-5cd72601-e946-4372-8912-092269361484.PNG)
+![IMG_7086](https://user-images.githubusercontent.com/81375773/157630778-cb22268b-83bf-4f14-b613-c60debbac5f8.PNG)
+
+
+
+
 
 
 A few resources to get you started if this is your first Flutter project:
