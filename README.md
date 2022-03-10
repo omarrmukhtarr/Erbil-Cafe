@@ -47,7 +47,7 @@ Another Sample
 <img src="https://user-images.githubusercontent.com/81375773/157632183-150e451b-365b-40a5-bfeb-7ba78f62b2a8.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632189-4dec8bd9-b16d-4c47-a902-38334abe51a1.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632199-7c9c227c-c3e2-4100-a77a-c92c0e92ff7a.PNG" width="300" height="600">
 
 
-<img src="https://user-images.githubusercontent.com/81375773/157632137-1e8838e9-4df3-479f-9240-a0285f9bb2c4.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632161-88ecdf27-8aa6-463e-940a-b5edffc51fca.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632175-3906599f-067f-4b62-8c60-ecf3fb187f8d.PNG" width="300" height="600">
+<img src="https://user-images.githubusercontent.com/81375773/157632175-3906599f-067f-4b62-8c60-ecf3fb187f8d.PNG" width="300" height="600"> |   <img src="https://user-images.githubusercontent.com/81375773/157632137-1e8838e9-4df3-479f-9240-a0285f9bb2c4.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632161-88ecdf27-8aa6-463e-940a-b5edffc51fca.PNG" width="300" height="600"> 
 
 
 
