@@ -31,7 +31,7 @@ Onboarding Screen
 Sign in Or Sign Up
 
 
- <img src="https://user-images.githubusercontent.com/81375773/157630778-cb22268b-83bf-4f14-b613-c60debbac5f8.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157630771-5cd72601-e946-4372-8912-092269361484.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157630771-5cd72601-e946-4372-8912-092269361484.PNG" width="300" height="600">
+ <img src="https://user-images.githubusercontent.com/81375773/157630778-cb22268b-83bf-4f14-b613-c60debbac5f8.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157630771-5cd72601-e946-4372-8912-092269361484.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157634312-9753f88d-9321-439d-86b6-67f2f8d97232.PNG" width="300" height="600">
 
 
 
@@ -48,6 +48,7 @@ Another Sample
 
 
 <img src="https://user-images.githubusercontent.com/81375773/157632175-3906599f-067f-4b62-8c60-ecf3fb187f8d.PNG" width="300" height="600">  | <img src="https://user-images.githubusercontent.com/81375773/157632161-88ecdf27-8aa6-463e-940a-b5edffc51fca.PNG" width="300" height="600"> |   <img src="https://user-images.githubusercontent.com/81375773/157632137-1e8838e9-4df3-479f-9240-a0285f9bb2c4.PNG" width="300" height="600">
+
 
 
 
