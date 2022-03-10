@@ -24,10 +24,8 @@ Because the application contains the same information and features:
 
 Onboarding Screen
 
-<img src="https://user-images.githubusercontent.com/81375773/157628690-73144480-22e0-4b27-b953-50595b46c144.PNG" width="300" height="600">. | <img src="https://user-images.githubusercontent.com/81375773/157628690-73144480-22e0-4b27-b953-50595b46c144.PNG" width="300" height="600">
-![IMG_7083](https://user-images.githubusercontent.com/81375773/157628690-73144480-22e0-4b27-b953-50595b46c144.PNG)
-![IMG_7084](https://user-images.githubusercontent.com/81375773/157628685-6117bb9d-04f4-4bbc-bde5-6e6302ec919c.PNG)
-![IMG_7085](https://user-images.githubusercontent.com/81375773/157628656-260fc5af-d708-434f-abfc-6a8fa4f99b36.PNG)
+<img src="https://user-images.githubusercontent.com/81375773/157628690-73144480-22e0-4b27-b953-50595b46c144.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157628685-6117bb9d-04f4-4bbc-bde5-6e6302ec919c.PNG" width="300" height="600"> |  <img src="https://user-images.githubusercontent.com/81375773/157628656-260fc5af-d708-434f-abfc-6a8fa4f99b36.PNG" width="300" height="600">
+
 
 
 
