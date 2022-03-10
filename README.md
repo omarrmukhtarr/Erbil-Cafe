@@ -20,7 +20,7 @@ Because the application contains the same information and features:
 
 4- The list of foods and drinks of cafes is valuable so that the user is clear about the type of food and drinks and their prices
 
-## Some Screen shoot Of my Project
+## Some Screenshot Of my Project
 
 This project is a starting point for a Flutter application.
 
