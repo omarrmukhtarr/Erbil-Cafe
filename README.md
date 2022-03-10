@@ -20,6 +20,19 @@ Because the application contains the same information and features:
 
 4- The list of foods and drinks of cafes is valuable so that the user is clear about the type of food and drinks and their prices
 
+
+## Some Screenshot Of my Project
+
+
+
+# This repo has a video on its readme :p
+
+
+https://user-images.githubusercontent.com/58986949/115314310-805b2780-a1a7-11eb-8558-648a367ea231.mp4
+
+
+
+
 ## Some Screenshot Of my Project
 
 Onboarding Screen
