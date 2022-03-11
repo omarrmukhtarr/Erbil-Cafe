@@ -113,7 +113,6 @@ class _LocationScreenState extends State<LocationScreen> {
       "position": const LatLng(36.18967315791056, 44.009653641929866),
       "marker": 'assets/markers/cafe.png',
       "locate": 'Qalla'
-      
     },
     {
       "name": "TCHE TCHE",
@@ -301,10 +300,7 @@ class _LocationScreenState extends State<LocationScreen> {
                       _customInfoWindowController.googleMapController =
                           controller;
                       controller.setMapStyle(MapStyle().retro);
-                    }
-               
-                    );
-                
+                    });
               }),
 
           // CustomInfoWindow(
@@ -465,10 +461,8 @@ class _LocationScreenState extends State<LocationScreen> {
         icon: _bitmapIcon ?? BitmapDescriptor.defaultMarker,
         position: contact['position'],
         infoWindow: InfoWindow(
-          
           title: contact['name'],
           snippet: contact['locate'],
-          
         ),
       );
 
@@ -481,21 +475,16 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 }
 
+class Omer extends StatelessWidget {
+  const Omer({Key? key}) : super(key: key);
 
-
-// class Omer extends StatelessWidget {
-//   const Omer({ Key? key }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 200,
-//       width: 200,
-//        decoration: BoxDecoration(
-//          color: Colors.amber
-
-//        ),
-//        child: Text("Omerrrrrrr"),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      width: 200,
+      decoration: BoxDecoration(color: Colors.amber),
+      child: Text("Omerrrrrrr"),
+    );
+  }
+}

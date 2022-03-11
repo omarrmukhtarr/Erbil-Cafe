@@ -129,15 +129,17 @@ class AlreefCafePage extends StatelessWidget {
                                   )),
                               SizedBox(height: 30),
                               Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: PrimaryText(
-                                  text:
-                                      'Saj Al Reef Group. Is an Iraqi chain of restaurants owned by Saj Al Reef Group which runs a well known number of brands of restaurants serving a wide variety of food that the customer can choose starting from our spatiality “Saj” and “Pizza” to all the international dishes through our brands\nSaj Al Reef\nSnack Al Reef\nShawarma corner',
-                                  size: 15,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white54,
-                                ),
-                              ),
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    "ریف کافێ  هەموو کەش و هەوایەکی گونجاو دابین دەکات بۆ ئەوەی بە هێمنی بخوێنن و بگەنە باشترین ئەنجام کە پێویستت پێیە,خوێندنەوە جیهانێکی گەورەیە ... ئەوە وا دەکات خۆتبزر بکەی یان خۆت ببینیتەوەلە ریف کافێ دەبێتە گەورەترین کتێبخانەی هەولێردەتوانن سەردانی ئێمە بکەن و لە جیهانێکی جیاواز چێژ وەرگرن, ئایا پێویستانە بیرۆکەکانتان دەرببرن لە شوێنێکی ئارام, لە ریف کافێ دەتوانن بیرۆکەکانتان لە کەشێکی رەخساو دەرببرن.",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white70,
+                                      fontFamily: "kurdish",
+                                    ),
+                                    textDirection: TextDirection.rtl,
+                                  )),
                               SizedBox(height: 10),
                               Center(
                                 child: Padding(
@@ -265,6 +267,11 @@ class AlreefCafePage extends StatelessWidget {
                                     scrollDirection: Axis.horizontal,
                                     children: [
                                       hotAlreefCafeCard(
+                                          'assets/shop/alreef/a8.jpg',
+                                          'AMERICA',
+                                          '18 Tourist Place',
+                                          context),
+                                      hotAlreefCafeCard(
                                           'assets/shop/alreef/a1.jpg',
                                           'AMERICA',
                                           '18 Tourist Place',
@@ -351,7 +358,6 @@ class AlreefCafePage extends StatelessWidget {
         forceWebView: false,
         universalLinksOnly: true,
         enableJavaScript: false,
-        
       );
     } else {
       throw 'Could not launch $url';

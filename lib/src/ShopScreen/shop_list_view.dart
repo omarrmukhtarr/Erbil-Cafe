@@ -60,7 +60,7 @@ class HotelListView extends StatelessWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) =>
-                            AlreefCafe("assets/shop/alreef/a2.jpg"),
+                            AlreefCafe("assets/shop/alreef/a8.jpg"),
                       ),
                     );
                 },

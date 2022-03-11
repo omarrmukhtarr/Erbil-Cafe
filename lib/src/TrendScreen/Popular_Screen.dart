@@ -317,7 +317,7 @@ class PopularScreen extends StatelessWidget {
                     ),
                     buildSingleItem(
                       context: context,
-                      images: "assets/Coffee/coffee8.jpeg",
+                      images: "assets/Coffee/coffee4.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
                       price: 6000,
@@ -332,7 +332,7 @@ class PopularScreen extends StatelessWidget {
                       rating: 4.5,
                     ),
                     buildSingleItem(
-                      images: "assets/Coffee/coffee4.jpeg",
+                      images: "assets/Coffee/coffee8.jpeg",
                       title: "Cappuccino",
                       subTitle: "With Chocolate",
                       price: 6000,

@@ -28,7 +28,7 @@ class HotelListData {
       perNight: 180,
     ),
     HotelListData(
-      imagePath: 'assets/shop/barbera/shop1.jpg',
+      imagePath: 'assets/shop/barbera/shop9.jpg',
       titleTxt: 'Barbera Cafe',
       subTxt: 'Kurdistan, Erbil',
       dist: 2.0,
