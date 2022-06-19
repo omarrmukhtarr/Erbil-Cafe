@@ -55,11 +55,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Container(
                             margin: EdgeInsets.only(left: 10),
                             alignment: Alignment.centerRight,
-                            child: RaisedButton(
+                            child: ElevatedButton(
                               child: Text(
                                 "Back",
                                 style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w600),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: HexColor('#141921')),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                primary: HexColor('#d17842'),
                               ),
                               onPressed: () {
                                 _pageController.previousPage(
@@ -67,33 +72,37 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   curve: Curves.ease,
                                 );
                               },
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              color: HexColor('#d17842'),
-                              textColor: HexColor('#141921'),
-                              padding: EdgeInsets.all(8.0),
-                              splashColor: Colors.grey,
+                              // shape: RoundedRectangleBorder(
+                              //     borderRadius: BorderRadius.circular(20)),
+                              // color: HexColor('#d17842'),
+                              // textColor: HexColor('#141921'),
+                              // padding: EdgeInsets.all(8.0),
+                              // splashColor: Colors.grey,
                             ),
                           ),
                           Container(
                               margin: EdgeInsets.only(right: 10),
                               alignment: Alignment.centerRight,
-                              child: RaisedButton(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
+                              child: ElevatedButton(
+                                // shape: RoundedRectangleBorder(
+                                //     borderRadius: BorderRadius.circular(20)),
                                 child: Text(
                                   "Skip",
                                   style: TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w600),
+                                      fontWeight: FontWeight.w600,
+                                      color: HexColor('#141921')),
                                 ),
                                 onPressed: () {
                                   _pageController.jumpToPage(_numPages);
                                 },
-                                color: HexColor('#d17842'),
-                                textColor: HexColor('#141921'),
-                                padding: EdgeInsets.all(8.0),
-                                splashColor: Colors.grey,
+                                style: ElevatedButton.styleFrom(
+                                  primary: HexColor('#d17842'),
+                                ),
+                                // color: HexColor('#d17842'),
+                                // textColor: HexColor('#141921'),
+                                // padding: EdgeInsets.all(8.0),
+                                // splashColor: Colors.grey,
                               )),
                         ],
                       )
@@ -110,7 +119,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
@@ -134,7 +144,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               style: kSubtitleStyle3,
                               textDirection: TextDirection.rtl,
                             ),
-                         
                           ],
                         ),
                       ),
@@ -203,41 +212,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ? Expanded(
                         child: Align(
                           alignment: FractionalOffset.bottomRight,
-                          child: FlatButton(
-                            onPressed: () {
-                              _pageController.nextPage(
-                                duration: Duration(milliseconds: 500),
-                                curve: Curves.ease,
-                              );
-                            },
-                            child: Container(
-                              width: 120,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  color: HexColor('#d17842'),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20))),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Text(
-                                    'Next',
-                                    style: TextStyle(
-                                        color: HexColor('#141921'),
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  SizedBox(width: 10.0),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color: HexColor('#141921'),
-                                    size: 20.0,
-                                  ),
-                                ],
+                          //need to add a new style button
+                          child: ElevatedButton(
+                              onPressed: () {
+                                _pageController.nextPage(
+                                  duration: Duration(milliseconds: 500),
+                                  curve: Curves.ease,
+                                );
+                              },
+                              child: Container(
+                                width: 120,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                    color: HexColor('#d17842'),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20))),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      'Next',
+                                      style: TextStyle(
+                                          color: HexColor('#141921'),
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    SizedBox(width: 10.0),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      color: HexColor('#141921'),
+                                      size: 20.0,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
+                              style: ElevatedButton.styleFrom(
+                                primary: HexColor('#141921'),
+                              )),
                         ),
                       )
                     : Text(''),
@@ -254,10 +266,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  FlatButton(
+                  //need to add a new style button
+                  ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/SignInScreen');
                     },
+                    style: ElevatedButton.styleFrom(
+                      primary: HexColor('#d17842'),
+                    ),
                     child: Center(
                       child: Padding(
                         padding: EdgeInsets.only(
@@ -274,10 +290,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ),
-                  new FlatButton(
+                  //need to add a new style button
+                  new ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/Home');
                     },
+                    style: ElevatedButton.styleFrom(
+                      primary: HexColor('#d17842'),
+                    ),
                     child: Center(
                       child: Padding(
                         padding: EdgeInsets.only(
