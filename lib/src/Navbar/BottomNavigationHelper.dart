@@ -4,7 +4,6 @@ import 'package:erbilcafe/src/ShopScreen/Shop_Screen.dart';
 import 'package:erbilcafe/src/TrendScreen/Popular_Screen.dart';
 import 'package:erbilcafe/src/profile/profile_screen.dart';
 
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 
 import 'package:hexcolor/hexcolor.dart';

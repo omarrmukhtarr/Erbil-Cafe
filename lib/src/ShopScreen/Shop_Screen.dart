@@ -85,7 +85,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         },
                         body: Container(
                           color:
-                              HotelAppTheme.buildLightTheme().backgroundColor,
+                              HotelAppTheme.buildLightTheme().colorScheme.background,
                           child: ListView.builder(
                             itemCount: hotelList.length,
                             padding: const EdgeInsets.only(top: 8),
@@ -263,7 +263,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(16.0),
                   child: Icon(FontAwesomeIcons.search,
                       size: 20,
-                      color: HotelAppTheme.buildLightTheme().backgroundColor),
+                      color: HotelAppTheme.buildLightTheme().colorScheme.background),
                 ),
               ),
             ),
@@ -276,7 +276,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   Widget getAppBarUI() {
     return Container(
       decoration: BoxDecoration(
-        color: HotelAppTheme.buildLightTheme().backgroundColor,
+        color: HotelAppTheme.buildLightTheme().colorScheme.background,
         boxShadow: <BoxShadow>[
           BoxShadow(
               color: Colors.grey.withOpacity(0.5),

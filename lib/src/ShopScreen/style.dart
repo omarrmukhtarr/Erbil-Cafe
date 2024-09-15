@@ -10,10 +10,10 @@ class PrimaryText extends StatelessWidget {
   final String text;
 
   const PrimaryText({
-    this.size: 16,
-    this.color: AppColor.primaryColor,
-    this.fontWeight: FontWeight.w600,
-    this.overflow: TextOverflow.visible,
+    this.size = 16,
+    this.color = AppColor.primaryColor,
+    this.fontWeight = FontWeight.w600,
+    this.overflow = TextOverflow.visible,
     required this.text,
   });
 

@@ -1,7 +1,6 @@
 import 'package:erbilcafe/src/ShopScreen/StorePart/alreef/Alreef_Booking.dart';
 import 'package:erbilcafe/src/ShopScreen/StorePart/alreef/menu.dart';
 
-import 'package:erbilcafe/src/ShopScreen/style.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -174,10 +173,9 @@ class AlreefCafePage extends StatelessWidget {
                                       height: getProportionateScreenHeight(56),
                                       child: TextButton(
                                         style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
+                                          foregroundColor: Colors.white, shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          primary: Colors.white,
                                           backgroundColor: HexColor('#ddb892'),
                                         ),
                                         onPressed: () {
@@ -207,10 +205,9 @@ class AlreefCafePage extends StatelessWidget {
                                       height: getProportionateScreenHeight(56),
                                       child: TextButton(
                                         style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
+                                          foregroundColor: Colors.white, shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          primary: Colors.white,
                                           backgroundColor: HexColor('#ddb892'),
                                         ),
                                         onPressed: () {

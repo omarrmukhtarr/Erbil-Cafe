@@ -1,4 +1,3 @@
-import 'package:erbilcafe/src/profile/components/profile_pic.dart';
 import 'package:erbilcafe/src/profile/components/profile_pic2.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';

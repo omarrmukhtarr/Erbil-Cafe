@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:erbilcafe/src/Location.dart/map_style.dart';
 import 'package:flutter/services.dart';

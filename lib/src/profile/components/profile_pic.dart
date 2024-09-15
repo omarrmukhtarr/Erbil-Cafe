@@ -26,11 +26,10 @@ class ProfilePic extends StatelessWidget {
               width: 45,
               child: TextButton(
                 style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
+                  foregroundColor: Colors.white, shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                     side: BorderSide(color: Colors.white),
                   ),
-                  primary: Colors.white,
                   backgroundColor: Colors.black,
                 ),
                 onPressed: () {},

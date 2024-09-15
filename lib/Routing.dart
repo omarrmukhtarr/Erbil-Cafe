@@ -4,9 +4,7 @@ import 'package:erbilcafe/src/Navbar/BottomNavigationHelper.dart';
 import 'package:erbilcafe/src/OnboardScreen/onboarding_screen.dart';
 
 import 'package:erbilcafe/src/ShopScreen/Shop_Screen.dart';
-import 'package:erbilcafe/src/ShopScreen/StorePart/BarberaCafe/Barbera_Cafe.dart';
 import 'package:erbilcafe/src/ShopScreen/StorePart/BarberaCafe/menu.dart';
-import 'package:erbilcafe/src/ShopScreen/StorePart/NazdarhairanCafe/NazdarhairanCafe.dart';
 import 'package:erbilcafe/src/complete_profile/complete_profile_screen.dart';
 import 'package:erbilcafe/src/forgot_password/forgot_password_screen.dart';
 import 'package:erbilcafe/src/login_success/login_success_screen.dart';

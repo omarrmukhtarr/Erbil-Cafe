@@ -186,10 +186,9 @@ class BarberaCafePage extends StatelessWidget {
                                       height: getProportionateScreenHeight(56),
                                       child: TextButton(
                                         style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
+                                          foregroundColor: Colors.white, shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          primary: Colors.white,
                                           backgroundColor: HexColor('#ddb892'),
                                         ),
                                         onPressed: () {
@@ -219,10 +218,9 @@ class BarberaCafePage extends StatelessWidget {
                                       height: getProportionateScreenHeight(56),
                                       child: TextButton(
                                         style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
+                                          foregroundColor: Colors.white, shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          primary: Colors.white,
                                           backgroundColor: HexColor('#ddb892'),
                                         ),
                                         onPressed: () {

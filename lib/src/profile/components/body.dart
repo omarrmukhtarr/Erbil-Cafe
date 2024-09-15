@@ -1,5 +1,4 @@
 import 'package:erbilcafe/size_config.dart';
-import 'package:erbilcafe/src/profile/components/aboutUs.dart';
 import 'package:flutter/material.dart';
 
 import 'header_widget.dart';
