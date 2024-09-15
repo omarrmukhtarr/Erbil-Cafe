@@ -42,7 +42,7 @@ class HotelAppTheme {
       ),
       textTheme: _buildTextTheme(base.textTheme),
       primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
-      platform: TargetPlatform.iOS, colorScheme: colorScheme.copyWith(secondary: secondaryColor).copyWith(background: HexColor('#E6CCB2')).copyWith(error: const Color(0xFFB00020)),
+      platform: TargetPlatform.iOS, colorScheme: colorScheme.copyWith(secondary: secondaryColor).copyWith(surface: HexColor('#E6CCB2')).copyWith(error: const Color(0xFFB00020)),
     );
   }
 }

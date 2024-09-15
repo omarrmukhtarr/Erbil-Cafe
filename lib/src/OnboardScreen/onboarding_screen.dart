@@ -64,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     color: HexColor('#141921')),
                               ),
                               style: ElevatedButton.styleFrom(
-                                primary: HexColor('#d17842'),
+                                backgroundColor: HexColor('#d17842'),
                               ),
                               onPressed: () {
                                 _pageController.previousPage(
@@ -97,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   _pageController.jumpToPage(_numPages);
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  primary: HexColor('#d17842'),
+                                  backgroundColor: HexColor('#d17842'),
                                 ),
                                 // color: HexColor('#d17842'),
                                 // textColor: HexColor('#141921'),
@@ -248,7 +248,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                primary: HexColor('#141921'),
+                                backgroundColor: HexColor('#141921'),
                               )),
                         ),
                       )
@@ -272,7 +272,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       Navigator.pushNamed(context, '/SignInScreen');
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: HexColor('#d17842'),
+                      backgroundColor: HexColor('#d17842'),
                     ),
                     child: Center(
                       child: Padding(
@@ -296,7 +296,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       Navigator.pushNamed(context, '/Home');
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: HexColor('#d17842'),
+                      backgroundColor: HexColor('#d17842'),
                     ),
                     child: Center(
                       child: Padding(
