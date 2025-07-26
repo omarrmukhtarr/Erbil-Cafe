@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -31,10 +31,10 @@ dependencies:
     sdk: flutter
   lottie: ^2.3.2
 
-  firebase_core: ^2.13.0
-  firebase_auth: ^4.6.1
-  cloud_firestore: ^4.7.1
-  firebase_analytics: ^10.4.1
+  # firebase_core: ^2.13.0
+  # firebase_auth: ^4.6.1
+  # cloud_firestore: ^4.7.1
+  # firebase_analytics: ^10.4.1
   curved_navigation_bar: ^1.0.3
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -51,11 +51,9 @@ dependencies:
   flutter_svg: ^2.0.6
   font_awesome_flutter: ^10.4.0
   flutter_rating_bar: ^4.0.0
-  card_swiper : ^2.0.1
+  card_swiper: ^2.0.1
   scaffold_gradient_background: ^1.0.3+1
   url_launcher: ^6.0.20
- 
-  
 
 dev_dependencies:
   flutter_test:
@@ -68,34 +66,31 @@ flutter_native_splash:
   image: "assets/splash/cafe.png"
   android: true
   ios: true
-  
+
   flutter_launcher_icons: ^0.9.2
 #####
 # Generate App Icon with Single Command:
-  # flutter clean && flutter pub get && flutter pub run flutter_launcher_icons:main
+# flutter clean && flutter pub get && flutter pub run flutter_launcher_icons:main
 
 # OR Generate App Icon with Multiple Commands:
-  # flutter clean
-  # flutter pub get
-  # flutter pub run flutter_launcher_icons:main
-#####  
-  
+# flutter clean
+# flutter pub get
+# flutter pub run flutter_launcher_icons:main
+#####
+
 flutter_icons:
   image_path_android: "assets/icon/playstore.png"
   image_path_ios: "assets/icon/appstore.png"
   android: true
   ios: "AppIcon"
-   
+
   flutter_lints: ^1.0.0
-  
-  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -103,22 +98,19 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-
-    -  assets/img/
-    -  assets/lottie/
-    -  assets/Coffee/
-    -  assets/icon/
-    -  assets/images/
-    -  assets/markers/
-    -  assets/Coffee/coffeeicon.svg
-    -  assets/Coffee/milkicon.svg
-    -  assets/icons/
-    -  assets/shop/barbera/
-    -  assets/shop/nazdar/
-    -  assets/shop/menu/
-    -  assets/shop/alreef/
-    
- 
+    - assets/img/
+    - assets/lottie/
+    - assets/Coffee/
+    - assets/icon/
+    - assets/images/
+    - assets/markers/
+    - assets/Coffee/coffeeicon.svg
+    - assets/Coffee/milkicon.svg
+    - assets/icons/
+    - assets/shop/barbera/
+    - assets/shop/nazdar/
+    - assets/shop/menu/
+    - assets/shop/alreef/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -141,8 +133,8 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: assets/fonts/Montserrat-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+    #       - asset: fonts/Schyler-Italic.ttf
+    #         style: italic
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Bold.ttf
