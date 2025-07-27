@@ -184,7 +184,14 @@ class _LocationScreenState extends State<LocationScreen> {
               future: createMarkers(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return LinearProgressIndicator();
+                  return Container(
+                    color: HexColor('#141921'),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: HexColor('#E6CCB2'),
+                      ),
+                    ),
+                  );
                 }
 
                 return GoogleMap(
@@ -448,29 +455,40 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 
   Future<bool> createMarkers() async {
-    var _bitmapIcon = await _getAssetIcon(context);
+    try {
+      var _bitmapIcon = await _getAssetIcon(context);
 
-    Marker marker;
-    bool theValue = false;
-    final ImageConfiguration config =
-        createLocalImageConfiguration(context, size: const Size(5, 5));
-    _contacts.forEach((contact) {
-      marker = Marker(
-        markerId: MarkerId(contact['name']),
-        icon: _bitmapIcon ?? BitmapDescriptor.defaultMarker,
-        position: contact['position'],
-        infoWindow: InfoWindow(
-          title: contact['name'],
-          snippet: contact['locate'],
-        ),
-      );
+      Marker marker;
+      bool theValue = false;
+      final ImageConfiguration config =
+          createLocalImageConfiguration(context, size: const Size(5, 5));
+      
+      for (var contact in _contacts) {
+        try {
+          marker = Marker(
+            markerId: MarkerId(contact['name']),
+            icon: _bitmapIcon ?? BitmapDescriptor.defaultMarker,
+            position: contact['position'],
+            infoWindow: InfoWindow(
+              title: contact['name'],
+              snippet: contact['locate'],
+            ),
+          );
 
-      setState(() {
-        _markers.add(marker);
-      });
-      theValue = true;
-    });
-    return theValue;
+          setState(() {
+            _markers.add(marker);
+          });
+          theValue = true;
+        } catch (e) {
+          print('Error creating marker for ${contact['name']}: $e');
+          // Continue with other markers
+        }
+      }
+      return theValue;
+    } catch (e) {
+      print('Error in createMarkers: $e');
+      return false;
+    }
   }
 }
 
