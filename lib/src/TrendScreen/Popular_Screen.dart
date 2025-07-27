@@ -217,7 +217,7 @@ class PopularScreen extends StatelessWidget {
                           // color: Color(0xff141921),
                           borderRadius: BorderRadius.circular(15.0),
                           image: DecorationImage(
-                            image: AssetImage("assets/images/ProfileImage.png"),
+                            image: AssetImage("assets/images/success.png"),
                           )),
                     ),
                   ],

@@ -291,9 +291,9 @@ class _LocationScreenState extends State<LocationScreen> {
                       //   },
                       // );
                     },
-                    onCameraMove: (position) {
-                      _customInfoWindowController.onCameraMove!();
-                    },
+                                          onCameraMove: (position) {
+                        _customInfoWindowController.onCameraMove?.call();
+                      },
                     onMapCreated: (GoogleMapController controller) {
                       _controller = controller;
                       _customInfoWindowController.googleMapController =
