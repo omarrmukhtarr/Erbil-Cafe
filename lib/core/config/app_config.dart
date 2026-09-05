@@ -1,0 +1,41 @@
+import 'package:flutter/foundation.dart';
+
+/// Build-time configuration.
+///
+/// Nothing secret is hardcoded here. v1 committed a Google Maps API key
+/// directly into `Location_Screen.dart` and `.env.dart`, which then leaked into
+/// the public git history. Values now arrive through `--dart-define`:
+///
+/// ```
+/// flutter run \
+///   --dart-define=API_URL=http://10.0.2.2:3100/api/v1 \
+///   --dart-define=MAPS_API_KEY=…
+/// ```
+abstract final class AppConfig {
+  static const _apiUrlOverride = String.fromEnvironment('API_URL');
+
+  /// Base URL of the ErbilCafe API.
+  ///
+  /// Falls back to a local backend when no override is supplied. The Android
+  /// emulator reaches the host through 10.0.2.2, while the iOS simulator shares
+  /// the host's own localhost — so the default has to be resolved at runtime
+  /// rather than baked in as a constant.
+  static String get apiUrl {
+    if (_apiUrlOverride.isNotEmpty) return _apiUrlOverride;
+    return defaultTargetPlatform == TargetPlatform.android
+        ? 'http://10.0.2.2:3100/api/v1'
+        : 'http://localhost:3100/api/v1';
+  }
+
+  /// Only used by the web build; the native SDKs read the key from their own
+  /// platform config, which is not committed.
+  static const mapsApiKey = String.fromEnvironment('MAPS_API_KEY');
+
+  static const connectTimeout = Duration(seconds: 15);
+  static const receiveTimeout = Duration(seconds: 20);
+
+  /// How long cached café and menu data is served before refetching.
+  static const cacheTtl = Duration(minutes: 10);
+
+  static const isProduction = bool.fromEnvironment('dart.vm.product');
+}

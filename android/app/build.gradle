@@ -43,8 +43,11 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.erbilcafe"
-        minSdkVersion 16 // <<== set this
+        applicationId "com.erbil.erbilcafe"
+        minSdkVersion 23
+        // Supplied by android/local.properties (untracked), so the key is
+        // never committed the way v1's was.
+        manifestPlaceholders += [mapsApiKey: localProperties.getProperty('MAPS_API_KEY') ?: '']
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

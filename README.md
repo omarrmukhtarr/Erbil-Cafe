@@ -1,77 +1,99 @@
 # ErbilCafe
 
-My First Project
+A café discovery app for Erbil, Kurdistan — browse cafés, read menus with real
+prices, find them on a map, leave reviews and book a table. Kurdish, Arabic and
+English with full right-to-left support.
 
-Erbil Café's application is a general introduction of all Erbil cafes.
+Part of the [ErbilCafe platform](https://github.com/omarrmukhtarr/erbilcafe-backend):
+this app, the API, and an admin dashboard.
 
-What is the purpose of creating this app or what is the workbook of this applet? 
+## Version 2
 
-The app aims to make it easier for users or residents of Erbil to choose and select their favorite café.
+v1 (2022) was a UI prototype: every café, menu item and map pin was hardcoded in
+Dart, sign-in accepted any input, and the booking screens read *"Sorry, Service
+Not Availabe For Now"*. v2 keeps the same look and screen flow but runs on a
+real backend.
 
-And also be clear about the cafes in Erbil,
+| | v1 | v2 |
+|---|---|---|
+| Data | Dart literals, 4 cafés | API, 15 cafés with real coordinates |
+| Menus | 3 identical 419-line widget files | one data-driven screen |
+| Auth | `signInAnon()` printed to console | JWT with refresh-token rotation |
+| Search | decorative | real, across all three languages |
+| Ratings | hardcoded 4.4 / 80 reviews | real, recomputed on each approval |
+| Booking | "Service Not Available" | live availability and capacity |
+| Languages | English only | Kurdish, Arabic, English with RTL |
+| Maps key | committed in source | platform config, untracked |
 
-Because the application contains the same information and features:
+## Running
 
-1. A summary of information about the café. 
+The [API](https://github.com/omarrmukhtarr/erbilcafe-backend) must be running.
 
-2- Some pictures of that café to be sure of the environment of that café
+```bash
+flutter pub get
 
-3- Place the café on the map to make it easier to find the location of the café without using other map applications to find its location 
+# iOS simulator (shares the host's localhost)
+flutter run --dart-define=API_URL=http://localhost:3100/api/v1
 
-4- The list of foods and drinks of cafes is valuable so that the user is clear about the type of food and drinks and their prices
+# Android emulator (the host is 10.0.2.2)
+flutter run --dart-define=API_URL=http://10.0.2.2:3100/api/v1
+```
 
+Seeded accounts: `user@erbilcafe.app` / `user12345`.
 
+### Maps keys
 
+Never commit them. v1's key leaked into this repository's git history and must
+be treated as public.
 
-### demo video
+```bash
+cp ios/Flutter/Secrets.example.xcconfig ios/Flutter/Secrets.xcconfig
+cp android/local.properties.example android/local.properties   # then merge with your existing file
+```
 
+Restrict each key to its bundle id / application id in Google Cloud Console.
 
+## Architecture
 
-https://user-images.githubusercontent.com/91552974/157659540-7ef9494c-8f60-4934-9b52-98c833ab5fa6.mp4
+```
+lib/
+├── app/         theme tokens, router (go_router + guards), DI
+├── core/        network (Dio + refresh interceptor), storage, errors, shared widgets
+├── l10n/        app_ku.arb · app_ar.arb · app_en.arb
+└── features/    onboarding auth home cafes menu map reviews favorites
+                 reservations profile
+                 └── each: data/ (models, repositories) · presentation/ (cubits, screens)
+```
 
+State is `flutter_bloc` cubits; dependencies come from `get_it`.
 
+**Session handling.** Access tokens live in the platform keystore, not
+SharedPreferences. The API rotates refresh tokens and revokes every session if a
+used one is replayed, so `AuthInterceptor` collapses concurrent 401s into a
+single refresh — two parallel refreshes would sign the user out.
 
+**Localisation.** The API resolves content for the request language, so the app
+receives plain strings rather than doing fallback itself. Flutter's built-in RTL
+list covers Arabic but not `ku`, so direction is forced from the resolved locale
+in `app.dart`. Café carousels use a compact card whose height is deterministic,
+because Kurdish and Arabic wrap taller than English.
 
+**Guests browse freely.** Sign-in is asked for at the point an account is
+actually needed — saving, reviewing, booking — not as a wall at launch.
 
+## Design system
 
+Every colour is from v1, counted from the original source: `#d17842` accent
+(39 uses), `#e6ccb2` cream (34), `#141921` ground (33), `#17191f` cards,
+`#231715` rating badges. Radii follow v1's own scale — 10 chips, 15 inputs,
+20 cards, 25/50 pills, 30 sheets. See `lib/app/theme/`.
 
-## Some Screenshot Of my Project
+*Fixed from v1:* `theme.dart` set `fontFamily: "Muli"`, a font never declared in
+`pubspec.yaml`, so every screen silently fell back to the platform default.
 
-Onboarding Screen
+## Tests
 
-<img src="https://user-images.githubusercontent.com/81375773/157628690-73144480-22e0-4b27-b953-50595b46c144.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157628685-6117bb9d-04f4-4bbc-bde5-6e6302ec919c.PNG" width="300" height="600"> |  <img src="https://user-images.githubusercontent.com/81375773/157628656-260fc5af-d708-434f-abfc-6a8fa4f99b36.PNG" width="300" height="600">
-
-
-
-Sign in Or Sign Up
-
-
- <img src="https://user-images.githubusercontent.com/81375773/157630778-cb22268b-83bf-4f14-b613-c60debbac5f8.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157630771-5cd72601-e946-4372-8912-092269361484.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157634312-9753f88d-9321-439d-86b6-67f2f8d97232.PNG" width="300" height="600">
-
-
-
-
-Another Sample
-
-
-
-<img src="https://user-images.githubusercontent.com/81375773/157632203-488b6257-42d4-4557-a489-14895f444a11.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632219-9f882534-79b1-437a-afc0-c86769296a48.PNG" width="300" height="600"> | 
-
-
-
-<img src="https://user-images.githubusercontent.com/81375773/157632183-150e451b-365b-40a5-bfeb-7ba78f62b2a8.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632189-4dec8bd9-b16d-4c47-a902-38334abe51a1.PNG" width="300" height="600"> | <img src="https://user-images.githubusercontent.com/81375773/157632199-7c9c227c-c3e2-4100-a77a-c92c0e92ff7a.PNG" width="300" height="600">
-
-
-<img src="https://user-images.githubusercontent.com/81375773/157632175-3906599f-067f-4b62-8c60-ecf3fb187f8d.PNG" width="300" height="600">  | <img src="https://user-images.githubusercontent.com/81375773/157632161-88ecdf27-8aa6-463e-940a-b5edffc51fca.PNG" width="300" height="600"> |   <img src="https://user-images.githubusercontent.com/81375773/157632137-1e8838e9-4df3-479f-9240-a0285f9bb2c4.PNG" width="300" height="600">
-
-
-
-
-
-
-
-
-
-
-
-
+```bash
+flutter analyze   # clean
+flutter test
+```
