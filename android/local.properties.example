@@ -1,0 +1,3 @@
+# Copy to local.properties and fill in. Never commit the real file.
+# Restrict the key to this application id and signing certificate.
+MAPS_API_KEY=your-android-maps-key-here
