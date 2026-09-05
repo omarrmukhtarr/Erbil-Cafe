@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/network/api_client.dart';
@@ -15,6 +16,7 @@ import '../../features/favorites/data/favorites_repository.dart';
 import '../../features/menu/data/repositories/menu_repository.dart';
 import '../../features/reservations/data/repositories/reservation_repository.dart';
 import '../../features/reviews/data/repositories/review_repository.dart';
+import '../router/app_router.dart';
 
 final sl = GetIt.instance;
 
@@ -69,6 +71,15 @@ Future<void> setupInjector() async {
 
   // ─── Session ────────────────────────────────────────────────────────
   sl.registerSingleton<AuthCubit>(AuthCubit(sl<AuthRepository>()));
+
+  // ─── Router ─────────────────────────────────────────────────────────
+  // One instance, owned here rather than built in a widget's initState: the
+  // redirect reads the session, and tests need to drive navigation without
+  // going through the tab bar, which on iOS is a native view with no Flutter
+  // widgets to tap.
+  sl.registerSingleton<GoRouter>(
+    createRouter(authCubit: sl<AuthCubit>(), prefs: sl<AppPreferences>()),
+  );
 
   // Registered last: the interceptor needs AuthCubit to exist so it can report
   // an expired session, and AuthCubit needs the repository above it.

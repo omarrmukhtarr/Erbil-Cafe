@@ -1,13 +1,12 @@
 import 'dart:io' show Platform;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native_better/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/widgets/liquid_glass.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// The tab shell, with a bar that follows each platform's own convention.
@@ -16,9 +15,13 @@ import '../../../../l10n/app_localizations.dart';
 /// hand-painted CustomPainter that matched neither platform, ignored the safe
 /// area and carried no semantics. This uses each platform's real component:
 ///
-/// * **iOS** — [CupertinoTabBar] over UIKit's own `UIGlassEffect`, bridged in
-///   [LiquidGlass]. Flutter exposes no Liquid Glass API on any channel, so the
-///   material comes from the platform itself rather than being imitated.
+/// * **iOS** — [CNTabBar], a real UIKit tab bar rendered as a platform view by
+///   `cupertino_native_better`. Flutter exposes no Liquid Glass API on any
+///   channel, so the material has to come from the platform. This replaced a
+///   hand-rolled `UIGlassEffect` bridge because a bare platform view bleeds
+///   through a modal scrim under iOS hybrid composition — the tab bar stayed
+///   bright while the page behind a sheet dimmed. `CNTabBar` tears its view
+///   down for the duration of a modal, driven by [CNTabBarRouteObserver].
 /// * **Android** — Material 3 [NavigationBar], which brings the platform's own
 ///   pill indicator, ripple and motion.
 class AppShell extends StatelessWidget {
@@ -51,15 +54,15 @@ class AppShell extends StatelessWidget {
       !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
   List<_Tab> _tabsFor(AppLocalizations l10n) => [
-        _Tab(l10n.home, CupertinoIcons.house, CupertinoIcons.house_fill,
+        // SF Symbol names for the native bar; Material icons for Android.
+        _Tab(l10n.home, 'cup.and.saucer', 'cup.and.saucer.fill',
             Icons.coffee_outlined, Icons.coffee_rounded),
-        _Tab(l10n.explore, CupertinoIcons.search, CupertinoIcons.search,
+        _Tab(l10n.explore, 'magnifyingglass', 'magnifyingglass',
             Icons.storefront_outlined, Icons.storefront),
-        _Tab(l10n.map, CupertinoIcons.map, CupertinoIcons.map_fill,
-            Icons.map_outlined, Icons.map),
-        _Tab(l10n.favorites, CupertinoIcons.heart, CupertinoIcons.heart_fill,
+        _Tab(l10n.map, 'map', 'map.fill', Icons.map_outlined, Icons.map),
+        _Tab(l10n.favorites, 'heart', 'heart.fill',
             Icons.favorite_border, Icons.favorite),
-        _Tab(l10n.profile, CupertinoIcons.person, CupertinoIcons.person_fill,
+        _Tab(l10n.profile, 'person', 'person.fill',
             Icons.person_outline, Icons.person),
       ];
 
@@ -84,25 +87,25 @@ class AppShell extends StatelessWidget {
 class _Tab {
   const _Tab(
     this.label,
-    this.cupertinoIcon,
-    this.cupertinoActiveIcon,
+    this.symbol,
+    this.activeSymbol,
     this.materialIcon,
     this.materialActiveIcon,
   );
 
   final String label;
-  final IconData cupertinoIcon;
-  final IconData cupertinoActiveIcon;
+
+  /// SF Symbol name, resolved natively on iOS.
+  final String symbol;
+  final String activeSymbol;
+
   final IconData materialIcon;
   final IconData materialActiveIcon;
 }
 
-/// iOS: UIKit's own Liquid Glass material behind a transparent tab bar.
-///
-/// The material comes from `UIGlassEffect` through a platform view, so it is
-/// the same one the system uses for its bars on iOS 26 — refraction included.
-/// `CupertinoTabBar` sits on top with a fully transparent background, which
-/// also switches off its own blur so the two do not stack.
+/// iOS: a real UIKit tab bar, so the Liquid Glass material, its selection
+/// platter and its spring animations come from the system rather than being
+/// approximated in Dart.
 class _GlassTabBar extends StatelessWidget {
   const _GlassTabBar({
     required this.tabs,
@@ -116,44 +119,27 @@ class _GlassTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
+    final isLight = Theme.of(context).brightness == Brightness.light;
 
-    // A light tint keeps the glass tied to the palette instead of reading as
-    // neutral system chrome. Kept low so the material still does the work.
-    final tint = (isLight ? AppColors.cream : AppColors.ink)
-        .withValues(alpha: isLight ? 0.30 : 0.34);
-
-    final hairline =
-        (isLight ? AppColors.onCream : Colors.white).withValues(alpha: 0.10);
-
-    return LiquidGlass(
-      tint: tint,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: hairline, width: 0.5)),
-        ),
-        child: CupertinoTabBar(
-          currentIndex: index,
-          onTap: onTap,
-          // Transparent: the glass behind is the background.
-          backgroundColor: Colors.transparent,
-          activeColor: AppColors.accent,
-          inactiveColor:
-              isLight ? AppColors.onCreamMuted : AppColors.onCardMuted,
-          iconSize: 26,
-          height: 52,
-          border: null,
-          items: [
-            for (final tab in tabs)
-              BottomNavigationBarItem(
-                icon: Icon(tab.cupertinoIcon),
-                activeIcon: Icon(tab.cupertinoActiveIcon),
-                label: tab.label,
-              ),
-          ],
-        ),
-      ),
+    return CNTabBar(
+      currentIndex: index,
+      onTap: onTap,
+      // The accent carries through to the native selection platter.
+      tint: AppColors.accent,
+      backgroundColor: isLight ? AppColors.cream : AppColors.ink,
+      labelFontFamily: 'RalewaySemi',
+      labelFontSize: 11.5,
+      iconSize: 24,
+      // Drops the platform view while a sheet is up, so the scrim dims the bar
+      // instead of it bleeding through.
+      items: [
+        for (final tab in tabs)
+          CNTabBarItem(
+            label: tab.label,
+            icon: CNSymbol(tab.symbol),
+            activeIcon: CNSymbol(tab.activeSymbol),
+          ),
+      ],
     );
   }
 }

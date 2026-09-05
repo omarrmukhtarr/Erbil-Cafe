@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
    <!-- Injected from local.properties at build time -->
     <application
-        android:label="erbilcafe"
+        android:label="ErbilCafe"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
