@@ -84,6 +84,16 @@ class AppShell extends StatelessWidget {
   }
 }
 
+/// Maps between a tab's position in the list and its position on screen.
+///
+/// The mapping is its own inverse, so one function serves both directions:
+/// reversing twice returns the original index.
+@visibleForTesting
+int mirrorTabIndex(int index, int count, {required bool isRtl}) {
+  if (!isRtl || count == 0) return index;
+  return count - 1 - index;
+}
+
 class _Tab {
   const _Tab(
     this.label,
@@ -117,27 +127,52 @@ class _GlassTabBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
 
+  /// SF Symbols carry more visual weight than Material icons at the same point
+  /// size. The plugin's default of 24 crowded the labels and made the bar look
+  /// oversized against Apple's own.
+  static const _iconSize = 18.0;
+
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
 
+    // UIKit mirrors a tab bar only when the *app* is right-to-left, which it
+    // decides from the bundle's localizations — and ours ships only English.
+    // The app's own language is chosen in Dart, so a Kurdish or Arabic user on
+    // an English phone got a mirrored Flutter UI with an unmirrored native bar.
+    //
+    // Ordering the items ourselves keeps the two in step whatever the device
+    // language is. If CFBundleLocalizations is ever added for ar/ku, UIKit will
+    // start mirroring too and this must be removed, or the two cancel out.
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final ordered = isRtl ? tabs.reversed.toList() : tabs;
+
     return CNTabBar(
-      currentIndex: index,
-      onTap: onTap,
+      currentIndex: mirrorTabIndex(index, tabs.length, isRtl: isRtl),
+      onTap: (i) => onTap(mirrorTabIndex(i, tabs.length, isRtl: isRtl)),
       // The accent carries through to the native selection platter.
       tint: AppColors.accent,
       backgroundColor: isLight ? AppColors.cream : AppColors.ink,
-      labelFontFamily: 'RalewaySemi',
-      labelFontSize: 11.5,
-      iconSize: 24,
+      // Montserrat, not the app's RalewaySemi: a semibold display face reads
+      // heavy and foreign at tab-bar size next to SF Symbols.
+      //
+      // The family must be set for the size to apply at all — the plugin's
+      // applyLabelFont returns early when it is null, and the label falls back
+      // to UIKit's default size.
+      labelFontFamily: 'Montserrat',
+      labelFontSize: 10,
+      // Note: CNTabBar.iconSize is only a fallback for items whose symbol
+      // carries no size of its own, and CNSymbol always defaults to 24 — so
+      // the size has to be set per symbol below or it has no effect.
+      iconSize: _iconSize,
       // Drops the platform view while a sheet is up, so the scrim dims the bar
       // instead of it bleeding through.
       items: [
-        for (final tab in tabs)
+        for (final tab in ordered)
           CNTabBarItem(
             label: tab.label,
-            icon: CNSymbol(tab.symbol),
-            activeIcon: CNSymbol(tab.activeSymbol),
+            icon: CNSymbol(tab.symbol, size: _iconSize),
+            activeIcon: CNSymbol(tab.activeSymbol, size: _iconSize),
           ),
       ],
     );
