@@ -38,7 +38,7 @@ dependencies:
   shared_preferences: ^2.3.3
 
   # Maps & location
-  google_maps_flutter: ^2.13.1
+  google_maps_flutter: ^2.18.0   # <2.18 sent newLatLngZoom for a bounds update and crashed iOS
   geolocator: ^13.0.2
   url_launcher: ^6.3.1
 
