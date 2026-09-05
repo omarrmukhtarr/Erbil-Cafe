@@ -1,9 +1,7 @@
 {
   "@@locale": "ar",
-
   "appName": "مقاهي أربيل",
   "appTagline": "اكتشف مقاهي أربيل",
-
   "onboardingTitle1": "اعثر على مقهاك",
   "onboardingBody1": "كل مقاهي أربيل في مكان واحد، مع الصور والقوائم والأسعار الحقيقية.",
   "onboardingTitle2": "شاهد القائمة أولاً",
@@ -13,7 +11,6 @@
   "getStarted": "ابدأ",
   "skip": "تخطٍّ",
   "next": "التالي",
-
   "signIn": "تسجيل الدخول",
   "signUp": "إنشاء حساب",
   "signOut": "تسجيل الخروج",
@@ -29,15 +26,22 @@
   "verifyPhone": "تأكيد رقمك",
   "otpSentTo": "أرسلنا رمزاً إلى {target}",
   "@otpSentTo": {
-    "placeholders": { "target": { "type": "String" } }
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
   },
   "resendCode": "إعادة إرسال الرمز",
   "resendIn": "إعادة الإرسال خلال {seconds} ثانية",
   "@resendIn": {
-    "placeholders": { "seconds": { "type": "int" } }
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
   },
   "verify": "تأكيد",
-
   "emailRequired": "الرجاء إدخال بريدك الإلكتروني",
   "emailInvalid": "الرجاء إدخال بريد إلكتروني صحيح",
   "passwordRequired": "الرجاء إدخال كلمة المرور",
@@ -47,13 +51,11 @@
   "nameRequired": "الرجاء إدخال اسمك",
   "phoneRequired": "الرجاء إدخال رقم هاتفك",
   "phoneInvalid": "أدخل رقماً صحيحاً، مثل +9647501234567",
-
   "home": "الرئيسية",
   "explore": "استكشاف",
   "map": "الخريطة",
   "favorites": "المحفوظة",
   "profile": "الملف الشخصي",
-
   "popular": "الأكثر شهرة",
   "featured": "مميّز",
   "nearby": "قريب منك",
@@ -76,7 +78,6 @@
   "sortDistance": "الأقرب",
   "sortReviews": "الأكثر تقييماً",
   "sortNewest": "الأحدث",
-
   "menu": "القائمة",
   "reviews": "التقييمات",
   "about": "نبذة",
@@ -88,15 +89,22 @@
   "bookTable": "احجز طاولة",
   "reviewCount": "{count, plural, =0{لا تقييمات} =1{تقييم واحد} =2{تقييمان} few{{count} تقييمات} other{{count} تقييماً}}",
   "@reviewCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "distanceAway": "يبعد {km} كم",
   "@distanceAway": {
-    "placeholders": { "km": { "type": "String" } }
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
   },
   "noMenuYet": "لم يضف هذا المقهى قائمة بعد",
   "unavailable": "غير متوفر",
-
   "writeReview": "اكتب تقييماً",
   "editReview": "تعديل تقييمك",
   "yourRating": "تقييمك",
@@ -106,11 +114,9 @@
   "noReviewsYet": "لا توجد تقييمات بعد",
   "beFirstToReview": "كن أول من يقيّم هذا المقهى.",
   "replyFromCafe": "رد من المقهى",
-
   "savedCafes": "المقاهي المحفوظة",
   "noFavorites": "لم تحفظ شيئاً بعد",
   "noFavoritesBody": "اضغط على القلب لحفظ مقهى هنا.",
-
   "reservations": "الحجوزات",
   "myBookings": "حجوزاتي",
   "selectDate": "التاريخ",
@@ -134,14 +140,16 @@
   "fullyBooked": "محجوز بالكامل",
   "seatsLeft": "{count} مقعد متبقٍ",
   "@seatsLeft": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "closedOnDay": "المقهى مغلق في ذلك اليوم",
-
   "notifications": "الإشعارات",
   "noNotifications": "لا إشعارات",
   "markAllRead": "تحديد الكل كمقروء",
-
   "settings": "الإعدادات",
   "language": "اللغة",
   "theme": "المظهر",
@@ -155,7 +163,6 @@
   "aboutApp": "نبذة",
   "deleteAccount": "حذف الحساب",
   "deleteAccountConfirm": "لا يمكن التراجع عن هذا. هل تريد حذف حسابك؟",
-
   "retry": "إعادة المحاولة",
   "cancel": "إلغاء",
   "save": "حفظ",
@@ -164,7 +171,6 @@
   "close": "إغلاق",
   "seeAll": "عرض الكل",
   "loading": "جارٍ التحميل…",
-
   "errorGeneric": "حدث خطأ ما",
   "errorNetwork": "لا يوجد اتصال بالإنترنت",
   "errorNetworkBody": "تحقّق من اتصالك وحاول مرة أخرى.",
@@ -172,22 +178,21 @@
   "errorTimeout": "استغرق ذلك وقتاً طويلاً — حاول مرة أخرى",
   "errorUnauthorized": "الرجاء تسجيل الدخول للمتابعة",
   "offlineBanner": "أنت غير متصل — يتم عرض بيانات محفوظة",
-
   "signInRequired": "تسجيل الدخول مطلوب",
   "signInToFavorite": "سجّل الدخول لحفظ المقاهي.",
   "signInToReview": "سجّل الدخول لكتابة تقييم.",
   "signInToBook": "سجّل الدخول لحجز طاولة.",
-
   "currencyIqd": "د.ع",
   "priceBudget": "اقتصادي",
   "priceModerate": "متوسط",
   "priceUpscale": "راقٍ",
-
   "sunday": "الأحد",
   "monday": "الإثنين",
   "tuesday": "الثلاثاء",
   "wednesday": "الأربعاء",
   "thursday": "الخميس",
   "friday": "الجمعة",
-  "saturday": "السبت"
+  "saturday": "السبت",
+  "noPhotoYet": "لا توجد صورة بعد",
+  "photoUnavailable": "الصورة غير متاحة"
 }

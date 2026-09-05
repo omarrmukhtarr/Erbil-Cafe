@@ -60,13 +60,35 @@ void main() {
       expect(find.text('0.0'), findsNothing);
     });
 
-    testWidgets('renders a placeholder when the café has no photo',
+    testWidgets('says a café has no photo instead of showing a blank box',
         (tester) async {
       await tester.pumpApp(
         Scaffold(body: CafeCard(cafe: buildCafe(), onTap: () {})),
       );
 
-      expect(find.byIcon(Icons.local_cafe_outlined), findsOneWidget);
+      // A bare grey box left people unsure whether it was still loading; the
+      // card now names the state and fills the space with the café's initials.
+      expect(find.text('No photo yet'), findsOneWidget);
+      expect(find.text('BC'), findsOneWidget);
+    });
+
+    testWidgets('derives initials from a single-word name', (tester) async {
+      await tester.pumpApp(
+        Scaffold(body: CafeCard(cafe: buildCafe(name: 'Huqqabaz'), onTap: () {})),
+      );
+
+      expect(find.text('H'), findsOneWidget);
+    });
+
+    testWidgets('derives initials from a non-Latin name', (tester) async {
+      await tester.pumpApp(
+        Scaffold(
+          body: CafeCard(cafe: buildCafe(name: 'کافێی باربێرا'), onTap: () {}),
+        ),
+        locale: const Locale('ku'),
+      );
+
+      expect(find.text('هێشتا وێنە نییە'), findsOneWidget);
     });
 
     testWidgets('shows distance only when the query supplied coordinates',

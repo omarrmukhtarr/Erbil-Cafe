@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
@@ -60,7 +61,10 @@ class CafeCard extends StatelessWidget {
                 children: [
                   Hero(
                     tag: 'cafe-image-${cafe.id}',
-                    child: _CafeImage(url: cafe.coverImage),
+                    child: _CafeImage(
+                      url: cafe.coverImage,
+                      name: cafe.name,
+                    ),
                   ),
 
                   // Scrim so the chips stay legible over a bright photo.
@@ -249,31 +253,119 @@ class _MetaRow extends StatelessWidget {
 }
 
 class _CafeImage extends StatelessWidget {
-  const _CafeImage({this.url});
+  const _CafeImage({required this.name, this.url});
 
   final String? url;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
-    // The placeholder sits inside the dark card, so it uses the dark ramp
-    // rather than the page's cream.
-    const placeholder = ColoredBox(
-      color: AppColors.cardDarkAlt,
-      child: Center(
-        child: Icon(Icons.local_cafe_outlined,
-            size: 36, color: AppColors.onCardDisabled),
-      ),
-    );
-
-    if (url == null) return placeholder;
+    if (url == null) return _NoPhoto(name: name, reason: _NoPhotoReason.missing);
 
     return CachedNetworkImage(
       imageUrl: url!,
       fit: BoxFit.cover,
       fadeInDuration: const Duration(milliseconds: 200),
       // A flat fill rather than a spinner — a grid of spinners is noisy.
-      placeholder: (context, _) => const ColoredBox(color: AppColors.cardDarkAlt),
-      errorWidget: (context, _, __) => placeholder,
+      placeholder: (context, _) =>
+          const ColoredBox(color: AppColors.cardDarkAlt),
+      errorWidget: (context, _, __) =>
+          _NoPhoto(name: name, reason: _NoPhotoReason.failed),
+    );
+  }
+}
+
+enum _NoPhotoReason { missing, failed }
+
+/// Stands in for a café photo.
+///
+/// A bare grey box with a generic cup icon left people wondering whether the
+/// image was still loading or the app was broken. This says which, and fills
+/// the space with the café's own initials over a tint derived from its name —
+/// so a list of photo-less cafés still looks deliberate and stays
+/// distinguishable at a glance.
+class _NoPhoto extends StatelessWidget {
+  const _NoPhoto({required this.name, required this.reason});
+
+  final String name;
+  final _NoPhotoReason reason;
+
+  /// Same name always yields the same shade, so a café looks consistent
+  /// wherever it appears.
+  Color get _tint {
+    const ramp = [
+      AppColors.brownDarkest,
+      AppColors.brownMid,
+      AppColors.brownWarm,
+      AppColors.brownDeep,
+      AppColors.badge,
+    ];
+    if (name.isEmpty) return ramp.first;
+    final hash = name.codeUnits.fold<int>(0, (sum, unit) => sum + unit);
+    return ramp[hash % ramp.length];
+  }
+
+  String get _initials {
+    final words =
+        name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return '?';
+    if (words.length == 1) return words.first.characters.first.toUpperCase();
+    return (words[0].characters.first + words[1].characters.first).toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final failed = reason == _NoPhotoReason.failed;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _tint.withValues(alpha: 0.85),
+            AppColors.cardDarkAlt,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _initials,
+              style: const TextStyle(
+                color: AppColors.cream,
+                fontFamily: 'Poppins',
+                fontSize: 30,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
+            ),
+            const Gap.sm(),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  failed ? Icons.wifi_off_rounded : Icons.image_not_supported_outlined,
+                  size: 13,
+                  color: AppColors.cream.withValues(alpha: 0.75),
+                ),
+                const HGap(5),
+                Text(
+                  failed ? l10n.photoUnavailable : l10n.noPhotoYet,
+                  style: TextStyle(
+                    color: AppColors.cream.withValues(alpha: 0.75),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

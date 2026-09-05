@@ -503,4 +503,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saturday => 'Saturday';
+
+  @override
+  String get noPhotoYet => 'No photo yet';
+
+  @override
+  String get photoUnavailable => 'Photo unavailable';
 }

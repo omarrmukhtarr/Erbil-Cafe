@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// The tab shell, with a bar that follows each platform's own convention.
@@ -16,9 +16,9 @@ import '../../../../l10n/app_localizations.dart';
 /// hand-painted CustomPainter that matched neither platform, ignored the safe
 /// area and carried no semantics. This uses each platform's real component:
 ///
-/// * **iOS** — [CupertinoTabBar] over a live [BackdropFilter]. A translucent
-///   bar with a real blur behind it *is* the system material, so on iOS 26 it
-///   takes the Liquid Glass treatment rather than imitating it in paint.
+/// * **iOS** — [CupertinoTabBar] over UIKit's own `UIGlassEffect`, bridged in
+///   [LiquidGlass]. Flutter exposes no Liquid Glass API on any channel, so the
+///   material comes from the platform itself rather than being imitated.
 /// * **Android** — Material 3 [NavigationBar], which brings the platform's own
 ///   pill indicator, ripple and motion.
 class AppShell extends StatelessWidget {
@@ -97,7 +97,12 @@ class _Tab {
   final IconData materialActiveIcon;
 }
 
-/// iOS: a translucent bar over a live blur — the system's own glass material.
+/// iOS: UIKit's own Liquid Glass material behind a transparent tab bar.
+///
+/// The material comes from `UIGlassEffect` through a platform view, so it is
+/// the same one the system uses for its bars on iOS 26 — refraction included.
+/// `CupertinoTabBar` sits on top with a fully transparent background, which
+/// also switches off its own blur so the two do not stack.
 class _GlassTabBar extends StatelessWidget {
   const _GlassTabBar({
     required this.tabs,
@@ -114,42 +119,39 @@ class _GlassTabBar extends StatelessWidget {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
 
-    // Tinted from the page colour so the glass reads as part of the app rather
-    // than a grey system slab. The alpha is what lets the blur show through —
-    // an opaque colour would switch CupertinoTabBar's blur off entirely.
+    // A light tint keeps the glass tied to the palette instead of reading as
+    // neutral system chrome. Kept low so the material still does the work.
     final tint = (isLight ? AppColors.cream : AppColors.ink)
-        .withValues(alpha: isLight ? 0.72 : 0.66);
+        .withValues(alpha: isLight ? 0.30 : 0.34);
 
     final hairline =
         (isLight ? AppColors.onCream : Colors.white).withValues(alpha: 0.10);
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: hairline, width: 0.5)),
-          ),
-          child: CupertinoTabBar(
-            currentIndex: index,
-            onTap: onTap,
-            backgroundColor: tint,
-            activeColor: AppColors.accent,
-            inactiveColor:
-                isLight ? AppColors.onCreamMuted : AppColors.onCardMuted,
-            iconSize: 26,
-            height: 52,
-            // The hairline above replaces the bar's own border.
-            border: null,
-            items: [
-              for (final tab in tabs)
-                BottomNavigationBarItem(
-                  icon: Icon(tab.cupertinoIcon),
-                  activeIcon: Icon(tab.cupertinoActiveIcon),
-                  label: tab.label,
-                ),
-            ],
-          ),
+    return LiquidGlass(
+      tint: tint,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: hairline, width: 0.5)),
+        ),
+        child: CupertinoTabBar(
+          currentIndex: index,
+          onTap: onTap,
+          // Transparent: the glass behind is the background.
+          backgroundColor: Colors.transparent,
+          activeColor: AppColors.accent,
+          inactiveColor:
+              isLight ? AppColors.onCreamMuted : AppColors.onCardMuted,
+          iconSize: 26,
+          height: 52,
+          border: null,
+          items: [
+            for (final tab in tabs)
+              BottomNavigationBarItem(
+                icon: Icon(tab.cupertinoIcon),
+                activeIcon: Icon(tab.cupertinoActiveIcon),
+                label: tab.label,
+              ),
+          ],
         ),
       ),
     );
