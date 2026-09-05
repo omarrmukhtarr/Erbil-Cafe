@@ -104,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Text(
                           page.body,
                           style: theme.textTheme.bodyLarge
-                              ?.copyWith(color: AppColors.textMuted),
+                              ?.copyWith(color: AppColors.onCreamMuted),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -125,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       dotWidth: 8,
                       expansionFactor: 3,
                       activeDotColor: AppColors.accent,
-                      dotColor: AppColors.textDisabled,
+                      dotColor: AppColors.onCreamMuted,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxl),

@@ -18,9 +18,9 @@ import '../cubit/cafe_list_cubit.dart';
 
 /// Browse and search.
 ///
-/// v1's shop screen had a search field that was purely decorative and four
-/// hardcoded entries. This searches the API across Kurdish, Arabic and English,
-/// and filters by area, price, amenities and open-now.
+/// v1's shop screen had a decorative search field and four hardcoded entries.
+/// This searches the API across Kurdish, Arabic and English and filters by
+/// area, price and open-now.
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -41,9 +41,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ..loadAreas();
 
     _scrollController.addListener(() {
-      // Prefetch before the user hits the bottom so scrolling stays smooth.
+      // Prefetch before the bottom so scrolling stays smooth.
       final position = _scrollController.position;
-      if (position.pixels >= position.maxScrollExtent - 400) {
+      if (position.pixels >= position.maxScrollExtent - 500) {
         _cubit.loadMore();
       }
     });
@@ -60,6 +60,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -72,40 +73,51 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.page,
-                    AppSpacing.md,
+                    AppSpacing.lg,
                     AppSpacing.page,
-                    AppSpacing.sm,
+                    AppSpacing.md,
                   ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: _cubit.search,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchHint,
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchController.text.isEmpty
-                          ? null
-                          : IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                _searchController.clear();
-                                _cubit.search('');
-                                setState(() {});
-                              },
-                            ),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.explore, style: theme.textTheme.displayLarge),
+                      const Gap.md(),
+                      TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          _cubit.search(value);
+                          setState(() {}); // toggles the clear button
+                        },
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          hintText: l10n.searchHint,
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          suffixIcon: _searchController.text.isEmpty
+                              ? null
+                              : IconButton(
+                                  icon: const Icon(Icons.close, size: 18),
+                                  tooltip: l10n.clearFilters,
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    _cubit.search('');
+                                    setState(() {});
+                                  },
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
                 _FilterBar(cubit: _cubit, state: state),
+                const Gap.md(),
 
                 Expanded(
                   child: switch (state.status) {
                     ListStatus.loading => ListView.separated(
-                        padding: const EdgeInsets.all(AppSpacing.page),
+                        padding: _listPadding,
                         itemCount: 4,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: AppSpacing.xl),
+                        separatorBuilder: (_, __) => const Gap.xxl(),
                         itemBuilder: (_, __) => const CafeCardSkeleton(),
                       ),
                     ListStatus.failure when state.cafes.isEmpty => ErrorView(
@@ -121,6 +133,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 onPressed: () {
                                   _searchController.clear();
                                   _cubit.clearFilters();
+                                  setState(() {});
                                 },
                                 child: Text(l10n.clearFilters),
                               )
@@ -128,22 +141,23 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                     _ => RefreshIndicator(
                         color: AppColors.accent,
+                        backgroundColor:
+                            theme.colorScheme.surfaceContainerHighest,
                         onRefresh: () => _cubit.load(),
                         child: ListView.separated(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(AppSpacing.page),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: _listPadding,
                           itemCount: state.cafes.length +
                               (state.status == ListStatus.loadingMore ? 1 : 0),
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: AppSpacing.xl),
+                          separatorBuilder: (_, __) => const Gap.xxl(),
                           itemBuilder: (context, index) {
                             if (index >= state.cafes.length) {
                               return const Padding(
                                 padding: EdgeInsets.all(AppSpacing.xl),
                                 child: Center(
                                   child: CircularProgressIndicator(
-                                    color: AppColors.accent,
-                                  ),
+                                      color: AppColors.accent),
                                 ),
                               );
                             }
@@ -175,9 +189,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ),
     );
   }
+
+  static const _listPadding = EdgeInsets.fromLTRB(
+    AppSpacing.page,
+    0,
+    AppSpacing.page,
+    AppSpacing.bottomBarClearance,
+  );
 }
 
-/// Filter chips in a single scrollable row above the results.
+/// Filter chips in one scrollable row above the results.
 class _FilterBar extends StatelessWidget {
   const _FilterBar({required this.cubit, required this.state});
 
@@ -190,7 +211,7 @@ class _FilterBar extends StatelessWidget {
     final query = state.query;
 
     return SizedBox(
-      height: 44,
+      height: 38,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
@@ -200,21 +221,7 @@ class _FilterBar extends StatelessWidget {
             selected: query.openNow == true,
             onTap: () => cubit.setOpenNow(query.openNow == true ? null : true),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          _Chip(
-            label: l10n.allAreas,
-            selected: query.area == null,
-            onTap: () => cubit.setArea(null),
-          ),
-          for (final area in state.areas) ...[
-            const SizedBox(width: AppSpacing.sm),
-            _Chip(
-              label: '${area.area} (${area.count})',
-              selected: query.area == area.area,
-              onTap: () => cubit.setArea(area.area),
-            ),
-          ],
-          const SizedBox(width: AppSpacing.sm),
+          const HGap.sm(),
           for (final price in PriceRange.values) ...[
             _Chip(
               label: price.symbol,
@@ -223,7 +230,20 @@ class _FilterBar extends StatelessWidget {
                 query.priceRange == price ? null : price,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const HGap.sm(),
+          ],
+          _Chip(
+            label: l10n.allAreas,
+            selected: query.area == null,
+            onTap: () => cubit.setArea(null),
+          ),
+          for (final area in state.areas) ...[
+            const HGap.sm(),
+            _Chip(
+              label: '${area.area} · ${area.count}',
+              selected: query.area == area.area,
+              onTap: () => cubit.setArea(area.area),
+            ),
           ],
         ],
       ),
@@ -247,25 +267,31 @@ class _Chip extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Center(
-      child: Material(
-        color: selected
-            ? AppColors.accent
-            : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: AppRadius.pillR,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : AppColors.textMuted,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        child: Material(
+          color: selected
+              ? AppColors.accent
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: AppRadius.pillR,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: selected
+                      ? Colors.white
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),

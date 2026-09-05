@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.erbilcafe">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
    <!-- Injected from local.properties at build time -->
     <application
         android:label="erbilcafe"

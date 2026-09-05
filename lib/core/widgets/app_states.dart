@@ -7,8 +7,10 @@ import '../../app/theme/app_spacing.dart';
 import '../../l10n/app_localizations.dart';
 import '../error/failure.dart';
 
-/// Skeleton placeholder. v1 showed a bare spinner; a skeleton in the shape of
-/// the content it replaces reads as faster and avoids a layout jump.
+/// Skeleton placeholder.
+///
+/// v1 showed a bare spinner; a skeleton shaped like the content it stands in
+/// for reads as faster and avoids the layout jump when data lands.
 class AppSkeleton extends StatelessWidget {
   const AppSkeleton({
     this.height = 16,
@@ -23,15 +25,20 @@ class AppSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
+    // On cream the skeleton must be darker than the page; on ink, lighter.
+    final base = isLight ? AppColors.creamSunken : AppColors.cardDarkAlt;
+    final highlight = isLight ? AppColors.creamRaised : const Color(0xFF2A2E37);
+
     return Shimmer.fromColors(
-      baseColor: scheme.surfaceContainerHighest,
-      highlightColor: scheme.surface,
+      baseColor: base,
+      highlightColor: highlight,
       child: Container(
         height: height,
         width: width,
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
+          color: base,
           borderRadius: BorderRadius.circular(radius),
         ),
       ),
@@ -41,21 +48,21 @@ class AppSkeleton extends StatelessWidget {
 
 /// Card-shaped skeleton used while a café list loads.
 class CafeCardSkeleton extends StatelessWidget {
-  const CafeCardSkeleton({super.key});
+  const CafeCardSkeleton({this.compact = false, super.key});
+
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const AspectRatio(
-          aspectRatio: 16 / 10,
-          child: AppSkeleton(radius: AppRadius.card),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        const AppSkeleton(height: 18, width: 160),
-        const SizedBox(height: AppSpacing.sm),
-        const AppSkeleton(height: 12, width: 110),
+        AppSkeleton(height: compact ? 148 : 190, radius: AppRadius.card),
+        const Gap.md(),
+        const AppSkeleton(height: 18, width: 170),
+        const Gap.sm(),
+        const AppSkeleton(height: 13, width: 120),
       ],
     );
   }
@@ -81,29 +88,39 @@ class EmptyView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxxl),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xxxl,
+          vertical: AppSpacing.huge,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              width: 76,
+              height: 76,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 32, color: AppColors.textMuted),
+              child: Icon(icon, size: 32, color: theme.colorScheme.onSurfaceVariant),
             ),
-            const SizedBox(height: AppSpacing.xl),
-            Text(title,
-                style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+            const Gap.xl(),
+            Text(
+              title,
+              style: theme.textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
             if (message != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(message!,
-                  style: theme.textTheme.bodySmall, textAlign: TextAlign.center),
+              const Gap.sm(),
+              Text(
+                message!,
+                style: theme.textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
             ],
             if (action != null) ...[
-              const SizedBox(height: AppSpacing.xl),
+              const Gap.xl(),
               action!,
             ],
           ],
@@ -132,11 +149,7 @@ class ErrorView extends StatelessWidget {
           l10n.errorNetworkBody,
         ),
       TimeoutFailure() => (Icons.timer_off_outlined, l10n.errorTimeout, null),
-      UnauthorizedFailure() => (
-          Icons.lock_outline,
-          l10n.errorUnauthorized,
-          null,
-        ),
+      UnauthorizedFailure() => (Icons.lock_outline, l10n.errorUnauthorized, null),
       NotFoundFailure() => (Icons.search_off, failure.message, null),
       _ => (Icons.error_outline, l10n.errorGeneric, failure.message),
     };
@@ -149,9 +162,47 @@ class ErrorView extends StatelessWidget {
           ? null
           : FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, size: 18),
               label: Text(l10n.retry),
             ),
+    );
+  }
+}
+
+/// Section heading with an optional trailing action, used across the tabs.
+class SectionHeader extends StatelessWidget {
+  const SectionHeader({
+    required this.title,
+    this.actionLabel,
+    this.onAction,
+    this.padding,
+    super.key,
+  });
+
+  final String title;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: padding ??
+          const EdgeInsets.fromLTRB(
+            AppSpacing.page,
+            AppSpacing.section,
+            AppSpacing.sm,
+            AppSpacing.md,
+          ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+          ),
+          if (onAction != null && actionLabel != null)
+            TextButton(onPressed: onAction, child: Text(actionLabel!)),
+        ],
+      ),
     );
   }
 }

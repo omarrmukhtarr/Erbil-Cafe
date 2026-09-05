@@ -74,7 +74,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Text(
                   'We will send a code to reset your password.',
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: AppColors.textMuted),
+                      ?.copyWith(color: AppColors.onCreamMuted),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
                 TextFormField(

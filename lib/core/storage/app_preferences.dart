@@ -28,10 +28,11 @@ class AppPreferences {
   ThemeMode get themeMode {
     final value = _prefs.getString(_themeKey);
     return switch (value) {
-      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
       'system' => ThemeMode.system,
-      // Dark is the product's real identity, so it is the default.
-      _ => ThemeMode.dark,
+      // The cream page with dark cards is the product's identity, so the
+      // light theme is the default rather than following the system.
+      _ => ThemeMode.light,
     };
   }
 

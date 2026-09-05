@@ -136,6 +136,26 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
   }
 }
 
+/// One icon-and-label pair from a booking's summary line.
+class _Fact extends StatelessWidget {
+  const _Fact({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.accent),
+        const SizedBox(width: 6),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
 class _BookingCard extends StatelessWidget {
   const _BookingCard({
     required this.reservation,
@@ -156,8 +176,8 @@ class _BookingCard extends StatelessWidget {
       ReservationStatus.pending => (l10n.bookingPending, AppColors.warning),
       ReservationStatus.confirmed => (l10n.bookingConfirmed, AppColors.success),
       ReservationStatus.declined => (l10n.bookingDeclined, AppColors.error),
-      ReservationStatus.cancelled => (l10n.bookingCancelled, AppColors.textMuted),
-      ReservationStatus.completed => (l10n.bookingCompleted, AppColors.textMuted),
+      ReservationStatus.cancelled => (l10n.bookingCancelled, AppColors.onCardMuted),
+      ReservationStatus.completed => (l10n.bookingCompleted, AppColors.onCardMuted),
     };
 
     return Container(
@@ -200,23 +220,22 @@ class _BookingCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
 
-          Row(
+          // Wrap, not Row: a long localised date plus time and party size
+          // overflows a narrow phone.
+          Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Icon(Icons.calendar_today_outlined,
-                  size: 14, color: AppColors.accent),
-              const SizedBox(width: 6),
-              Text(Formatters.date(reservation.date),
-                  style: theme.textTheme.bodySmall),
-              const SizedBox(width: AppSpacing.lg),
-              const Icon(Icons.schedule, size: 14, color: AppColors.accent),
-              const SizedBox(width: 6),
-              Text(reservation.time, style: theme.textTheme.bodySmall),
-              const SizedBox(width: AppSpacing.lg),
-              const Icon(Icons.people_outline,
-                  size: 14, color: AppColors.accent),
-              const SizedBox(width: 6),
-              Text('${reservation.partySize}',
-                  style: theme.textTheme.bodySmall),
+              _Fact(
+                icon: Icons.calendar_today_outlined,
+                label: Formatters.date(reservation.date),
+              ),
+              _Fact(icon: Icons.schedule, label: reservation.time),
+              _Fact(
+                icon: Icons.people_outline,
+                label: '${reservation.partySize}',
+              ),
             ],
           ),
 

@@ -1,3 +1,8 @@
+import 'dart:io' show Platform;
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,12 +10,17 @@ import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
-/// The tab shell.
+/// The tab shell, with a bar that follows each platform's own convention.
 ///
-/// v1 used a vendored `CurvedNavigationBar` copied into `lib/src/Navbar/`.
-/// This keeps the same look — cream bar on the dark ground, the active icon
-/// lifted into a circle — using Material 3's NavigationBar so it stays
-/// accessible and themable instead of a hand-painted CustomPainter.
+/// v1 vendored a copied `CurvedNavigationBar` into `lib/src/Navbar/` — a
+/// hand-painted CustomPainter that matched neither platform, ignored the safe
+/// area and carried no semantics. This uses each platform's real component:
+///
+/// * **iOS** — [CupertinoTabBar] over a live [BackdropFilter]. A translucent
+///   bar with a real blur behind it *is* the system material, so on iOS 26 it
+///   takes the Liquid Glass treatment rather than imitating it in paint.
+/// * **Android** — Material 3 [NavigationBar], which brings the platform's own
+///   pill indicator, ripple and motion.
 class AppShell extends StatelessWidget {
   const AppShell({required this.location, required this.child, super.key});
 
@@ -26,88 +36,184 @@ class AppShell extends StatelessWidget {
   ];
 
   int get _index {
-    final i = _tabs.indexOf(location);
-    return i < 0 ? 0 : i;
+    final exact = _tabs.indexOf(location);
+    if (exact >= 0) return exact;
+
+    // Prefix match so a nested route keeps its parent tab selected. Skips
+    // index 0, whose path is '/' and would match everything.
+    for (var i = _tabs.length - 1; i > 0; i--) {
+      if (location.startsWith(_tabs[i])) return i;
+    }
+    return 0;
   }
+
+  static bool get _useCupertino =>
+      !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+
+  List<_Tab> _tabsFor(AppLocalizations l10n) => [
+        _Tab(l10n.home, CupertinoIcons.house, CupertinoIcons.house_fill,
+            Icons.coffee_outlined, Icons.coffee_rounded),
+        _Tab(l10n.explore, CupertinoIcons.search, CupertinoIcons.search,
+            Icons.storefront_outlined, Icons.storefront),
+        _Tab(l10n.map, CupertinoIcons.map, CupertinoIcons.map_fill,
+            Icons.map_outlined, Icons.map),
+        _Tab(l10n.favorites, CupertinoIcons.heart, CupertinoIcons.heart_fill,
+            Icons.favorite_border, Icons.favorite),
+        _Tab(l10n.profile, CupertinoIcons.person, CupertinoIcons.person_fill,
+            Icons.person_outline, Icons.person),
+      ];
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final tabs = _tabsFor(l10n);
+    void onTap(int index) => context.go(_tabs[index]);
 
     return Scaffold(
+      // The bar is translucent, so content scrolls beneath it instead of being
+      // clipped above an opaque strip. Screens add bottom padding themselves.
+      extendBody: true,
       body: child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: NavigationBarTheme(
-            data: NavigationBarThemeData(
-              backgroundColor: Colors.transparent,
-              indicatorColor: AppColors.accent.withValues(alpha: 0.18),
-              labelTextStyle: WidgetStateProperty.resolveWith(
-                (states) => TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: states.contains(WidgetState.selected)
-                      ? AppColors.accent
-                      : AppColors.textDisabled,
+      bottomNavigationBar: _useCupertino
+          ? _GlassTabBar(tabs: tabs, index: _index, onTap: onTap)
+          : _MaterialTabBar(tabs: tabs, index: _index, onTap: onTap),
+    );
+  }
+}
+
+class _Tab {
+  const _Tab(
+    this.label,
+    this.cupertinoIcon,
+    this.cupertinoActiveIcon,
+    this.materialIcon,
+    this.materialActiveIcon,
+  );
+
+  final String label;
+  final IconData cupertinoIcon;
+  final IconData cupertinoActiveIcon;
+  final IconData materialIcon;
+  final IconData materialActiveIcon;
+}
+
+/// iOS: a translucent bar over a live blur — the system's own glass material.
+class _GlassTabBar extends StatelessWidget {
+  const _GlassTabBar({
+    required this.tabs,
+    required this.index,
+    required this.onTap,
+  });
+
+  final List<_Tab> tabs;
+  final int index;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
+    // Tinted from the page colour so the glass reads as part of the app rather
+    // than a grey system slab. The alpha is what lets the blur show through —
+    // an opaque colour would switch CupertinoTabBar's blur off entirely.
+    final tint = (isLight ? AppColors.cream : AppColors.ink)
+        .withValues(alpha: isLight ? 0.72 : 0.66);
+
+    final hairline =
+        (isLight ? AppColors.onCream : Colors.white).withValues(alpha: 0.10);
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: hairline, width: 0.5)),
+          ),
+          child: CupertinoTabBar(
+            currentIndex: index,
+            onTap: onTap,
+            backgroundColor: tint,
+            activeColor: AppColors.accent,
+            inactiveColor:
+                isLight ? AppColors.onCreamMuted : AppColors.onCardMuted,
+            iconSize: 26,
+            height: 52,
+            // The hairline above replaces the bar's own border.
+            border: null,
+            items: [
+              for (final tab in tabs)
+                BottomNavigationBarItem(
+                  icon: Icon(tab.cupertinoIcon),
+                  activeIcon: Icon(tab.cupertinoActiveIcon),
+                  label: tab.label,
                 ),
-              ),
-              iconTheme: WidgetStateProperty.resolveWith(
-                (states) => IconThemeData(
-                  size: 24,
-                  color: states.contains(WidgetState.selected)
-                      ? AppColors.accent
-                      : AppColors.textDisabled,
-                ),
-              ),
-            ),
-            child: NavigationBar(
-              selectedIndex: _index,
-              height: 64,
-              elevation: 0,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              onDestinationSelected: (index) => context.go(_tabs[index]),
-              destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.coffee_outlined),
-                  selectedIcon: const Icon(Icons.coffee_rounded),
-                  label: l10n.home,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.storefront_outlined),
-                  selectedIcon: const Icon(Icons.storefront),
-                  label: l10n.explore,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.map_outlined),
-                  selectedIcon: const Icon(Icons.map),
-                  label: l10n.map,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.favorite_border),
-                  selectedIcon: const Icon(Icons.favorite),
-                  label: l10n.favorites,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.person_outline),
-                  selectedIcon: const Icon(Icons.person),
-                  label: l10n.profile,
-                ),
-              ],
-            ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Android: the platform's Material 3 navigation bar.
+class _MaterialTabBar extends StatelessWidget {
+  const _MaterialTabBar({
+    required this.tabs,
+    required this.index,
+    required this.onTap,
+  });
+
+  final List<_Tab> tabs;
+  final int index;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
+    final surface = isLight ? AppColors.creamRaised : AppColors.cardDarkAlt;
+    final inactive = isLight ? AppColors.onCreamMuted : AppColors.onCardMuted;
+
+    return NavigationBarTheme(
+      data: NavigationBarThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: AppColors.accent.withValues(alpha: 0.18),
+        indicatorShape: const StadiumBorder(),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            color: states.contains(WidgetState.selected)
+                ? AppColors.accent
+                : inactive,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            size: 24,
+            color: states.contains(WidgetState.selected)
+                ? AppColors.accent
+                : inactive,
+          ),
+        ),
+      ),
+      child: NavigationBar(
+        selectedIndex: index,
+        onDestinationSelected: onTap,
+        height: 68,
+        elevation: 3,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        destinations: [
+          for (final tab in tabs)
+            NavigationDestination(
+              icon: Icon(tab.materialIcon),
+              selectedIcon: Icon(tab.materialActiveIcon),
+              label: tab.label,
+            ),
+        ],
       ),
     );
   }

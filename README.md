@@ -83,13 +83,42 @@ actually needed — saving, reviewing, booking — not as a wall at launch.
 
 ## Design system
 
-Every colour is from v1, counted from the original source: `#d17842` accent
-(39 uses), `#e6ccb2` cream (34), `#141921` ground (33), `#17191f` cards,
-`#231715` rating badges. Radii follow v1's own scale — 10 chips, 15 inputs,
-20 cards, 25/50 pills, 30 sheets. See `lib/app/theme/`.
+The signature look is a **cream page carrying near-black cards** — v1's Home,
+Menu, Profile and Booking screens all set `backgroundColor: #E6CCB2` and drew
+their tiles in `#17191f` with black section headings. Only the two full-bleed
+photo screens were dark.
+
+| Token | | Role |
+|---|---|---|
+| `cream` | `#E6CCB2` | the page |
+| `cardDark` | `#17191F` | cards and tiles on it |
+| `accent` | `#D17842` | prices, active states, CTAs |
+| `badge` | `#231715` | rating chips |
+| `shadow` | `#30221F` | card shadow — warm, not grey |
+| `ink` | `#141921` | full-bleed photo screens, and the dark theme's page |
+
+Because the card is dark while the page is light, text ink depends on the
+surface. `AppCard` applies that flip once, so widgets inside it can keep using
+`theme.textTheme.*`. Radii follow v1's scale — 10 chips, 15 inputs, 20 cards,
+25/50 pills, 30 sheets. See `lib/app/theme/`.
 
 *Fixed from v1:* `theme.dart` set `fontFamily: "Muli"`, a font never declared in
 `pubspec.yaml`, so every screen silently fell back to the platform default.
+
+## Platform conventions
+
+The tab bar is each platform's own component, not a shared imitation. iOS gets
+a `CupertinoTabBar` over a live `BackdropFilter` — a translucent bar with a real
+blur *is* the system material, so on iOS 26 it takes the Liquid Glass treatment.
+Android gets the Material 3 `NavigationBar` with its own indicator and motion.
+v1 vendored a copied `CurvedNavigationBar` that matched neither.
+
+## Maps
+
+The Map tab needs a Google Maps key. Without one the iOS SDK raises an uncaught
+native exception on the first map view — uncatchable from Dart — so the app asks
+the host over a method channel first and falls back to a café list rather than
+crashing.
 
 ## Tests
 

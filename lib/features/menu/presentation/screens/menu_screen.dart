@@ -7,6 +7,7 @@ import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/models/menu.dart';
@@ -16,6 +17,7 @@ import '../../data/repositories/menu_repository.dart';
 ///
 /// This one screen replaces v1's three hand-written menu files — 419 lines
 /// each, byte-identical apart from the class name — and works for every café.
+/// The look is v1's: black section headings on cream, dark tiles beneath.
 class MenuScreen extends StatefulWidget {
   const MenuScreen({required this.slug, super.key});
 
@@ -41,6 +43,7 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.menu)),
@@ -51,9 +54,9 @@ class _MenuScreenState extends State<MenuScreen> {
             return ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.page),
               itemCount: 6,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.lg),
+              separatorBuilder: (_, __) => const Gap.md(),
               itemBuilder: (_, __) =>
-                  const AppSkeleton(height: 88, radius: AppRadius.card),
+                  const AppSkeleton(height: 92, radius: AppRadius.card),
             );
           }
 
@@ -76,25 +79,36 @@ class _MenuScreenState extends State<MenuScreen> {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(AppSpacing.page),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.page,
+              AppSpacing.sm,
+              AppSpacing.page,
+              AppSpacing.huge,
+            ),
             children: [
-              for (final category in menu.categories) ...[
+              for (final category in menu.categories)
                 if (category.items.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(
-                      top: AppSpacing.md,
+                      top: AppSpacing.lg,
                       bottom: AppSpacing.lg,
                     ),
                     child: Row(
                       children: [
-                        Text(
-                          category.name,
-                          style: Theme.of(context).textTheme.titleLarge,
+                        Flexible(
+                          child: Text(
+                            category.name,
+                            style: theme.textTheme.headlineMedium,
+                          ),
                         ),
-                        const SizedBox(width: AppSpacing.md),
+                        const HGap.md(),
                         Expanded(
-                          child: Divider(
-                            color: AppColors.tan.withValues(alpha: 0.3),
+                          child: Container(
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: AppColors.onCream.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
                       ],
@@ -102,9 +116,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   ),
                   for (final item in category.items)
                     _MenuItemTile(item: item, currency: l10n.currencyIqd),
-                  const SizedBox(height: AppSpacing.lg),
                 ],
-              ],
             ],
           );
         },
@@ -113,6 +125,7 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 }
 
+/// A dark tile on the cream page, as v1 drew its menu items.
 class _MenuItemTile extends StatelessWidget {
   const _MenuItemTile({required this.item, required this.currency});
 
@@ -127,71 +140,72 @@ class _MenuItemTile extends StatelessWidget {
     return Opacity(
       // Unavailable items stay visible but clearly muted, so the menu still
       // reads as complete.
-      opacity: item.isAvailable ? 1 : 0.45,
-      child: Container(
+      opacity: item.isAvailable ? 1 : 0.5,
+      child: AppCard(
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: AppRadius.cardR,
-        ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipRRect(
               borderRadius: AppRadius.chipR,
               child: SizedBox(
-                width: 64,
-                height: 64,
+                width: 68,
+                height: 68,
                 child: item.thumbUrl == null
-                    ? ColoredBox(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: const Icon(Icons.local_cafe_outlined,
-                            color: AppColors.textDisabled),
+                    ? const ColoredBox(
+                        color: AppColors.cardDarkAlt,
+                        child: Icon(Icons.local_cafe_outlined,
+                            color: AppColors.onCardDisabled),
                       )
                     : CachedNetworkImage(
                         imageUrl: item.thumbUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (context, _) => ColoredBox(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                        ),
-                        errorWidget: (context, _, __) => ColoredBox(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                        ),
+                        placeholder: (context, _) =>
+                            const ColoredBox(color: AppColors.cardDarkAlt),
+                        errorWidget: (context, _, __) =>
+                            const ColoredBox(color: AppColors.cardDarkAlt),
                       ),
               ),
             ),
-            const SizedBox(width: AppSpacing.lg),
+            const HGap.lg(),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
                       Flexible(
                         child: Text(
                           item.name,
-                          style: theme.textTheme.titleMedium,
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(color: AppColors.onCard),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (item.isPopular) ...[
-                        const SizedBox(width: AppSpacing.sm),
+                        const HGap.sm(),
                         const Icon(Icons.star_rounded,
-                            size: 14, color: AppColors.accent),
+                            size: 15, color: AppColors.accent),
                       ],
                     ],
                   ),
                   if (item.description.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                    const Gap.xxs(),
                     Text(
                       item.description,
-                      style: theme.textTheme.bodySmall,
+                      style: const TextStyle(
+                        color: AppColors.onCardMuted,
+                        fontSize: 12.5,
+                        height: 1.4,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                  const SizedBox(height: AppSpacing.sm),
+                  const Gap.sm(),
                   Text(
                     item.isAvailable
                         ? Formatters.price(item.priceIqd, currency)
@@ -199,7 +213,7 @@ class _MenuItemTile extends StatelessWidget {
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: item.isAvailable
                           ? AppColors.accent
-                          : AppColors.textDisabled,
+                          : AppColors.onCardDisabled,
                     ),
                   ),
                 ],

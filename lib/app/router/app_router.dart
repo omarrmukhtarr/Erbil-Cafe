@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -54,9 +55,16 @@ GoRouter createRouter({
   required AuthCubit authCubit,
   required AppPreferences prefs,
 }) {
+  // Debug-only entry point override, so a screen can be opened directly
+  // during development: flutter run --dart-define=START_ROUTE=/map
+  const startRouteOverride = String.fromEnvironment('START_ROUTE');
+  final initialLocation = kDebugMode && startRouteOverride.isNotEmpty
+      ? startRouteOverride
+      : (prefs.hasOnboarded ? Routes.home : Routes.onboarding);
+
   return GoRouter(
     navigatorKey: _rootKey,
-    initialLocation: prefs.hasOnboarded ? Routes.home : Routes.onboarding,
+    initialLocation: initialLocation,
 
     // Re-evaluates redirects whenever the session changes, so signing out from
     // any screen bounces to sign-in without each screen listening itself.

@@ -43,9 +43,9 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     const CircleAvatar(
                       radius: 40,
-                      backgroundColor: AppColors.surfaceAlt,
+                      backgroundColor: AppColors.creamSunken,
                       child: Icon(Icons.person_outline,
-                          size: 40, color: AppColors.textMuted),
+                          size: 40, color: AppColors.onCreamMuted),
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     Text(l10n.signInRequired,
@@ -68,7 +68,8 @@ class ProfileScreen extends StatelessWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(AppSpacing.page),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.lg,
+                AppSpacing.page, AppSpacing.bottomBarClearance),
             children: [
               Row(
                 children: [
@@ -78,7 +79,7 @@ class ProfileScreen extends StatelessWidget {
                     child: Text(
                       user.name.isEmpty ? '?' : user.name[0].toUpperCase(),
                       style: const TextStyle(
-                        color: AppColors.background,
+                        color: AppColors.cream,
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                       ),
@@ -201,7 +202,7 @@ class _Tile extends StatelessWidget {
         child: Icon(icon, size: 20, color: AppColors.accent),
       ),
       title: Text(label),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+      trailing: const Icon(Icons.chevron_right, color: AppColors.onCreamMuted),
     );
   }
 }

@@ -6,6 +6,7 @@ import '../core/network/api_client.dart';
 import '../core/storage/app_preferences.dart';
 import '../features/auth/presentation/cubit/auth_cubit.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/kurdish_material_localizations.dart';
 import 'di/injector.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
@@ -58,6 +59,9 @@ class _ErbilCafeAppState extends State<ErbilCafeApp> {
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            // Must precede the global delegates: Flutter has no `ku` entry, so
+            // without these the framework's own strings fall back to English.
+            ...KurdishLocalizations.delegates,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

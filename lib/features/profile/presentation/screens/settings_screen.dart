@@ -113,7 +113,7 @@ class _Options<T> extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: optionValue == value
                         ? Colors.white
-                        : AppColors.textMuted,
+                        : AppColors.onCreamMuted,
                   ),
                 ),
               ),

@@ -79,7 +79,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             color: AppColors.accent,
             onRefresh: _reload,
             child: ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.page),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.lg,
+                  AppSpacing.page, AppSpacing.bottomBarClearance),
               itemCount: cafes.length,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xl),
               itemBuilder: (context, index) {
