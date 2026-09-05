@@ -11,12 +11,14 @@ import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/utils/auth_guard.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../favorites/data/favorites_repository.dart';
 import '../../../menu/data/repositories/menu_repository.dart';
 import '../../../reviews/data/models/review.dart';
 import '../../../reviews/data/repositories/review_repository.dart';
+import '../../data/models/cafe.dart';
 import '../../data/repositories/cafe_repository.dart';
 import '../cubit/cafe_detail_cubit.dart';
 
@@ -35,6 +37,9 @@ class CafeDetailScreen extends StatefulWidget {
 
 class _CafeDetailScreenState extends State<CafeDetailScreen> {
   late final CafeDetailCubit _cubit;
+
+  /// Height of the pinned booking bar, so content can clear it.
+  static const _ctaHeight = 96.0;
 
   @override
   void initState() {
@@ -75,11 +80,23 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
           }
 
           if (state.status == DetailStatus.failure) {
-            return Scaffold(
-              appBar: AppBar(),
-              body: ErrorView(
-                failure: state.failure!,
-                onRetry: () => _cubit.load(widget.slug),
+            return SafeArea(
+              child: Column(
+                children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: IconButton(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                  ),
+                  Expanded(
+                    child: ErrorView(
+                      failure: state.failure!,
+                      onRetry: () => _cubit.load(widget.slug),
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -89,16 +106,17 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
 
           return CustomScrollView(
             slivers: [
-              // Full-bleed header image with the content sheet riding over it,
-              // as in v1's café pages.
+              // Full-bleed header with the content riding over it, as v1 did.
               SliverAppBar(
                 expandedHeight: 300,
                 pinned: true,
                 stretch: true,
                 backgroundColor: theme.colorScheme.surface,
+                surfaceTintColor: Colors.transparent,
                 leading: _CircleButton(
                   icon: Icons.arrow_back,
                   onTap: () => context.pop(),
+                  semanticLabel: l10n.close,
                 ),
                 actions: [
                   _CircleButton(
@@ -106,6 +124,7 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                         ? Icons.favorite
                         : Icons.favorite_border,
                     color: cafe.isFavorited ? AppColors.accent : Colors.white,
+                    semanticLabel: l10n.favorites,
                     onTap: () => requireAuth(
                       context,
                       reason: l10n.signInToFavorite,
@@ -116,252 +135,137 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  const HGap.sm(),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Hero(
-                        tag: 'cafe-image-${cafe.id}',
-                        child: cafe.coverImage == null
-                            ? ColoredBox(
-                                color:
-                                    theme.colorScheme.surfaceContainerHighest,
-                              )
-                            : CachedNetworkImage(
-                                imageUrl: cafe.coverImage!,
-                                fit: BoxFit.cover,
-                                placeholder: (context, _) => ColoredBox(
-                                  color: theme
-                                      .colorScheme.surfaceContainerHighest,
-                                ),
-                                errorWidget: (context, _, __) => ColoredBox(
-                                  color: theme
-                                      .colorScheme.surfaceContainerHighest,
-                                ),
-                              ),
-                      ),
-                      const DecoratedBox(
-                        decoration:
-                            BoxDecoration(gradient: AppColors.imageScrim),
-                      ),
-                    ],
-                  ),
+                  background: _HeaderImage(url: cafe.coverImage, id: cafe.id),
                 ),
               ),
 
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.page),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.page,
+                  AppSpacing.xl,
+                  AppSpacing.page,
+                  // Clears the pinned booking bar.
+                  _ctaHeight + AppSpacing.xl,
+                ),
+                sliver: SliverList.list(
+                  children: [
+                    _TitleBlock(cafe: cafe, l10n: l10n),
+
+                    if (cafe.description.isNotEmpty) ...[
+                      const Gap.lg(),
+                      Text(cafe.description, style: theme.textTheme.bodyLarge),
+                    ],
+
+                    const Gap.xxl(),
+                    _QuickActions(
+                      phone: detail.phone,
+                      onCall: () => _open('tel:${detail.phone}'),
+                      onDirections: () => _open(
+                        'https://www.google.com/maps/dir/?api=1'
+                        '&destination=${cafe.lat},${cafe.lng}',
+                      ),
+                      onMenu: () => context.push(Routes.menu(widget.slug)),
+                      l10n: l10n,
+                    ),
+
+                    if (cafe.amenities.isNotEmpty) ...[
+                      const Gap.section(),
+                      _Heading(l10n.amenities),
+                      const Gap.md(),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
                         children: [
-                          Expanded(
-                            child: Text(cafe.name,
-                                style: theme.textTheme.headlineMedium),
-                          ),
-                          Text(
-                            cafe.priceRange.symbol,
-                            style: theme.textTheme.titleLarge
-                                ?.copyWith(color: AppColors.accent),
-                          ),
+                          for (final amenity in cafe.amenities)
+                            _AmenityChip(label: amenity.name),
                         ],
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                    ],
 
-                      Row(
-                        children: [
-                          if (cafe.reviewCount > 0) ...[
-                            const Icon(Icons.star_rounded,
-                                size: 18, color: AppColors.accent),
-                            const SizedBox(width: 4),
-                            Text(
-                              cafe.ratingAvg.toStringAsFixed(1),
-                              style: theme.textTheme.labelLarge,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              l10n.reviewCount(cafe.reviewCount),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                          ],
-                          Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: cafe.isOpenNow
-                                ? AppColors.success
-                                : AppColors.textDisabled,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            cafe.isOpenNow ? l10n.openNow : l10n.closed,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cafe.isOpenNow
-                                  ? AppColors.success
-                                  : AppColors.textMuted,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (cafe.description.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(cafe.description,
-                            style: theme.textTheme.bodyMedium),
-                      ],
-
-                      const SizedBox(height: AppSpacing.xl),
-
-                      // Quick actions
-                      Row(
-                        children: [
-                          if (detail.phone != null)
-                            Expanded(
-                              child: _ActionButton(
-                                icon: Icons.phone_outlined,
-                                label: l10n.call,
-                                onTap: () => _open('tel:${detail.phone}'),
-                              ),
-                            ),
-                          if (detail.phone != null)
-                            const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _ActionButton(
-                              icon: Icons.directions_outlined,
-                              label: l10n.directions,
-                              onTap: () => _open(
-                                'https://www.google.com/maps/dir/?api=1'
-                                '&destination=${cafe.lat},${cafe.lng}',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _ActionButton(
-                              icon: Icons.menu_book_outlined,
-                              label: l10n.menu,
-                              onTap: () =>
-                                  context.push(Routes.menu(widget.slug)),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (cafe.amenities.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.xxl),
-                        Text(l10n.amenities,
-                            style: theme.textTheme.titleMedium),
-                        const SizedBox(height: AppSpacing.md),
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
-                          children: [
-                            for (final amenity in cafe.amenities)
-                              Chip(
-                                label: Text(amenity.name),
-                                backgroundColor:
-                                    theme.colorScheme.surfaceContainerHighest,
-                              ),
-                          ],
-                        ),
-                      ],
-
-                      if (detail.images.length > 1) ...[
-                        const SizedBox(height: AppSpacing.xxl),
-                        Text(l10n.gallery, style: theme.textTheme.titleMedium),
-                        const SizedBox(height: AppSpacing.md),
-                        SizedBox(
-                          height: 120,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: detail.images.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: AppSpacing.sm),
-                            itemBuilder: (context, index) {
-                              final image = detail.images[index];
-                              return ClipRRect(
-                                borderRadius: AppRadius.chipR,
-                                child: CachedNetworkImage(
-                                  imageUrl: image.thumbUrl ?? image.url,
-                                  width: 140,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, _) => Container(
-                                    width: 140,
-                                    color: theme
-                                        .colorScheme.surfaceContainerHighest,
-                                  ),
-                                  errorWidget: (context, _, __) => Container(
-                                    width: 140,
-                                    color: theme
-                                        .colorScheme.surfaceContainerHighest,
-                                  ),
+                    if (detail.images.length > 1) ...[
+                      const Gap.section(),
+                      _Heading(l10n.gallery),
+                      const Gap.md(),
+                      SizedBox(
+                        height: 128,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          clipBehavior: Clip.none,
+                          itemCount: detail.images.length,
+                          separatorBuilder: (_, __) => const HGap.md(),
+                          itemBuilder: (context, index) {
+                            final image = detail.images[index];
+                            return ClipRRect(
+                              borderRadius: AppRadius.chipR,
+                              child: CachedNetworkImage(
+                                imageUrl: image.thumbUrl ?? image.url,
+                                width: 150,
+                                fit: BoxFit.cover,
+                                placeholder: (context, _) => Container(
+                                  width: 150,
+                                  color: AppColors.creamSunken,
                                 ),
-                              );
+                                errorWidget: (context, _, __) => Container(
+                                  width: 150,
+                                  color: AppColors.creamSunken,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
+                    if (detail.openingHours.isNotEmpty) ...[
+                      const Gap.section(),
+                      _Heading(l10n.openingHours),
+                      const Gap.md(),
+                      _OpeningHours(hours: detail.openingHours),
+                    ],
+
+                    // ─── Reviews ─────────────────────────────────
+                    const Gap.section(),
+                    Row(
+                      children: [
+                        Expanded(child: _Heading(l10n.reviews)),
+                        TextButton(
+                          onPressed: () => requireAuth(
+                            context,
+                            reason: l10n.signInToReview,
+                            action: () async {
+                              final wrote = await context
+                                  .push<bool>(Routes.review(widget.slug));
+                              if (wrote ?? false) _cubit.reloadReviews();
                             },
                           ),
+                          child: Text(l10n.writeReview),
                         ),
                       ],
+                    ),
 
-                      if (detail.openingHours.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.xxl),
-                        Text(l10n.openingHours,
-                            style: theme.textTheme.titleMedium),
-                        const SizedBox(height: AppSpacing.md),
-                        _OpeningHours(hours: detail.openingHours),
-                      ],
-
-                      // ─── Reviews ─────────────────────────────────
-                      const SizedBox(height: AppSpacing.xxl),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(l10n.reviews,
-                                style: theme.textTheme.titleMedium),
-                          ),
-                          TextButton(
-                            onPressed: () => requireAuth(
-                              context,
-                              reason: l10n.signInToReview,
-                              action: () async {
-                                final wrote = await context
-                                    .push<bool>(Routes.review(widget.slug));
-                                if (wrote ?? false) _cubit.reloadReviews();
-                              },
-                            ),
-                            child: Text(l10n.writeReview),
-                          ),
-                        ],
-                      ),
-
-                      if (state.summary.total > 0)
-                        _RatingBreakdown(summary: state.summary),
-
-                      const SizedBox(height: AppSpacing.md),
-
-                      if (state.reviews.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.xl),
-                          child: Center(
-                            child: Text(
-                              l10n.noReviewsYet,
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ),
-                        )
-                      else
-                        for (final review in state.reviews.take(5))
-                          _ReviewTile(review: review),
-
-                      const SizedBox(height: AppSpacing.huge),
+                    if (state.summary.total > 0) ...[
+                      const Gap.sm(),
+                      _RatingBreakdown(summary: state.summary),
                     ],
-                  ),
+
+                    const Gap.lg(),
+
+                    if (state.reviews.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.xxl),
+                        child: Center(
+                          child: Text(l10n.noReviewsYet,
+                              style: theme.textTheme.bodySmall),
+                        ),
+                      )
+                    else
+                      for (final review in state.reviews.take(5))
+                        _ReviewTile(review: review),
+                  ],
                 ),
               ),
             ],
@@ -369,24 +273,42 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
         },
       ),
 
-      // The booking CTA that v1 rendered as "Service Not Availabe For Now".
+      // The booking CTA v1 rendered as "Service Not Availabe For Now".
       bottomNavigationBar: BlocBuilder<CafeDetailCubit, CafeDetailState>(
         bloc: _cubit,
         builder: (context, state) {
           if (state.detail == null) return const SizedBox.shrink();
 
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: ElevatedButton.icon(
-                onPressed: () => requireAuth(
-                  context,
-                  reason: l10n.signInToBook,
-                  action: () async =>
-                      context.push(Routes.book(widget.slug)),
+          return Container(
+            // A solid strip so the CTA never sits on top of scrolling text.
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, -4),
                 ),
-                icon: const Icon(Icons.event_seat_outlined),
-                label: Text(l10n.bookTable),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.page,
+                  AppSpacing.md,
+                  AppSpacing.page,
+                  AppSpacing.md,
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: () => requireAuth(
+                    context,
+                    reason: l10n.signInToBook,
+                    action: () async => context.push(Routes.book(widget.slug)),
+                  ),
+                  icon: const Icon(Icons.event_seat_outlined, size: 20),
+                  label: Text(l10n.bookTable),
+                ),
               ),
             ),
           );
@@ -396,39 +318,186 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
   }
 }
 
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({
-    required this.icon,
-    required this.onTap,
-    this.color = Colors.white,
-  });
+class _HeaderImage extends StatelessWidget {
+  const _HeaderImage({required this.url, required this.id});
 
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color color;
+  final String? url;
+  final String id;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Material(
-        color: AppColors.badge.withValues(alpha: 0.6),
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Icon(icon, color: color, size: 20),
-          ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Hero(
+          tag: 'cafe-image-$id',
+          child: url == null
+              ? const ColoredBox(
+                  color: AppColors.cardDarkAlt,
+                  child: Icon(Icons.local_cafe_outlined,
+                      size: 48, color: AppColors.onCardDisabled),
+                )
+              : CachedNetworkImage(
+                  imageUrl: url!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, _) =>
+                      const ColoredBox(color: AppColors.cardDarkAlt),
+                  errorWidget: (context, _, __) =>
+                      const ColoredBox(color: AppColors.cardDarkAlt),
+                ),
         ),
-      ),
+        const DecoratedBox(
+          decoration: BoxDecoration(gradient: AppColors.imageScrim),
+        ),
+      ],
     );
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
+class _TitleBlock extends StatelessWidget {
+  const _TitleBlock({required this.cafe, required this.l10n});
+
+  final Cafe cafe;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(cafe.name, style: theme.textTheme.displayLarge),
+            ),
+            const HGap.md(),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                cafe.priceRange.symbol,
+                style: theme.textTheme.titleLarge
+                    ?.copyWith(color: AppColors.accent),
+              ),
+            ),
+          ],
+        ),
+        const Gap.sm(),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.xs,
+          children: [
+            if (cafe.reviewCount > 0)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.star_rounded,
+                      size: 18, color: AppColors.accent),
+                  const HGap(4),
+                  Text(cafe.ratingAvg.toStringAsFixed(1),
+                      style: theme.textTheme.labelLarge),
+                  const HGap(6),
+                  Text(l10n.reviewCount(cafe.reviewCount),
+                      style: theme.textTheme.bodySmall),
+                ],
+              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.circle,
+                  size: 8,
+                  color: cafe.isOpenNow
+                      ? AppColors.success
+                      : AppColors.onCreamMuted,
+                ),
+                const HGap(6),
+                Text(
+                  cafe.isOpenNow ? l10n.openNow : l10n.closed,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cafe.isOpenNow
+                        ? AppColors.success
+                        : AppColors.onCreamMuted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            if (cafe.area != null)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.location_on_outlined,
+                      size: 15, color: AppColors.onCreamMuted),
+                  const HGap(4),
+                  Text(cafe.area!, style: theme.textTheme.bodySmall),
+                ],
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Call / Directions / Menu.
+///
+/// Drawn as dark tiles rather than tinted cream: a cream-on-cream button was
+/// nearly invisible, and the dark surface matches the card language.
+class _QuickActions extends StatelessWidget {
+  const _QuickActions({
+    required this.phone,
+    required this.onCall,
+    required this.onDirections,
+    required this.onMenu,
+    required this.l10n,
+  });
+
+  final String? phone;
+  final VoidCallback onCall;
+  final VoidCallback onDirections;
+  final VoidCallback onMenu;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (phone != null) ...[
+          Expanded(
+            child: _ActionTile(
+              icon: Icons.phone_outlined,
+              label: l10n.call,
+              onTap: onCall,
+            ),
+          ),
+          const HGap.md(),
+        ],
+        Expanded(
+          child: _ActionTile(
+            icon: Icons.directions_outlined,
+            label: l10n.directions,
+            onTap: onDirections,
+          ),
+        ),
+        const HGap.md(),
+        Expanded(
+          child: _ActionTile(
+            icon: Icons.menu_book_outlined,
+            label: l10n.menu,
+            onTap: onMenu,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -440,23 +509,62 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: AppRadius.inputR,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-          child: Column(
-            children: [
-              Icon(icon, size: 20, color: AppColors.accent),
-              const SizedBox(height: 4),
-              Text(label, style: theme.textTheme.labelSmall),
-            ],
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 22, color: AppColors.accent),
+          const Gap(6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.onCard,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Heading extends StatelessWidget {
+  const _Heading(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: Theme.of(context).textTheme.titleLarge);
+}
+
+class _AmenityChip extends StatelessWidget {
+  const _AmenityChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.creamSunken,
+        borderRadius: AppRadius.pillR,
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.onCream,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -466,7 +574,7 @@ class _ActionButton extends StatelessWidget {
 class _OpeningHours extends StatelessWidget {
   const _OpeningHours({required this.hours});
 
-  final List<dynamic> hours;
+  final List<OpeningHour> hours;
 
   @override
   Widget build(BuildContext context) {
@@ -483,37 +591,41 @@ class _OpeningHours extends StatelessWidget {
       l10n.saturday,
     ];
 
+    // DateTime.weekday is 1=Monday…7=Sunday; the API uses 0=Sunday.
     final today = DateTime.now().weekday % 7;
 
     return Column(
       children: [
         for (final hour in hours)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    names[hour.dayOfWeek as int],
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    names[hour.dayOfWeek],
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       // Highlight today so the current hours are findable.
                       color: hour.dayOfWeek == today
                           ? AppColors.accent
-                          : AppColors.textMuted,
+                          : AppColors.onCreamMuted,
                       fontWeight: hour.dayOfWeek == today
                           ? FontWeight.w700
-                          : FontWeight.normal,
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
                 Text(
-                  hour.isClosed as bool
+                  hour.isClosed
                       ? l10n.closed
                       : '${hour.opensAt} – ${hour.closesAt}',
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: hour.dayOfWeek == today
                         ? AppColors.accent
-                        : AppColors.textMuted,
+                        : AppColors.onCreamMuted,
+                    fontWeight: hour.dayOfWeek == today
+                        ? FontWeight.w700
+                        : FontWeight.w500,
                   ),
                 ),
               ],
@@ -532,51 +644,46 @@ class _RatingBreakdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                summary.average.toStringAsFixed(1),
-                style: theme.textTheme.displayLarge,
-              ),
-              Text(
-                '${summary.total}',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(summary.average.toStringAsFixed(1),
+                  style: theme.textTheme.displayLarge),
+              Text(l10n.reviewCount(summary.total),
+                  style: theme.textTheme.bodySmall),
             ],
           ),
-          const SizedBox(width: AppSpacing.xl),
+          const HGap.lg(),
           Expanded(
             child: Column(
               children: [
                 for (var stars = 5; stars >= 1; stars--)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 2.5),
                     child: Row(
                       children: [
                         SizedBox(
-                          width: 14,
-                          child: Text(
-                            '$stars',
-                            style: theme.textTheme.labelSmall,
-                          ),
+                          width: 12,
+                          child: Text('$stars',
+                              style: theme.textTheme.labelSmall),
                         ),
+                        const HGap.sm(),
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(999),
                             child: LinearProgressIndicator(
                               value: summary.fraction(stars),
-                              minHeight: 6,
-                              backgroundColor:
-                                  theme.colorScheme.surfaceContainerHighest,
+                              minHeight: 7,
+                              backgroundColor: AppColors.creamSunken,
                               valueColor: const AlwaysStoppedAnimation(
-                                AppColors.accent,
-                              ),
+                                  AppColors.accent),
                             ),
                           ),
                         ),
@@ -602,41 +709,42 @@ class _ReviewTile extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
 
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: AppRadius.cardR,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               CircleAvatar(
-                radius: 16,
+                radius: 17,
                 backgroundColor: AppColors.cream,
                 child: Text(
                   review.authorName.isEmpty
                       ? '?'
                       : review.authorName[0].toUpperCase(),
                   style: const TextStyle(
-                    color: AppColors.background,
+                    color: AppColors.onCream,
                     fontWeight: FontWeight.w700,
-                    fontSize: 12,
+                    fontSize: 13,
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
+              const HGap.md(),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(review.authorName, style: theme.textTheme.labelLarge),
+                    Text(
+                      review.authorName,
+                      style: theme.textTheme.labelLarge
+                          ?.copyWith(color: AppColors.onCard),
+                    ),
                     Text(
                       Formatters.relative(review.createdAt),
-                      style: theme.textTheme.labelSmall,
+                      style: const TextStyle(
+                          color: AppColors.onCardMuted, fontSize: 11.5),
                     ),
                   ],
                 ),
@@ -651,24 +759,34 @@ class _ReviewTile extends StatelessWidget {
                       size: 14,
                       color: i <= review.rating
                           ? AppColors.accent
-                          : AppColors.textDisabled,
+                          : AppColors.onCardDisabled,
                     ),
                 ],
               ),
             ],
           ),
           if (review.comment != null && review.comment!.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(review.comment!, style: theme.textTheme.bodyMedium),
+            const Gap.md(),
+            Text(
+              review.comment!,
+              // Reviews arrive in Kurdish, Arabic or English; let the text
+              // pick its own direction rather than inheriting the UI's.
+              textDirection: null,
+              style: const TextStyle(
+                color: AppColors.onCard,
+                fontSize: 14,
+                height: 1.55,
+              ),
+            ),
           ],
           if (review.reply != null) ...[
-            const SizedBox(height: AppSpacing.md),
+            const Gap.md(),
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+              decoration: const BoxDecoration(
+                color: AppColors.cardDarkAlt,
                 borderRadius: AppRadius.chipR,
-                border: const Border(
+                border: Border(
                   left: BorderSide(color: AppColors.accent, width: 2),
                 ),
               ),
@@ -677,16 +795,61 @@ class _ReviewTile extends StatelessWidget {
                 children: [
                   Text(
                     l10n.replyFromCafe,
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(color: AppColors.accent),
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(review.reply!.body, style: theme.textTheme.bodySmall),
+                  const Gap.xs(),
+                  Text(
+                    review.reply!.body,
+                    style: const TextStyle(
+                        color: AppColors.onCardMuted, fontSize: 13, height: 1.5),
+                  ),
                 ],
               ),
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _CircleButton extends StatelessWidget {
+  const _CircleButton({
+    required this.icon,
+    required this.onTap,
+    required this.semanticLabel,
+    this.color = Colors.white,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final String semanticLabel;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Semantics(
+        button: true,
+        label: semanticLabel,
+        child: Material(
+          color: AppColors.badge.withValues(alpha: 0.55),
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: Icon(icon, color: color, size: 20),
+            ),
+          ),
+        ),
       ),
     );
   }

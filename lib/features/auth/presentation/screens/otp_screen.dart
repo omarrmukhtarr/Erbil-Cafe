@@ -133,7 +133,7 @@ class _OtpScreenState extends State<OtpScreen> {
               Text(
                 l10n.otpSentTo(widget.identifier),
                 style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textMuted),
+                    ?.copyWith(color: AppColors.onCreamMuted),
               ),
               const SizedBox(height: AppSpacing.huge),
 

@@ -202,7 +202,7 @@ class _BookTableScreenState extends State<BookTableScreen> {
                         style: theme.textTheme.bodyLarge),
                     const Spacer(),
                     const Icon(Icons.chevron_right,
-                        color: AppColors.textMuted),
+                        color: AppColors.onCreamMuted),
                   ],
                 ),
               ),
@@ -212,20 +212,21 @@ class _BookTableScreenState extends State<BookTableScreen> {
             const SizedBox(height: AppSpacing.xxl),
             Text(l10n.partySize, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpacing.md),
-            Row(
+            // Wrap, not Row: eight options overflow a phone's width, and a
+            // horizontal scroller would hide the larger party sizes.
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: [
                 for (final size in [1, 2, 3, 4, 5, 6, 8, 10])
-                  Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.sm),
-                    child: _Pill(
-                      label: '$size',
-                      selected: _partySize == size,
-                      onTap: () {
-                        _partySize = size;
-                        // Availability depends on party size, so refetch.
-                        _loadAvailability();
-                      },
-                    ),
+                  _Pill(
+                    label: '$size',
+                    selected: _partySize == size,
+                    onTap: () {
+                      _partySize = size;
+                      // Availability depends on party size, so refetch.
+                      _loadAvailability();
+                    },
                   ),
               ],
             ),
@@ -370,7 +371,7 @@ class _Pill extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : AppColors.textMuted,
+                color: selected ? Colors.white : AppColors.onCreamMuted,
               ),
             ),
           ),

@@ -86,7 +86,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 Text(
                   l10n.appTagline,
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: AppColors.textMuted),
+                      ?.copyWith(color: AppColors.onCreamMuted),
                 ),
                 const SizedBox(height: AppSpacing.huge),
 
