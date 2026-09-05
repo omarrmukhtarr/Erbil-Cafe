@@ -110,11 +110,19 @@ surface. `AppCard` applies that flip once, so widgets inside it can keep using
 The tab bar is each platform's own component, not a shared imitation.
 
 **iOS — real Liquid Glass.** Flutter exposes no Liquid Glass API on any channel
-(checked against stable, beta and master), so `LiquidGlass`
-(`lib/core/widgets/liquid_glass.dart`) bridges to UIKit's own `UIGlassEffect`
-through a platform view. That is the same material the system uses for its bars
-on iOS 26, refraction included. Below iOS 26 it falls back to
-`UIBlurEffect(.systemThinMaterial)`, and off-iOS to a `BackdropFilter`.
+(checked against stable, beta and master), so the bar is UIKit's own, rendered
+as a platform view by [`cupertino_native_better`]'s `CNTabBar`. That brings the
+genuine glass material, the floating pill, and the system's selection platter
+and spring animations.
+
+A hand-rolled `UIGlassEffect` bridge came first and was replaced: a bare
+platform view bleeds through a modal scrim under iOS hybrid composition, so the
+tab bar stayed bright while the page behind a sheet dimmed. `CNTabBar` tears its
+view down for the duration of a modal, driven by `CNTabBarRouteObserver` in the
+router's `observers`.
+
+One consequence: the bar has no Flutter widgets, so tests navigate by route
+(`sl<GoRouter>().go(...)`) rather than tapping it.
 
 **Android** gets the Material 3 `NavigationBar` with its own indicator and
 motion. v1 vendored a copied `CurvedNavigationBar` that matched neither platform.
@@ -138,9 +146,37 @@ spot a sheet lists them, so no café is ever stuck behind an unopenable pin.
 **Themes.** All six of v1's map styles are back behind a picker, plus two tuned
 to the app's palette. The choice persists.
 
+## Android
+
+The Android project was still on v1's 2022 toolchain — Gradle 7.3.1, **AGP
+4.1.0**, Kotlin 1.3.50, Java 8 — and no longer built at all against a modern
+JDK. It is now on Flutter's current template: Gradle 9.3.1, AGP 9.1.0, Kotlin
+2.4.0, Java 17, Kotlin DSL.
+
+Three things that build needs, each commented where it lives:
+`isCoreLibraryDesugaringEnabled` for `flutter_local_notifications`; a
+`subprojects` block pinning old plugins up to compileSdk 36; and `-dontwarn`
+rules for the Play Core split-install classes Flutter references but this app
+does not use.
+
+## Bundle size
+
+Nothing under `assets/` is referenced at runtime any more — café photos, menu
+images and map pins all come from the API, and icons are Material/SF symbols.
+Dropping them from the bundle took the release APK from 71.3 MB to 60 MB. That
+remaining figure is three CPU architectures; from the app bundle a device
+actually downloads **21.8 MB** (arm64).
+
+The files stay on disk: `assets/shop` is what the backend seed reads, and
+`assets/icon` and `assets/splash` feed the launcher-icon and splash generators.
+
 ## Tests
 
 ```bash
 flutter analyze   # clean
-flutter test
+flutter test      # 56 unit and widget tests
+
+# End-to-end against a running API
+flutter test integration_test/login_flow_test.dart \
+  --dart-define=API_URL=http://localhost:3100/api/v1
 ```

@@ -7,8 +7,9 @@ import '../core/storage/app_preferences.dart';
 import '../features/auth/presentation/cubit/auth_cubit.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/kurdish_material_localizations.dart';
+import 'package:go_router/go_router.dart';
+
 import 'di/injector.dart';
-import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
 class ErbilCafeApp extends StatefulWidget {
@@ -21,7 +22,7 @@ class ErbilCafeApp extends StatefulWidget {
 class _ErbilCafeAppState extends State<ErbilCafeApp> {
   late final _prefs = sl<AppPreferences>();
   late final _authCubit = sl<AuthCubit>();
-  late final _router = createRouter(authCubit: _authCubit, prefs: _prefs);
+  late final _router = sl<GoRouter>();
 
   late Locale? _locale = _prefs.locale;
   late ThemeMode _themeMode = _prefs.themeMode;

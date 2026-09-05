@@ -1,10 +1,12 @@
 import 'package:erbilcafe/app/app.dart';
 import 'package:erbilcafe/app/di/injector.dart';
 import 'package:erbilcafe/core/storage/app_preferences.dart';
+import 'package:erbilcafe/app/router/app_router.dart';
 import 'package:erbilcafe/core/storage/token_storage.dart';
 import 'package:erbilcafe/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 
 /// End-to-end sign-in against a running API.
@@ -34,6 +36,21 @@ void main() {
     await sl<AuthCubit>().restore();
     await tester.pumpWidget(const ErbilCafeApp());
     await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    // The router captured `hasOnboarded` when the injector built it, which on
+    // a fresh install is false. Start every test from Home regardless.
+    sl<GoRouter>().go(Routes.home);
+    await tester.pumpAndSettle(const Duration(seconds: 4));
+  }
+
+  /// Navigates by route rather than by tapping the tab bar.
+  ///
+  /// On iOS the bar is a native UIKit view, so it has no Flutter widgets for a
+  /// finder to hit. Driving the router also keeps these tests about the screen
+  /// under test rather than about the bar's implementation.
+  Future<void> goTo(WidgetTester tester, String route) async {
+    sl<GoRouter>().go(route);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
   }
 
   testWidgets('a guest can browse without an account', (tester) async {
@@ -52,9 +69,8 @@ void main() {
       (tester) async {
     await bootApp(tester);
 
-    // Profile tab → sign-in prompt.
-    await tester.tap(find.text('Profile').last);
-    await tester.pumpAndSettle();
+    // Profile → sign-in prompt.
+    await goTo(tester, Routes.profile);
     expect(find.text('Sign in required'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
@@ -76,8 +92,7 @@ void main() {
     expect(await sl<TokenStorage>().readAccessToken(), isNotNull);
     expect(await sl<TokenStorage>().readRefreshToken(), isNotNull);
 
-    await tester.tap(find.text('Profile').last);
-    await tester.pumpAndSettle(const Duration(seconds: 3));
+    await goTo(tester, Routes.profile);
 
     expect(find.text('Aram Hama'), findsOneWidget);
     expect(find.text('user@erbilcafe.app'), findsOneWidget);
@@ -90,8 +105,7 @@ void main() {
       (tester) async {
     await bootApp(tester);
 
-    await tester.tap(find.text('Profile').last);
-    await tester.pumpAndSettle();
+    await goTo(tester, Routes.profile);
     await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
     await tester.pumpAndSettle();
 
@@ -110,8 +124,7 @@ void main() {
   testWidgets('the session survives a restart', (tester) async {
     await bootApp(tester);
 
-    await tester.tap(find.text('Profile').last);
-    await tester.pumpAndSettle();
+    await goTo(tester, Routes.profile);
     await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -136,8 +149,7 @@ void main() {
   testWidgets('signing out clears the stored tokens', (tester) async {
     await bootApp(tester);
 
-    await tester.tap(find.text('Profile').last);
-    await tester.pumpAndSettle();
+    await goTo(tester, Routes.profile);
     await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
     await tester.pumpAndSettle();
     await tester.enterText(

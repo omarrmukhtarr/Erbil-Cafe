@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cupertino_native_better/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,6 +65,9 @@ GoRouter createRouter({
 
   return GoRouter(
     navigatorKey: _rootKey,
+    // Lets the native tab bar know when a sheet or dialog is up, so it can
+    // drop its platform view rather than bleeding through the scrim.
+    observers: [CNTabBarRouteObserver()],
     initialLocation: initialLocation,
 
     // Re-evaluates redirects whenever the session changes, so signing out from

@@ -57,6 +57,8 @@ dependencies:
   flutter_local_notifications: ^18.0.1
 
   cupertino_icons: ^1.0.8
+  # Native iOS 26 Liquid Glass widgets (trial)
+  cupertino_native_better: ^1.6.0
 
 dev_dependencies:
   flutter_test:
@@ -78,14 +80,11 @@ flutter:
   uses-material-design: true
   generate: true # builds the l10n delegates from lib/l10n/*.arb
 
-  assets:
-    - assets/img/
-    - assets/lottie/
-    - assets/icon/
-    - assets/icons/
-    - assets/images/
-    - assets/markers/
-    - assets/Coffee/
+  # No runtime assets: café photos, menu images and map pins all come from the
+  # API now, and icons are Material/SF symbols. The files under assets/ are kept
+  # for the launcher icon and splash generators below, and assets/shop is read
+  # by the backend seed — but none of it belongs in the shipped bundle, where it
+  # was costing ~11 MB.
 
   fonts:
     # Primary UI face, carried over from v1.
