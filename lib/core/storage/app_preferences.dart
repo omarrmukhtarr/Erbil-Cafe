@@ -10,6 +10,7 @@ class AppPreferences {
   static const _localeKey = 'locale';
   static const _themeKey = 'theme_mode';
   static const _onboardedKey = 'has_onboarded';
+  static const _mapThemeKey = 'map_theme';
 
   /// Null means "follow the device language".
   Locale? get locale {
@@ -38,6 +39,11 @@ class AppPreferences {
 
   Future<void> setThemeMode(ThemeMode mode) =>
       _prefs.setString(_themeKey, mode.name);
+
+  /// Name of the selected [MapTheme]; null falls back to the app's own style.
+  String? get mapTheme => _prefs.getString(_mapThemeKey);
+
+  Future<void> setMapTheme(String name) => _prefs.setString(_mapThemeKey, name);
 
   bool get hasOnboarded => _prefs.getBool(_onboardedKey) ?? false;
 

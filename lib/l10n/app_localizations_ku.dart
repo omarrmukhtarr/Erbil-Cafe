@@ -502,4 +502,10 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get saturday => 'شەممە';
+
+  @override
+  String get noPhotoYet => 'هێشتا وێنە نییە';
+
+  @override
+  String get photoUnavailable => 'وێنە بەردەست نییە';
 }

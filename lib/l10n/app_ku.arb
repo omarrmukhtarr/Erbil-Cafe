@@ -1,9 +1,7 @@
 {
   "@@locale": "ku",
-
   "appName": "کافێی هەولێر",
   "appTagline": "کافێکانی هەولێر بدۆزەرەوە",
-
   "onboardingTitle1": "کافێی خۆت بدۆزەرەوە",
   "onboardingBody1": "هەموو کافێکانی هەولێر لە یەک شوێندا، لەگەڵ وێنە و مێنیو و نرخی ڕاستەقینە.",
   "onboardingTitle2": "سەرەتا مێنیو ببینە",
@@ -13,7 +11,6 @@
   "getStarted": "دەست پێبکە",
   "skip": "تێپەڕاندن",
   "next": "دواتر",
-
   "signIn": "چوونەژوورەوە",
   "signUp": "دروستکردنی هەژمار",
   "signOut": "دەرچوون",
@@ -29,15 +26,22 @@
   "verifyPhone": "ژمارەکەت پشتڕاست بکەرەوە",
   "otpSentTo": "کۆدێکمان نارد بۆ {target}",
   "@otpSentTo": {
-    "placeholders": { "target": { "type": "String" } }
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
   },
   "resendCode": "دووبارە ناردنەوەی کۆد",
   "resendIn": "ناردنەوە لە {seconds} چرکەدا",
   "@resendIn": {
-    "placeholders": { "seconds": { "type": "int" } }
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
   },
   "verify": "پشتڕاستکردنەوە",
-
   "emailRequired": "تکایە ئیمەیلەکەت بنووسە",
   "emailInvalid": "تکایە ئیمەیلێکی دروست بنووسە",
   "passwordRequired": "تکایە وشەی نهێنی بنووسە",
@@ -47,13 +51,11 @@
   "nameRequired": "تکایە ناوت بنووسە",
   "phoneRequired": "تکایە ژمارەی مۆبایلت بنووسە",
   "phoneInvalid": "ژمارەیەکی دروست بنووسە، وەک +9647501234567",
-
   "home": "سەرەکی",
   "explore": "گەڕان",
   "map": "نەخشە",
   "favorites": "پاشەکەوتکراو",
   "profile": "پرۆفایل",
-
   "popular": "بەناوبانگ",
   "featured": "تایبەت",
   "nearby": "نزیک",
@@ -76,7 +78,6 @@
   "sortDistance": "نزیکترین",
   "sortReviews": "زۆرترین بۆچوون",
   "sortNewest": "نوێترین",
-
   "menu": "مێنیو",
   "reviews": "بۆچوونەکان",
   "about": "دەربارە",
@@ -88,15 +89,22 @@
   "bookTable": "حیجزکردنی مێز",
   "reviewCount": "{count, plural, =0{هیچ بۆچوونێک نییە} =1{١ بۆچوون} other{{count} بۆچوون}}",
   "@reviewCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "distanceAway": "{km} کم دوورە",
   "@distanceAway": {
-    "placeholders": { "km": { "type": "String" } }
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
   },
   "noMenuYet": "ئەم کافێیە هێشتا مێنیوی زیاد نەکردووە",
   "unavailable": "بەردەست نییە",
-
   "writeReview": "نووسینی بۆچوون",
   "editReview": "دەستکاری بۆچوونەکەت",
   "yourRating": "هەڵسەنگاندنی تۆ",
@@ -106,11 +114,9 @@
   "noReviewsYet": "هێشتا هیچ بۆچوونێک نییە",
   "beFirstToReview": "یەکەم کەس بە کە بۆچوون دەنووسێت.",
   "replyFromCafe": "وەڵام لە کافێکەوە",
-
   "savedCafes": "کافێە پاشەکەوتکراوەکان",
   "noFavorites": "هێشتا هیچت پاشەکەوت نەکردووە",
   "noFavoritesBody": "دڵەکە دابگرە بۆ پاشەکەوتکردنی کافێیەک.",
-
   "reservations": "حیجزەکان",
   "myBookings": "حیجزەکانی من",
   "selectDate": "بەروار",
@@ -134,14 +140,16 @@
   "fullyBooked": "تەواو حیجزکراوە",
   "seatsLeft": "{count} کورسی ماوە",
   "@seatsLeft": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "closedOnDay": "کافێکە لەو ڕۆژەدا داخراوە",
-
   "notifications": "ئاگادارکردنەوەکان",
   "noNotifications": "هیچ ئاگادارکردنەوەیەک نییە",
   "markAllRead": "هەمووی وەک خوێندراوە",
-
   "settings": "ڕێکخستنەکان",
   "language": "زمان",
   "theme": "ڕووکار",
@@ -155,7 +163,6 @@
   "aboutApp": "دەربارە",
   "deleteAccount": "سڕینەوەی هەژمار",
   "deleteAccountConfirm": "ئەمە ناگەڕێتەوە. هەژمارەکەت بسڕدرێتەوە؟",
-
   "retry": "دووبارە هەوڵدانەوە",
   "cancel": "هەڵوەشاندنەوە",
   "save": "پاشەکەوتکردن",
@@ -164,7 +171,6 @@
   "close": "داخستن",
   "seeAll": "بینینی هەموو",
   "loading": "بارکردن…",
-
   "errorGeneric": "هەڵەیەک ڕوویدا",
   "errorNetwork": "پەیوەندی ئینتەرنێت نییە",
   "errorNetworkBody": "پەیوەندییەکەت بپشکنە و دووبارە هەوڵبدەرەوە.",
@@ -172,22 +178,21 @@
   "errorTimeout": "کاتی زۆری خایاند — تکایە دووبارە هەوڵبدەرەوە",
   "errorUnauthorized": "تکایە بچۆ ژوورەوە بۆ بەردەوامبوون",
   "offlineBanner": "ئۆفڵاینیت — داتای پاشەکەوتکراو پیشان دەدرێت",
-
   "signInRequired": "پێویستە بچیتە ژوورەوە",
   "signInToFavorite": "بچۆ ژوورەوە بۆ پاشەکەوتکردنی کافێ.",
   "signInToReview": "بچۆ ژوورەوە بۆ نووسینی بۆچوون.",
   "signInToBook": "بچۆ ژوورەوە بۆ حیجزکردنی مێز.",
-
   "currencyIqd": "د.ع",
   "priceBudget": "هەرزان",
   "priceModerate": "مامناوەند",
   "priceUpscale": "گران",
-
   "sunday": "یەکشەممە",
   "monday": "دووشەممە",
   "tuesday": "سێشەممە",
   "wednesday": "چوارشەممە",
   "thursday": "پێنجشەممە",
   "friday": "هەینی",
-  "saturday": "شەممە"
+  "saturday": "شەممە",
+  "noPhotoYet": "هێشتا وێنە نییە",
+  "photoUnavailable": "وێنە بەردەست نییە"
 }

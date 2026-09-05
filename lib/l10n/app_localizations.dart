@@ -1047,6 +1047,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saturday'**
   String get saturday;
+
+  /// No description provided for @noPhotoYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo yet'**
+  String get noPhotoYet;
+
+  /// No description provided for @photoUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo unavailable'**
+  String get photoUnavailable;
 }
 
 class _AppLocalizationsDelegate

@@ -1,9 +1,7 @@
 {
   "@@locale": "en",
-
   "appName": "ErbilCafe",
   "appTagline": "Discover the cafés of Erbil",
-
   "onboardingTitle1": "Find your café",
   "onboardingBody1": "Every café in Erbil in one place, with photos, menus and real prices.",
   "onboardingTitle2": "See the menu first",
@@ -13,7 +11,6 @@
   "getStarted": "Get started",
   "skip": "Skip",
   "next": "Next",
-
   "signIn": "Sign in",
   "signUp": "Create account",
   "signOut": "Sign out",
@@ -29,15 +26,22 @@
   "verifyPhone": "Verify your number",
   "otpSentTo": "We sent a code to {target}",
   "@otpSentTo": {
-    "placeholders": { "target": { "type": "String" } }
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
   },
   "resendCode": "Resend code",
   "resendIn": "Resend in {seconds}s",
   "@resendIn": {
-    "placeholders": { "seconds": { "type": "int" } }
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
   },
   "verify": "Verify",
-
   "emailRequired": "Please enter your email",
   "emailInvalid": "Please enter a valid email",
   "passwordRequired": "Please enter your password",
@@ -47,13 +51,11 @@
   "nameRequired": "Please enter your name",
   "phoneRequired": "Please enter your phone number",
   "phoneInvalid": "Enter a valid number, e.g. +9647501234567",
-
   "home": "Home",
   "explore": "Explore",
   "map": "Map",
   "favorites": "Saved",
   "profile": "Profile",
-
   "popular": "Popular",
   "featured": "Featured",
   "nearby": "Nearby",
@@ -76,7 +78,6 @@
   "sortDistance": "Nearest",
   "sortReviews": "Most reviewed",
   "sortNewest": "Newest",
-
   "menu": "Menu",
   "reviews": "Reviews",
   "about": "About",
@@ -88,15 +89,22 @@
   "bookTable": "Book a table",
   "reviewCount": "{count, plural, =0{No reviews} =1{1 review} other{{count} reviews}}",
   "@reviewCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "distanceAway": "{km} km away",
   "@distanceAway": {
-    "placeholders": { "km": { "type": "String" } }
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
   },
   "noMenuYet": "This café hasn't added a menu yet",
   "unavailable": "Unavailable",
-
   "writeReview": "Write a review",
   "editReview": "Edit your review",
   "yourRating": "Your rating",
@@ -106,11 +114,9 @@
   "noReviewsYet": "No reviews yet",
   "beFirstToReview": "Be the first to review this café.",
   "replyFromCafe": "Reply from the café",
-
   "savedCafes": "Saved cafés",
   "noFavorites": "Nothing saved yet",
   "noFavoritesBody": "Tap the heart on a café to save it here.",
-
   "reservations": "Bookings",
   "myBookings": "My bookings",
   "selectDate": "Date",
@@ -134,14 +140,16 @@
   "fullyBooked": "Fully booked",
   "seatsLeft": "{count} seats left",
   "@seatsLeft": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "closedOnDay": "The café is closed that day",
-
   "notifications": "Notifications",
   "noNotifications": "No notifications",
   "markAllRead": "Mark all read",
-
   "settings": "Settings",
   "language": "Language",
   "theme": "Appearance",
@@ -155,7 +163,6 @@
   "aboutApp": "About",
   "deleteAccount": "Delete account",
   "deleteAccountConfirm": "This cannot be undone. Delete your account?",
-
   "retry": "Retry",
   "cancel": "Cancel",
   "save": "Save",
@@ -164,7 +171,6 @@
   "close": "Close",
   "seeAll": "See all",
   "loading": "Loading…",
-
   "errorGeneric": "Something went wrong",
   "errorNetwork": "No internet connection",
   "errorNetworkBody": "Check your connection and try again.",
@@ -172,22 +178,21 @@
   "errorTimeout": "That took too long — please try again",
   "errorUnauthorized": "Please sign in to continue",
   "offlineBanner": "You're offline — showing saved data",
-
   "signInRequired": "Sign in required",
   "signInToFavorite": "Sign in to save cafés.",
   "signInToReview": "Sign in to write a review.",
   "signInToBook": "Sign in to book a table.",
-
   "currencyIqd": "IQD",
   "priceBudget": "Budget",
   "priceModerate": "Moderate",
   "priceUpscale": "Upscale",
-
   "sunday": "Sunday",
   "monday": "Monday",
   "tuesday": "Tuesday",
   "wednesday": "Wednesday",
   "thursday": "Thursday",
   "friday": "Friday",
-  "saturday": "Saturday"
+  "saturday": "Saturday",
+  "noPhotoYet": "No photo yet",
+  "photoUnavailable": "Photo unavailable"
 }

@@ -31,6 +31,12 @@ import GoogleMaps
     GeneratedPluginRegistrant.register(with: self)
 
     if let controller = window?.rootViewController as? FlutterViewController {
+      // Apple's Liquid Glass material, which Flutter itself does not expose.
+      registrar(forPlugin: "LiquidGlass")?.register(
+        LiquidGlassViewFactory(messenger: controller.binaryMessenger),
+        withId: "erbilcafe/liquid_glass"
+      )
+
       FlutterMethodChannel(
         name: "erbilcafe/platform_config",
         binaryMessenger: controller.binaryMessenger

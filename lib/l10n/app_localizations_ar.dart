@@ -503,4 +503,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get saturday => 'السبت';
+
+  @override
+  String get noPhotoYet => 'لا توجد صورة بعد';
+
+  @override
+  String get photoUnavailable => 'الصورة غير متاحة';
 }
