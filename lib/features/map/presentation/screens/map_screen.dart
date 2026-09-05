@@ -169,8 +169,15 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
+    // A zero-area box gives fitBounds nothing to work with, so step in on the
+    // centroid instead.
+    final degenerate = bounds.southwest.latitude == bounds.northeast.latitude &&
+        bounds.southwest.longitude == bounds.northeast.longitude;
+
     await _controller?.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 80),
+      degenerate
+          ? CameraUpdate.newLatLngZoom(cluster.position, _zoom + 2)
+          : CameraUpdate.newLatLngBounds(bounds, 80),
     );
   }
 
