@@ -21,7 +21,6 @@ import '../../features/map/presentation/screens/map_screen.dart';
 import '../../features/menu/presentation/screens/menu_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
-import '../../features/profile/presentation/screens/settings_screen.dart';
 import '../../features/reservations/presentation/screens/book_table_screen.dart';
 import '../../features/reservations/presentation/screens/my_bookings_screen.dart';
 import '../../features/reviews/presentation/screens/write_review_screen.dart';
@@ -39,7 +38,6 @@ abstract final class Routes {
   static const favorites = '/favorites';
   static const profile = '/profile';
 
-  static const settings = '/settings';
   static const bookings = '/bookings';
 
   /// Explore, opened with a filter already applied.
@@ -111,7 +109,7 @@ GoRouter createRouter({
       };
 
       // Browsing is open to guests; only these routes require an account.
-      const protected = {Routes.favorites, Routes.bookings, Routes.settings};
+      const protected = {Routes.favorites, Routes.bookings};
       final needsAuth = protected.contains(path) ||
           path.endsWith('/book') ||
           path.endsWith('/review');
@@ -228,11 +226,6 @@ GoRouter createRouter({
         path: Routes.bookings,
         parentNavigatorKey: _rootKey,
         builder: (context, state) => const MyBookingsScreen(),
-      ),
-      GoRoute(
-        path: Routes.settings,
-        parentNavigatorKey: _rootKey,
-        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

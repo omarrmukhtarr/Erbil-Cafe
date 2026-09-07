@@ -223,5 +223,6 @@
     }
   },
   "reviewVisibleToEveryone": "Your rating goes live straight away and everyone will see it.",
-  "dataAttribution": "Café locations © OpenStreetMap contributors, ODbL."
+  "dataAttribution": "Café locations © OpenStreetMap contributors, ODbL.",
+  "preferences": "Preferences"
 }
