@@ -1,11 +1,8 @@
-import 'dart:io' show Platform;
-
 import 'package:cupertino_native_better/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -25,33 +22,24 @@ import '../../../../l10n/app_localizations.dart';
 /// * **Android** — Material 3 [NavigationBar], which brings the platform's own
 ///   pill indicator, ripple and motion.
 class AppShell extends StatelessWidget {
-  const AppShell({required this.location, required this.child, super.key});
+  const AppShell({required this.navigationShell, super.key});
 
-  final String location;
-  final Widget child;
+  /// The five tab branches, one navigator each, kept alive side by side.
+  ///
+  /// The shell owns which tab is current, so this widget no longer has to
+  /// infer it by prefix-matching the URL — a guess that could not tell
+  /// `/favorites` from a nested route under it, and that treated `/` as a
+  /// prefix of everything.
+  final StatefulNavigationShell navigationShell;
 
-  static const _tabs = [
-    Routes.home,
-    Routes.explore,
-    Routes.map,
-    Routes.favorites,
-    Routes.profile,
-  ];
-
-  int get _index {
-    final exact = _tabs.indexOf(location);
-    if (exact >= 0) return exact;
-
-    // Prefix match so a nested route keeps its parent tab selected. Skips
-    // index 0, whose path is '/' and would match everything.
-    for (var i = _tabs.length - 1; i > 0; i--) {
-      if (location.startsWith(_tabs[i])) return i;
-    }
-    return 0;
-  }
-
+  /// Read from [defaultTargetPlatform] rather than `dart:io`'s `Platform`, so
+  /// a test can pick which bar it is exercising. `Platform.isMacOS` is true in
+  /// a widget test — they run on the host — which meant every test that built
+  /// this shell tried to instantiate a UIKit platform view and hung.
   static bool get _useCupertino =>
-      !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS);
 
   List<_Tab> _tabsFor(AppLocalizations l10n) => [
         // SF Symbol names for the native bar; Material icons for Android.
@@ -70,16 +58,23 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final tabs = _tabsFor(l10n);
-    void onTap(int index) => context.go(_tabs[index]);
+    final index = navigationShell.currentIndex;
+
+    void onTap(int tapped) => navigationShell.goBranch(
+          tapped,
+          // Tapping the tab you are already on returns it to its root, which
+          // is what every native tab bar does.
+          initialLocation: tapped == index,
+        );
 
     return Scaffold(
       // The bar is translucent, so content scrolls beneath it instead of being
       // clipped above an opaque strip. Screens add bottom padding themselves.
       extendBody: true,
-      body: child,
+      body: navigationShell,
       bottomNavigationBar: _useCupertino
-          ? _GlassTabBar(tabs: tabs, index: _index, onTap: onTap)
-          : _MaterialTabBar(tabs: tabs, index: _index, onTap: onTap),
+          ? _GlassTabBar(tabs: tabs, index: index, onTap: onTap)
+          : _MaterialTabBar(tabs: tabs, index: index, onTap: onTap),
     );
   }
 }
