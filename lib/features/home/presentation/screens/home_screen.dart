@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,22 +8,31 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/utils/auth_guard.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../core/widgets/cafe_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../cafes/data/models/cafe.dart';
 import '../../../cafes/data/repositories/cafe_repository.dart';
 import '../../../cafes/presentation/cubit/cafe_list_cubit.dart';
 import '../../../favorites/data/favorites_repository.dart';
 import '../../../menu/data/models/menu.dart';
 import '../../../menu/data/repositories/menu_repository.dart';
+import '../widgets/area_strip.dart';
+import '../widgets/category_strip.dart';
+import '../widgets/popular_tile.dart';
 
 /// The Home tab.
 ///
 /// Replaces v1's `PopularScreen`, whose coffee tiles were a hardcoded widget
 /// tree that opened one shared detail page whichever item was tapped.
+///
+/// The page answers four questions in the order people actually ask them:
+/// *what kind of place am I after* (categories), *what is worth seeing*
+/// (featured), *where can I go right now* (open now), *what do people order*
+/// (popular), and *what is near which part of town* (areas). Every section is
+/// a different slice of the same catalogue, so a small café list still fills
+/// the screen with something useful.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -34,82 +42,84 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final CafeListCubit _featured;
+  late final CafeListCubit _openNow;
   late Future<List<PopularItem>> _popular;
-
-  /// Image + text block, matching `_PopularTile`'s own geometry.
-  static const _popularTileHeight = 244.0;
-  static const _popularImageHeight = 130.0;
+  late Future<List<AmenityCount>> _categories;
+  late Future<List<AreaCount>> _areas;
 
   @override
   void initState() {
     super.initState();
-    _featured = CafeListCubit(sl<CafeRepository>())
+    final cafes = sl<CafeRepository>();
+
+    _featured = CafeListCubit(cafes)
       ..load(query: const CafeQuery(featured: true, limit: 6));
+    _openNow = CafeListCubit(cafes)
+      ..load(query: const CafeQuery(openNow: true, sort: 'rating', limit: 8));
+
     _popular = sl<MenuRepository>().popular();
+    _categories = cafes.amenities();
+    _areas = cafes.areas();
   }
 
   @override
   void dispose() {
     _featured.close();
+    _openNow.close();
     super.dispose();
   }
 
   Future<void> _refresh() async {
-    setState(() => _popular = sl<MenuRepository>().popular());
-    await _featured.load();
+    final cafes = sl<CafeRepository>();
+    setState(() {
+      _popular = sl<MenuRepository>().popular();
+      _categories = cafes.amenities();
+      _areas = cafes.areas();
+    });
+    await Future.wait([_featured.load(), _openNow.load()]);
   }
+
+  /// Saves a café and reflects it in whichever carousels are showing it.
+  void _toggleFavorite(Cafe cafe, String reason) => requireAuth(
+        context,
+        reason: reason,
+        action: () async {
+          final result = await sl<FavoritesRepository>().toggle(cafe.id);
+          for (final cubit in [_featured, _openNow]) {
+            cubit.applyFavorite(cafe.id, isFavorited: result);
+          }
+        },
+      );
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final user = context.watch<AuthCubit>().state.user;
 
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
           color: AppColors.accent,
-          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          backgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
           onRefresh: _refresh,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.page,
-                  AppSpacing.lg,
-                  AppSpacing.md,
-                  0,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user == null
-                                  ? l10n.appName
-                                  : 'Hi, ${user.name.split(' ').first}',
-                              style: theme.textTheme.displayLarge,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const Gap.xs(),
-                            Text(l10n.appTagline,
-                                style: theme.textTheme.bodySmall),
-                          ],
-                        ),
-                      ),
-                      const HGap.sm(),
-                      _RoundAction(
-                        icon: Icons.search,
-                        tooltip: l10n.searchHint,
-                        onTap: () => context.go(Routes.explore),
-                      ),
-                    ],
+              const SliverToBoxAdapter(child: _Greeting()),
+
+              // ─── Categories ───────────────────────────────────────
+              SliverToBoxAdapter(
+                child: FutureBuilder<List<AmenityCount>>(
+                  future: _categories,
+                  builder: (context, snapshot) => CategoryStrip(
+                    categories: snapshot.data ?? const [],
+                    loading:
+                        snapshot.connectionState == ConnectionState.waiting,
+                    onOpenNow: () =>
+                        context.go(Routes.exploreWith(openNow: true)),
+                    onCategory: (key) =>
+                        context.go(Routes.exploreWith(amenity: key)),
                   ),
                 ),
               ),
@@ -118,77 +128,73 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(
                 child: SectionHeader(
                   title: l10n.featured,
+                  subtitle: l10n.featuredSubtitle,
                   actionLabel: l10n.seeAll,
                   onAction: () => context.go(Routes.explore),
                 ),
               ),
               SliverToBoxAdapter(
+                child: _CafeCarousel(
+                  cubit: _featured,
+                  cardWidth: 272,
+                  onFavorite: (cafe) =>
+                      _toggleFavorite(cafe, l10n.signInToFavorite),
+                ),
+              ),
+
+              // ─── Open right now ───────────────────────────────────
+              SliverToBoxAdapter(
                 child: BlocBuilder<CafeListCubit, CafeListState>(
-                  bloc: _featured,
+                  bloc: _openNow,
                   builder: (context, state) {
-                    if (state.status == ListStatus.loading) {
-                      return const SizedBox(
-                        height: CafeCard.compactHeight,
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: AppSpacing.page),
-                          child: CafeCardSkeleton(compact: true),
-                        ),
-                      );
+                    // A section that says "open now" and shows nothing is worse
+                    // than no section, so it only appears once it has cafés.
+                    if (state.status != ListStatus.loading &&
+                        state.cafes.isEmpty) {
+                      return const SizedBox.shrink();
                     }
 
-                    if (state.cafes.isEmpty) return const SizedBox.shrink();
-
-                    return SizedBox(
-                      height: CafeCard.compactHeight,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        clipBehavior: Clip.none,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.page),
-                        itemCount: state.cafes.length,
-                        separatorBuilder: (_, __) => const HGap.lg(),
-                        itemBuilder: (context, index) {
-                          final cafe = state.cafes[index];
-                          return SizedBox(
-                            width: 272,
-                            child: CafeCard(
-                              cafe: cafe,
-                              compact: true,
-                              onTap: () => context.push(Routes.cafe(cafe.slug)),
-                              onFavoriteTap: () => requireAuth(
-                                context,
-                                reason: l10n.signInToFavorite,
-                                action: () async {
-                                  final result = await sl<FavoritesRepository>()
-                                      .toggle(cafe.id);
-                                  _featured.applyFavorite(cafe.id,
-                                      isFavorited: result);
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          title: l10n.openRightNow,
+                          subtitle: l10n.openRightNowSubtitle,
+                          actionLabel: l10n.seeAll,
+                          onAction: () =>
+                              context.go(Routes.exploreWith(openNow: true)),
+                        ),
+                        _CafeCarousel(
+                          cubit: _openNow,
+                          cardWidth: 272,
+                          onFavorite: (cafe) =>
+                              _toggleFavorite(cafe, l10n.signInToFavorite),
+                        ),
+                      ],
                     );
                   },
                 ),
               ),
 
               // ─── Popular items ────────────────────────────────────
-              SliverToBoxAdapter(child: SectionHeader(title: l10n.popular)),
+              SliverToBoxAdapter(
+                child: SectionHeader(
+                  title: l10n.popular,
+                  subtitle: l10n.popularSubtitle,
+                ),
+              ),
               SliverToBoxAdapter(
                 child: FutureBuilder<List<PopularItem>>(
                   future: _popular,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const SizedBox(
-                        height: _popularTileHeight,
+                        height: PopularTile.height,
                         child: Padding(
                           padding:
                               EdgeInsets.symmetric(horizontal: AppSpacing.page),
                           child: AppSkeleton(
-                            height: _popularImageHeight,
+                            height: PopularTile.imageHeight,
                             radius: AppRadius.card,
                           ),
                         ),
@@ -199,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (items.isEmpty) return const SizedBox.shrink();
 
                     return SizedBox(
-                      height: _popularTileHeight,
+                      height: PopularTile.height,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         clipBehavior: Clip.none,
@@ -207,11 +213,35 @@ class _HomeScreenState extends State<HomeScreen> {
                             horizontal: AppSpacing.page),
                         itemCount: items.length,
                         separatorBuilder: (_, __) => const HGap.md(),
-                        itemBuilder: (context, index) => _PopularTile(
-                          item: items[index],
-                          imageHeight: _popularImageHeight,
-                        ),
+                        itemBuilder: (context, index) =>
+                            PopularTile(item: items[index]),
                       ),
+                    );
+                  },
+                ),
+              ),
+
+              // ─── Areas ────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: FutureBuilder<List<AreaCount>>(
+                  future: _areas,
+                  builder: (context, snapshot) {
+                    final areas = snapshot.data ?? const <AreaCount>[];
+                    if (areas.isEmpty) return const SizedBox.shrink();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          title: l10n.browseByArea,
+                          subtitle: l10n.browseByAreaSubtitle,
+                        ),
+                        AreaStrip(
+                          areas: areas,
+                          onTap: (area) =>
+                              context.go(Routes.exploreWith(area: area)),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -225,6 +255,119 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Title, tagline and the search shortcut.
+class _Greeting extends StatelessWidget {
+  const _Greeting();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final user = context.watch<AuthCubit>().state.user;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.page,
+        AppSpacing.lg,
+        AppSpacing.md,
+        0,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user == null
+                      ? l10n.appName
+                      : 'Hi, ${user.name.split(' ').first}',
+                  style: theme.textTheme.displayLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Gap.xs(),
+                Text(l10n.appTagline, style: theme.textTheme.bodySmall),
+              ],
+            ),
+          ),
+          const HGap.sm(),
+          _RoundAction(
+            icon: Icons.search,
+            tooltip: l10n.searchHint,
+            onTap: () => context.go(Routes.explore),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A horizontal run of [CafeCard]s driven by a [CafeListCubit].
+///
+/// Both café sections on this page are the same carousel over a different
+/// query, so the skeleton, the empty case and the fixed height live here once.
+class _CafeCarousel extends StatelessWidget {
+  const _CafeCarousel({
+    required this.cubit,
+    required this.cardWidth,
+    required this.onFavorite,
+  });
+
+  final CafeListCubit cubit;
+  final double cardWidth;
+  final void Function(Cafe cafe) onFavorite;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CafeListCubit, CafeListState>(
+      bloc: cubit,
+      builder: (context, state) {
+        if (state.status == ListStatus.loading) {
+          return SizedBox(
+            height: CafeCard.compactHeight,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+              itemCount: 2,
+              separatorBuilder: (_, __) => const HGap.lg(),
+              itemBuilder: (context, _) => SizedBox(
+                width: cardWidth,
+                child: const CafeCardSkeleton(compact: true),
+              ),
+            ),
+          );
+        }
+
+        if (state.cafes.isEmpty) return const SizedBox.shrink();
+
+        return SizedBox(
+          height: CafeCard.compactHeight,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+            itemCount: state.cafes.length,
+            separatorBuilder: (_, __) => const HGap.lg(),
+            itemBuilder: (context, index) {
+              final cafe = state.cafes[index];
+              return SizedBox(
+                width: cardWidth,
+                child: CafeCard(
+                  cafe: cafe,
+                  compact: true,
+                  onTap: () => context.push(Routes.cafe(cafe.slug)),
+                  onFavoriteTap: () => onFavorite(cafe),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -257,84 +400,6 @@ class _RoundAction extends StatelessWidget {
             height: 46,
             child: Icon(icon, size: 22, color: theme.colorScheme.onSurface),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A popular menu item — v1's coffee tile: dark surface, image on top, the
-/// price in copper with the currency label before the amount.
-class _PopularTile extends StatelessWidget {
-  const _PopularTile({required this.item, required this.imageHeight});
-
-  final PopularItem item;
-  final double imageHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-
-    return SizedBox(
-      width: 158,
-      child: AppCard(
-        onTap: () => context.push(Routes.menu(item.cafeSlug)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: imageHeight,
-              width: double.infinity,
-              child: item.item.thumbUrl == null
-                  ? const ColoredBox(
-                      color: AppColors.cardDarkAlt,
-                      child: Icon(Icons.local_cafe_outlined,
-                          color: AppColors.onCardDisabled),
-                    )
-                  : CachedNetworkImage(
-                      imageUrl: item.item.thumbUrl!,
-                      fit: BoxFit.cover,
-                      fadeInDuration: const Duration(milliseconds: 200),
-                      placeholder: (context, _) =>
-                          const ColoredBox(color: AppColors.cardDarkAlt),
-                      errorWidget: (context, _, __) =>
-                          const ColoredBox(color: AppColors.cardDarkAlt),
-                    ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    item.item.name,
-                    style: theme.textTheme.labelLarge
-                        ?.copyWith(color: AppColors.onCard),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Gap.xxs(),
-                  Text(
-                    item.cafeName,
-                    style: const TextStyle(
-                        color: AppColors.onCardMuted, fontSize: 12),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Gap.sm(),
-                  Text(
-                    Formatters.price(item.item.priceIqd, l10n.currencyIqd),
-                    style: theme.textTheme.labelLarge
-                        ?.copyWith(color: AppColors.accent),
-                    maxLines: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
