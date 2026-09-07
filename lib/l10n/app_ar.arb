@@ -194,5 +194,20 @@
   "friday": "الجمعة",
   "saturday": "السبت",
   "noPhotoYet": "لا توجد صورة بعد",
-  "photoUnavailable": "الصورة غير متاحة"
+  "photoUnavailable": "الصورة غير متاحة",
+  "featuredSubtitle": "أماكن مختارة تستحق الزيارة",
+  "openRightNow": "مفتوح الآن",
+  "openRightNowSubtitle": "يقدّم الخدمة في هذه الساعة",
+  "popularSubtitle": "ما تطلبه أربيل",
+  "browseByArea": "تصفّح حسب المنطقة",
+  "browseByAreaSubtitle": "اختر جزءًا من المدينة",
+  "newCafe": "جديد",
+  "cafeCount": "{count, plural, =0{لا مقاهي} =1{مقهى واحد} other{{count} مقهى}}",
+  "rateThisCafe": "قيّم هذا المقهى",
+  "tapToRate": "اضغط على نجمة للتقييم",
+  "yourReview": "تقييمك",
+  "reviewPublished": "شكرًا! تقييمك ظاهر الآن.",
+  "basedOnReviews": "{count, plural, =0{لا تقييمات بعد} =1{بناءً على تقييم واحد} other{بناءً على {count} تقييم}}",
+  "reviewVisibleToEveryone": "سيظهر تقييمك فورًا وسيراه الجميع.",
+  "dataAttribution": "مواقع المقاهي © مساهمو OpenStreetMap، ODbL."
 }
