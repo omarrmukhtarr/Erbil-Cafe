@@ -573,4 +573,7 @@ class AppLocalizationsKu extends AppLocalizations {
   @override
   String get dataAttribution =>
       'شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL.';
+
+  @override
+  String get preferences => 'هەڵبژاردەکان';
 }

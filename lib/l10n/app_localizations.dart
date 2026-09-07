@@ -1149,6 +1149,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Café locations © OpenStreetMap contributors, ODbL.'**
   String get dataAttribution;
+
+  /// No description provided for @preferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get preferences;
 }
 
 class _AppLocalizationsDelegate
