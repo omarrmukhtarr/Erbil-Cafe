@@ -118,6 +118,15 @@ class CafeRepository {
         .toList();
   }
 
+  /// Amenities at least one café offers, most common first. Feeds the home
+  /// screen's category strip.
+  Future<List<AmenityCount>> amenities() async {
+    final json = await _api.get<List<dynamic>>('/cafes/amenities');
+    return json
+        .map((e) => AmenityCount.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<List<AreaCount>> areas() async {
     final json = await _api.get<List<dynamic>>('/cafes/areas');
     return json
@@ -135,5 +144,29 @@ class AreaCount {
       );
 
   final String area;
+  final int count;
+}
+
+class AmenityCount {
+  const AmenityCount({
+    required this.key,
+    required this.name,
+    required this.count,
+    this.icon,
+  });
+
+  factory AmenityCount.fromJson(Map<String, dynamic> json) => AmenityCount(
+        key: json['key'] as String,
+        name: json['name'] as String? ?? '',
+        icon: json['icon'] as String?,
+        count: json['count'] as int? ?? 0,
+      );
+
+  final String key;
+  final String name;
+
+  /// The Material icon name the seed data carries, e.g. `local_parking`.
+  final String? icon;
+
   final int count;
 }

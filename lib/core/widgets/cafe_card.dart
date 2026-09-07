@@ -11,9 +11,15 @@ import 'app_card.dart';
 
 /// The café card: a near-black tile on the cream page, as v1 drew it.
 ///
-/// Anatomy carried over from v1 — full-bleed photo, the rating chip notched
-/// into the top-right corner on `#231715`, details beneath on the dark surface.
+/// Anatomy carried over from v1 — full-bleed photo, the rating in the
+/// top corner on `#231715`, details beneath on the dark surface.
 /// The Hero tag matches the detail screen so the image expands into it.
+///
+/// Everything that is *status* rides on the photo (rating, open/closed,
+/// featured, saved) and everything that is *identity* sits in the block
+/// beneath it (name, area, price, what the place offers). Keeping those two
+/// jobs on separate surfaces is what stops the compact tile reading as a wall
+/// of small grey text.
 class CafeCard extends StatelessWidget {
   const CafeCard({
     required this.cafe,
@@ -35,11 +41,11 @@ class CafeCard extends StatelessWidget {
   /// the tallest translation overflows the tile.
   final bool compact;
 
-  static const imageHeightCompact = 148.0;
+  static const imageHeightCompact = 158.0;
 
   /// Height of the compact tile, so carousels can size themselves from one
   /// number instead of a magic constant guessed per call site.
-  static const compactHeight = 268.0;
+  static const compactHeight = 278.0;
 
   @override
   Widget build(BuildContext context) {
@@ -52,58 +58,7 @@ class CafeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: compact ? imageHeightCompact : null,
-            child: AspectRatio(
-              aspectRatio: 16 / 10,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Hero(
-                    tag: 'cafe-image-${cafe.id}',
-                    child: _CafeImage(
-                      url: cafe.coverImage,
-                      name: cafe.name,
-                    ),
-                  ),
-
-                  // Scrim so the chips stay legible over a bright photo.
-                  const DecoratedBox(
-                    decoration: BoxDecoration(gradient: AppColors.imageScrim),
-                  ),
-
-                  if (cafe.isFeatured)
-                    Positioned(
-                      top: AppSpacing.md,
-                      left: AppSpacing.md,
-                      child: _Pill(
-                        label: l10n.featured,
-                        background: AppColors.cream,
-                        foreground: AppColors.onCream,
-                      ),
-                    ),
-
-                  if (cafe.reviewCount > 0)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: _RatingBadge(rating: cafe.ratingAvg),
-                    ),
-
-                  if (onFavoriteTap != null)
-                    Positioned(
-                      bottom: AppSpacing.md,
-                      right: AppSpacing.md,
-                      child: _FavoriteButton(
-                        isFavorited: cafe.isFavorited,
-                        onTap: onFavoriteTap!,
-                        label: l10n.favorites,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+          _Photo(cafe: cafe, compact: compact, onFavoriteTap: onFavoriteTap),
 
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -157,35 +112,23 @@ class CafeCard extends StatelessWidget {
                 if (cafe.amenities.isNotEmpty) ...[
                   const Gap.md(),
                   if (compact)
-                    // One clipped row — never a second line that would grow the
-                    // tile past the carousel's fixed height.
-                    SizedBox(
-                      height: 24,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: cafe.amenities.length.clamp(0, 3),
-                        separatorBuilder: (_, __) => const HGap.sm(),
-                        itemBuilder: (context, index) => _Pill(
-                          label: cafe.amenities[index].name,
-                          background: AppColors.cardDarkAlt,
-                          foreground: AppColors.onCardMuted,
-                        ),
-                      ),
-                    )
+                    // One measured row — never a clipped pill, and never a
+                    // second line that would grow the tile past the carousel's
+                    // fixed height.
+                    AmenityStrip(amenities: cafe.amenities)
                   else
                     Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.sm,
                       children: [
                         for (final amenity in cafe.amenities.take(4))
-                          _Pill(
+                          Pill(
                             label: amenity.name,
                             background: AppColors.cardDarkAlt,
                             foreground: AppColors.onCardMuted,
                           ),
                         if (cafe.amenities.length > 4)
-                          _Pill(
+                          Pill(
                             label: '+${cafe.amenities.length - 4}',
                             background: AppColors.cardDarkAlt,
                             foreground: AppColors.onCardMuted,
@@ -199,6 +142,100 @@ class CafeCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// The photo and everything that rides on it.
+class _Photo extends StatelessWidget {
+  const _Photo({
+    required this.cafe,
+    required this.compact,
+    required this.onFavoriteTap,
+  });
+
+  final Cafe cafe;
+  final bool compact;
+  final VoidCallback? onFavoriteTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    final image = Stack(
+      fit: StackFit.expand,
+      children: [
+        Hero(
+          tag: 'cafe-image-${cafe.id}',
+          child: _CafeImage(url: cafe.coverImage, name: cafe.name),
+        ),
+
+        // Scrim so the chips stay legible over a bright photo.
+        const DecoratedBox(
+          decoration: BoxDecoration(gradient: AppColors.imageScrim),
+        ),
+
+        // Top row: what the place *is* on the left, what people think of it
+        // on the right.
+        Positioned(
+          top: AppSpacing.md,
+          left: AppSpacing.md,
+          right: AppSpacing.md,
+          child: Row(
+            children: [
+              if (cafe.isFeatured)
+                Flexible(
+                  child: Pill(
+                    label: l10n.featured,
+                    background: AppColors.cream,
+                    foreground: AppColors.onCream,
+                    icon: Icons.star_rounded,
+                  ),
+                ),
+              const Spacer(),
+              _RatingBadge(
+                rating: cafe.ratingAvg,
+                reviewCount: cafe.reviewCount,
+                newLabel: l10n.newCafe,
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom row: whether you can go right now, and the save button.
+        Positioned(
+          bottom: AppSpacing.md,
+          left: AppSpacing.md,
+          right: AppSpacing.md,
+          child: Row(
+            children: [
+              Flexible(
+                child: _OpenBadge(
+                  isOpen: cafe.isOpenNow,
+                  label: cafe.isOpenNow ? l10n.openNow : l10n.closed,
+                ),
+              ),
+              const Spacer(),
+              if (onFavoriteTap != null)
+                _FavoriteButton(
+                  isFavorited: cafe.isFavorited,
+                  onTap: onFavoriteTap!,
+                  label: l10n.favorites,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    // A carousel tile is a fixed height and full-bleed width; a list card takes
+    // the full width and derives its height from the aspect ratio.
+    return compact
+        ? SizedBox(
+            height: CafeCard.imageHeightCompact,
+            width: double.infinity,
+            child: image,
+          )
+        : AspectRatio(aspectRatio: 16 / 10, child: image);
   }
 }
 
@@ -225,18 +262,9 @@ class _MetaRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        const HGap.sm(),
-        Text(
-          cafe.isOpenNow ? l10n.openNow : l10n.closed,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: cafe.isOpenNow
-                ? AppColors.successOnDark
-                : AppColors.onCardMuted,
-          ),
-        ),
         if (cafe.distanceKm != null) ...[
+          const HGap.sm(),
+          const Text('·', style: muted),
           const HGap.sm(),
           Flexible(
             child: Text(
@@ -284,6 +312,9 @@ enum _NoPhotoReason { missing, failed }
 /// the space with the café's own initials over a tint derived from its name —
 /// so a list of photo-less cafés still looks deliberate and stays
 /// distinguishable at a glance.
+///
+/// The initials sit behind the chips rather than competing with them: large,
+/// but at low contrast, so the eye still lands on the name in the block below.
 class _NoPhoto extends StatelessWidget {
   const _NoPhoto({required this.name, required this.reason});
 
@@ -335,12 +366,13 @@ class _NoPhoto extends StatelessWidget {
           children: [
             Text(
               _initials,
-              style: const TextStyle(
-                color: AppColors.cream,
+              style: TextStyle(
+                color: AppColors.cream.withValues(alpha: 0.62),
                 fontFamily: 'Poppins',
                 fontSize: 30,
                 fontWeight: FontWeight.w700,
                 height: 1,
+                letterSpacing: 1,
               ),
             ),
             const Gap.sm(),
@@ -348,15 +380,17 @@ class _NoPhoto extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  failed ? Icons.wifi_off_rounded : Icons.image_not_supported_outlined,
+                  failed
+                      ? Icons.wifi_off_rounded
+                      : Icons.image_not_supported_outlined,
                   size: 13,
-                  color: AppColors.cream.withValues(alpha: 0.75),
+                  color: AppColors.cream.withValues(alpha: 0.55),
                 ),
                 const HGap(5),
                 Text(
                   failed ? l10n.photoUnavailable : l10n.noPhotoYet,
                   style: TextStyle(
-                    color: AppColors.cream.withValues(alpha: 0.75),
+                    color: AppColors.cream.withValues(alpha: 0.55),
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -370,34 +404,109 @@ class _NoPhoto extends StatelessWidget {
   }
 }
 
-/// The rating chip notched into the card's corner, as in v1's tiles.
+/// The rating chip on the photo's top corner.
+///
+/// A café with no reviews used to show nothing here, which read as a gap in
+/// the design rather than a fact about the café. It now says "New" — an
+/// invitation to be the first to rate it.
 class _RatingBadge extends StatelessWidget {
-  const _RatingBadge({required this.rating});
+  const _RatingBadge({
+    required this.rating,
+    required this.reviewCount,
+    required this.newLabel,
+  });
 
   final double rating;
+  final int reviewCount;
+  final String newLabel;
 
   @override
   Widget build(BuildContext context) {
+    if (reviewCount == 0) {
+      return Pill(
+        label: newLabel,
+        background: AppColors.badge.withValues(alpha: 0.9),
+        foreground: AppColors.cream,
+      );
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: const BoxDecoration(
-        color: AppColors.badge,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(AppRadius.card),
-          bottomLeft: Radius.circular(AppRadius.input),
-        ),
+      padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+      decoration: BoxDecoration(
+        color: AppColors.badge.withValues(alpha: 0.9),
+        borderRadius: AppRadius.pillR,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(Icons.star_rounded, size: 14, color: AppColors.accent),
-          const HGap(4),
+          const HGap(3),
           Text(
             rating.toStringAsFixed(1),
             style: const TextStyle(
               color: AppColors.cream,
-              fontSize: 12,
+              fontSize: 12.5,
               fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
+          const HGap(3),
+          Text(
+            '($reviewCount)',
+            style: TextStyle(
+              color: AppColors.cream.withValues(alpha: 0.6),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Open/closed as a dot-and-label chip on the photo.
+///
+/// It used to sit inline with the area, where a green word next to a grey one
+/// competed with the café's own name. On the photo it is glanceable and the
+/// meta row is free for the address.
+class _OpenBadge extends StatelessWidget {
+  const _OpenBadge({required this.isOpen, required this.label});
+
+  final bool isOpen;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isOpen ? AppColors.successOnDark : AppColors.onCardMuted;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.badge.withValues(alpha: 0.9),
+        borderRadius: AppRadius.pillR,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const HGap(6),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -429,13 +538,13 @@ class _FavoriteButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          // 40pt keeps the target tappable without dominating the photo.
+          // 36pt keeps the target tappable without dominating the photo.
           child: SizedBox(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             child: Icon(
               isFavorited ? Icons.favorite : Icons.favorite_border,
-              size: 20,
+              size: 18,
               color: AppColors.accent,
             ),
           ),
@@ -445,29 +554,157 @@ class _FavoriteButton extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill({
+/// One row of amenity pills, and a `+N` for whatever did not fit.
+///
+/// The previous version put three pills in a non-scrolling `ListView`, which
+/// simply clipped the last one mid-word — "City vie…" with no indication that
+/// more existed. This measures each label first and only lays out the pills
+/// that fully fit, so the row always ends on a whole chip.
+class AmenityStrip extends StatelessWidget {
+  const AmenityStrip({required this.amenities, super.key});
+
+  final List<Amenity> amenities;
+
+  static const _height = 24.0;
+  static const _gap = AppSpacing.sm;
+  static const _style = TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600);
+
+  /// Pill padding: 10 either side.
+  ///
+  /// [style] must be the style the pill will actually render with — the font
+  /// family is inherited, and measuring with a different one is how this row
+  /// used to be a few pixels out.
+  static double _pillWidth(
+    String label,
+    TextStyle style,
+    TextDirection direction,
+    TextScaler scaler,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      textDirection: direction,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    return painter.width + 20;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final direction = Directionality.of(context);
+    final scaler = MediaQuery.textScalerOf(context);
+    final style = DefaultTextStyle.of(context).style.merge(_style);
+
+    return SizedBox(
+      height: _height,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final available = constraints.maxWidth;
+          final shown = <Amenity>[];
+          var used = 0.0;
+
+          for (final amenity in amenities) {
+            final width = _pillWidth(amenity.name, style, direction, scaler) +
+                (shown.isEmpty ? 0 : _gap);
+            final remaining = amenities.length - shown.length - 1;
+
+            // Leave room for the `+N` chip when anything will be left over.
+            final overflowWidth = remaining > 0
+                ? _gap + _pillWidth('+$remaining', style, direction, scaler)
+                : 0.0;
+
+            // A pixel of slack: text measured here and text laid out by the
+            // Row can round differently, and a hairline over is still an
+            // overflow stripe.
+            if (used + width + overflowWidth > available - 1) break;
+            used += width;
+            shown.add(amenity);
+          }
+
+          final hidden = amenities.length - shown.length;
+
+          // Nothing fit — show the count alone rather than an empty row.
+          if (shown.isEmpty) {
+            return Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Pill(
+                label: '+$hidden',
+                background: AppColors.cardDarkAlt,
+                foreground: AppColors.onCardMuted,
+              ),
+            );
+          }
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < shown.length; i++) ...[
+                if (i > 0) const HGap(_gap),
+                Pill(
+                  label: shown[i].name,
+                  background: AppColors.cardDarkAlt,
+                  foreground: AppColors.onCardMuted,
+                ),
+              ],
+              if (hidden > 0) ...[
+                const HGap(_gap),
+                Pill(
+                  label: '+$hidden',
+                  background: AppColors.cardDarkAlt,
+                  foreground: AppColors.onCardMuted,
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A small rounded label. Shared with the home carousels.
+class Pill extends StatelessWidget {
+  const Pill({
     required this.label,
     required this.background,
     required this.foreground,
+    this.icon,
+    super.key,
   });
 
   final String label;
   final Color background;
   final Color foreground;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.fromLTRB(icon == null ? 10 : 7, 5, 10, 5),
       decoration: BoxDecoration(color: background, borderRadius: AppRadius.pillR),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: foreground,
-          fontSize: 11.5,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 13, color: foreground),
+            const HGap(3),
+          ],
+          // Flexible so a pill in a width-constrained row ellipsizes instead
+          // of pushing the row into an overflow stripe.
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: foreground,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

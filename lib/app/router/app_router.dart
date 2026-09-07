@@ -42,6 +42,27 @@ abstract final class Routes {
   static const settings = '/settings';
   static const bookings = '/bookings';
 
+  /// Explore, opened with a filter already applied.
+  ///
+  /// The home screen's category strip and area tiles hand off here rather than
+  /// each growing their own listing screen — one filtered list, reachable from
+  /// several places.
+  static String exploreWith({
+    String? amenity,
+    String? area,
+    bool openNow = false,
+    String? sort,
+  }) {
+    final params = <String, String>{
+      if (amenity != null) 'amenity': amenity,
+      if (area != null) 'area': area,
+      if (openNow) 'openNow': '1',
+      if (sort != null) 'sort': sort,
+    };
+    if (params.isEmpty) return explore;
+    return Uri(path: explore, queryParameters: params).toString();
+  }
+
   static String cafe(String slug) => '/cafe/$slug';
   static String menu(String slug) => '/cafe/$slug/menu';
   static String book(String slug) => '/cafe/$slug/book';
@@ -148,7 +169,18 @@ GoRouter createRouter({
           ),
           GoRoute(
             path: Routes.explore,
-            builder: (context, state) => const ExploreScreen(),
+            builder: (context, state) {
+              final params = state.uri.queryParameters;
+              return ExploreScreen(
+                // Keyed on the filter so arriving from a different category
+                // rebuilds the screen instead of reusing the previous state.
+                key: ValueKey(state.uri.query),
+                initialAmenity: params['amenity'],
+                initialArea: params['area'],
+                initialOpenNow: params['openNow'] == '1',
+                initialSort: params['sort'],
+              );
+            },
           ),
           GoRoute(
             path: Routes.map,
