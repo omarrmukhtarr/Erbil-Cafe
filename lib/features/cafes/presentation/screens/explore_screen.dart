@@ -22,7 +22,20 @@ import '../cubit/cafe_list_cubit.dart';
 /// This searches the API across Kurdish, Arabic and English and filters by
 /// area, price and open-now.
 class ExploreScreen extends StatefulWidget {
-  const ExploreScreen({super.key});
+  const ExploreScreen({
+    this.initialAmenity,
+    this.initialArea,
+    this.initialOpenNow = false,
+    this.initialSort,
+    super.key,
+  });
+
+  /// Filters applied on arrival, set by whoever linked here — the home
+  /// screen's category strip, an area tile, or the "open now" section.
+  final String? initialAmenity;
+  final String? initialArea;
+  final bool initialOpenNow;
+  final String? initialSort;
 
   @override
   State<ExploreScreen> createState() => _ExploreScreenState();
@@ -37,7 +50,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void initState() {
     super.initState();
     _cubit = CafeListCubit(sl<CafeRepository>())
-      ..load()
+      ..load(
+        query: CafeQuery(
+          amenities: [
+            if (widget.initialAmenity != null) widget.initialAmenity!,
+          ],
+          area: widget.initialArea,
+          openNow: widget.initialOpenNow ? true : null,
+          sort: widget.initialSort ?? 'rating',
+        ),
+      )
       ..loadAreas();
 
     _scrollController.addListener(() {

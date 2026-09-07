@@ -91,8 +91,13 @@ class CafeDetailCubit extends Cubit<CafeDetailState> {
     }
   }
 
-  /// Re-reads reviews after the user writes one, so their pending review and
-  /// the updated breakdown appear without a full reload.
+  /// Re-reads reviews after the user rates the café, so their review, the
+  /// breakdown and the headline average all move together — without the page
+  /// blanking back to a spinner.
+  ///
+  /// The café itself is re-read too: `ratingAvg` on the header comes from the
+  /// café row, not from the review summary, and leaving it stale made a rating
+  /// look like it had not counted.
   Future<void> reloadReviews() async {
     final cafeId = state.detail?.cafe.id;
     if (cafeId == null) return;
@@ -102,6 +107,13 @@ class CafeDetailCubit extends Cubit<CafeDetailState> {
       emit(state.copyWith(reviews: page.page.items, summary: page.summary));
     } on Failure {
       // Leave the existing list in place.
+    }
+
+    try {
+      emit(state.copyWith(detail: await _cafes.detail(cafeId)));
+    } on Failure {
+      // The headline average stays as it was; the breakdown above is already
+      // correct, so this is cosmetic.
     }
   }
 
