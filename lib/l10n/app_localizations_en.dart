@@ -509,4 +509,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoUnavailable => 'Photo unavailable';
+
+  @override
+  String get featuredSubtitle => 'Hand-picked places worth the trip';
+
+  @override
+  String get openRightNow => 'Open right now';
+
+  @override
+  String get openRightNowSubtitle => 'Serving at this hour';
+
+  @override
+  String get popularSubtitle => 'What Erbil is ordering';
+
+  @override
+  String get browseByArea => 'Browse by area';
+
+  @override
+  String get browseByAreaSubtitle => 'Pick a part of the city';
+
+  @override
+  String get newCafe => 'New';
+
+  @override
+  String cafeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cafés',
+      one: '1 café',
+      zero: 'No cafés',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rateThisCafe => 'Rate this café';
+
+  @override
+  String get tapToRate => 'Tap a star to rate';
+
+  @override
+  String get yourReview => 'Your review';
+
+  @override
+  String get reviewPublished => 'Thanks! Your rating is live.';
+
+  @override
+  String basedOnReviews(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Based on $count ratings',
+      one: 'Based on 1 rating',
+      zero: 'No ratings yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewVisibleToEveryone =>
+      'Your rating goes live straight away and everyone will see it.';
+
+  @override
+  String get dataAttribution =>
+      'Café locations © OpenStreetMap contributors, ODbL.';
 }

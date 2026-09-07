@@ -508,4 +508,69 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get photoUnavailable => 'وێنە بەردەست نییە';
+
+  @override
+  String get featuredSubtitle => 'شوێنە هەڵبژێردراوەکان کە شایەنی سەردانن';
+
+  @override
+  String get openRightNow => 'ئێستا کراوەیە';
+
+  @override
+  String get openRightNowSubtitle => 'لەم کاتەدا خزمەت دەکەن';
+
+  @override
+  String get popularSubtitle => 'ئەوەی هەولێر داوای دەکات';
+
+  @override
+  String get browseByArea => 'بەپێی ناوچە';
+
+  @override
+  String get browseByAreaSubtitle => 'بەشێکی شار هەڵبژێرە';
+
+  @override
+  String get newCafe => 'نوێ';
+
+  @override
+  String cafeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count کافێ',
+      one: '١ کافێ',
+      zero: 'هیچ کافێیەک',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rateThisCafe => 'نمرە بەم کافێیە بدە';
+
+  @override
+  String get tapToRate => 'ئەستێرەیەک دابگرە بۆ نمرەدان';
+
+  @override
+  String get yourReview => 'پێداچوونەوەکەت';
+
+  @override
+  String get reviewPublished => 'سوپاس! نمرەکەت بڵاوکرایەوە.';
+
+  @override
+  String basedOnReviews(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'لەسەر بنەمای $count نمرە',
+      one: 'لەسەر بنەمای ١ نمرە',
+      zero: 'هێشتا نمرەی نییە',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewVisibleToEveryone =>
+      'نمرەکەت دەستبەجێ بڵاو دەبێتەوە و هەموو کەس دەیبینێت.';
+
+  @override
+  String get dataAttribution =>
+      'شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL.';
 }

@@ -509,4 +509,67 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get photoUnavailable => 'الصورة غير متاحة';
+
+  @override
+  String get featuredSubtitle => 'أماكن مختارة تستحق الزيارة';
+
+  @override
+  String get openRightNow => 'مفتوح الآن';
+
+  @override
+  String get openRightNowSubtitle => 'يقدّم الخدمة في هذه الساعة';
+
+  @override
+  String get popularSubtitle => 'ما تطلبه أربيل';
+
+  @override
+  String get browseByArea => 'تصفّح حسب المنطقة';
+
+  @override
+  String get browseByAreaSubtitle => 'اختر جزءًا من المدينة';
+
+  @override
+  String get newCafe => 'جديد';
+
+  @override
+  String cafeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مقهى',
+      one: 'مقهى واحد',
+      zero: 'لا مقاهي',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rateThisCafe => 'قيّم هذا المقهى';
+
+  @override
+  String get tapToRate => 'اضغط على نجمة للتقييم';
+
+  @override
+  String get yourReview => 'تقييمك';
+
+  @override
+  String get reviewPublished => 'شكرًا! تقييمك ظاهر الآن.';
+
+  @override
+  String basedOnReviews(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'بناءً على $count تقييم',
+      one: 'بناءً على تقييم واحد',
+      zero: 'لا تقييمات بعد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewVisibleToEveryone => 'سيظهر تقييمك فورًا وسيراه الجميع.';
+
+  @override
+  String get dataAttribution => 'مواقع المقاهي © مساهمو OpenStreetMap، ODbL.';
 }

@@ -1059,6 +1059,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo unavailable'**
   String get photoUnavailable;
+
+  /// No description provided for @featuredSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand-picked places worth the trip'**
+  String get featuredSubtitle;
+
+  /// No description provided for @openRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open right now'**
+  String get openRightNow;
+
+  /// No description provided for @openRightNowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Serving at this hour'**
+  String get openRightNowSubtitle;
+
+  /// No description provided for @popularSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What Erbil is ordering'**
+  String get popularSubtitle;
+
+  /// No description provided for @browseByArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by area'**
+  String get browseByArea;
+
+  /// No description provided for @browseByAreaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a part of the city'**
+  String get browseByAreaSubtitle;
+
+  /// No description provided for @newCafe.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newCafe;
+
+  /// No description provided for @cafeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No cafés} =1{1 café} other{{count} cafés}}'**
+  String cafeCount(int count);
+
+  /// No description provided for @rateThisCafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this café'**
+  String get rateThisCafe;
+
+  /// No description provided for @tapToRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a star to rate'**
+  String get tapToRate;
+
+  /// No description provided for @yourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review'**
+  String get yourReview;
+
+  /// No description provided for @reviewPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your rating is live.'**
+  String get reviewPublished;
+
+  /// No description provided for @basedOnReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No ratings yet} =1{Based on 1 rating} other{Based on {count} ratings}}'**
+  String basedOnReviews(int count);
+
+  /// No description provided for @reviewVisibleToEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating goes live straight away and everyone will see it.'**
+  String get reviewVisibleToEveryone;
+
+  /// No description provided for @dataAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Café locations © OpenStreetMap contributors, ODbL.'**
+  String get dataAttribution;
 }
 
 class _AppLocalizationsDelegate
