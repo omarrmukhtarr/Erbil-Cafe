@@ -9,11 +9,13 @@ import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/error/failure.dart';
 import '../../../../core/utils/auth_guard.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../favorites/data/favorites_repository.dart';
 import '../../../menu/data/repositories/menu_repository.dart';
 import '../../../reviews/data/models/review.dart';
@@ -55,6 +57,58 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
   void dispose() {
     _cubit.close();
     super.dispose();
+  }
+
+  /// The signed-in user's own review of this café, if they have left one.
+  Review? _myReview(CafeDetailState state) {
+    final userId = context.read<AuthCubit>().state.user?.id;
+    if (userId == null) return null;
+
+    for (final review in state.reviews) {
+      if (review.authorId == userId) return review;
+    }
+    return null;
+  }
+
+  /// Rating from the café's own page, without a detour through a form.
+  ///
+  /// Writing a review is a paragraph of work; leaving a rating is one tap, and
+  /// most people will only ever do the second. A comment is still one tap
+  /// further, offered in the confirmation rather than demanded up front.
+  Future<void> _rate(int stars, String cafeId, Review? mine) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final review = mine == null
+          ? await sl<ReviewRepository>().create(cafeId, rating: stars)
+          // Rating again replaces the previous rating rather than failing:
+          // the API allows one review per person per café.
+          : await sl<ReviewRepository>()
+              .update(mine.id, rating: stars, comment: mine.comment);
+
+      if (!mounted) return;
+      await _cubit.reloadReviews();
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            review.isPending ? l10n.reviewPending : l10n.reviewPublished,
+          ),
+          action: SnackBarAction(
+            label: l10n.writeReview,
+            onPressed: () async {
+              final wrote = await context.push<bool>(Routes.review(widget.slug));
+              if ((wrote ?? false) && mounted) _cubit.reloadReviews();
+            },
+          ),
+        ),
+      );
+    } on Failure catch (f) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(f.message)));
+    }
   }
 
   Future<void> _open(String url) async {
@@ -246,8 +300,22 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                       ],
                     ),
 
+                    const Gap.sm(),
+                    _QuickRate(
+                      myRating: _myReview(state)?.rating ?? 0,
+                      onRate: (stars) => requireAuth(
+                        context,
+                        reason: l10n.signInToReview,
+                        action: () => _rate(
+                          stars,
+                          detail.cafe.id,
+                          _myReview(state),
+                        ),
+                      ),
+                    ),
+
                     if (state.summary.total > 0) ...[
-                      const Gap.sm(),
+                      const Gap.md(),
                       _RatingBreakdown(summary: state.summary),
                     ],
 
@@ -632,6 +700,80 @@ class _OpeningHours extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Five taps, one of which rates the café.
+///
+/// Sits above the breakdown so the invitation to rate comes before the wall of
+/// other people's opinions. Once the user has rated, it shows their own stars
+/// back and tapping a different one changes it.
+class _QuickRate extends StatelessWidget {
+  const _QuickRate({required this.myRating, required this.onRate});
+
+  final int myRating;
+  final void Function(int stars) onRate;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final rated = myRating > 0;
+
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  rated ? l10n.yourRating : l10n.rateThisCafe,
+                  style: theme.textTheme.labelLarge
+                      ?.copyWith(color: AppColors.onCard),
+                ),
+                const Gap(2),
+                Text(
+                  l10n.tapToRate,
+                  style: const TextStyle(
+                    color: AppColors.onCardMuted,
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const HGap.sm(),
+          for (var stars = 1; stars <= 5; stars++)
+            Semantics(
+              button: true,
+              label: '$stars',
+              child: InkResponse(
+                onTap: () => onRate(stars),
+                radius: 18,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    stars <= myRating
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
+                    size: 26,
+                    color: stars <= myRating
+                        ? AppColors.accent
+                        : AppColors.onCardDisabled,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

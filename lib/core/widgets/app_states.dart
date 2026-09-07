@@ -6,6 +6,7 @@ import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../l10n/app_localizations.dart';
 import '../error/failure.dart';
+import 'cafe_card.dart';
 
 /// Skeleton placeholder.
 ///
@@ -58,7 +59,10 @@ class CafeCardSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppSkeleton(height: compact ? 148 : 190, radius: AppRadius.card),
+        AppSkeleton(
+          height: compact ? CafeCard.imageHeightCompact : 190,
+          radius: AppRadius.card,
+        ),
         const Gap.md(),
         const AppSkeleton(height: 18, width: 170),
         const Gap.sm(),
@@ -173,6 +177,7 @@ class ErrorView extends StatelessWidget {
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     required this.title,
+    this.subtitle,
     this.actionLabel,
     this.onAction,
     this.padding,
@@ -180,6 +185,12 @@ class SectionHeader extends StatelessWidget {
   });
 
   final String title;
+
+  /// One muted line under the heading, saying what the section is for. A
+  /// carousel of cafés reads very differently depending on *why* those cafés
+  /// are in it, and the title alone rarely carries that.
+  final String? subtitle;
+
   final String? actionLabel;
   final VoidCallback? onAction;
   final EdgeInsetsGeometry? padding;
@@ -195,12 +206,25 @@ class SectionHeader extends StatelessWidget {
             AppSpacing.md,
           ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                if (subtitle != null) ...[
+                  const Gap(3),
+                  Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ],
+            ),
           ),
-          if (onAction != null && actionLabel != null)
+          if (onAction != null && actionLabel != null) ...[
+            const HGap.sm(),
             TextButton(onPressed: onAction, child: Text(actionLabel!)),
+          ],
         ],
       ),
     );
