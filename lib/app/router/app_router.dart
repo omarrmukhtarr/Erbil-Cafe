@@ -67,8 +67,6 @@ abstract final class Routes {
   static String review(String slug) => '/cafe/$slug/review';
 }
 
-/// Tabs that keep their own navigation stack.
-final _shellKey = GlobalKey<NavigatorState>();
 final _rootKey = GlobalKey<NavigatorState>();
 
 GoRouter createRouter({
@@ -156,41 +154,74 @@ GoRouter createRouter({
       ),
 
       // ─── Tabs ─────────────────────────────────────────────────────
-      ShellRoute(
-        navigatorKey: _shellKey,
-        builder: (context, state, child) =>
-            AppShell(location: state.matchedLocation, child: child),
-        routes: [
-          GoRoute(
-            path: Routes.home,
-            builder: (context, state) => const HomeScreen(),
+      //
+      // One navigator per tab, held side by side in an IndexedStack.
+      //
+      // A plain ShellRoute put all five tabs in a *single* navigator, which
+      // made switching tabs a route replacement: iOS gave it the standard page
+      // transition, so tabs slid in over one another like a push, and every
+      // screen was torn down and rebuilt on the way out. Home refetched five
+      // endpoints each time it was returned to, Explore forgot its search and
+      // filters, and the map rebuilt its markers and clustering from scratch.
+      //
+      // A branch keeps its navigator, its widget state, its cubits and its
+      // scroll offset for as long as the app runs, and the swap between them
+      // is a paint, not an animation. Branches are built lazily, so a tab
+      // nobody opens — the map, with its platform view — costs nothing.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.home,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: Routes.explore,
-            builder: (context, state) {
-              final params = state.uri.queryParameters;
-              return ExploreScreen(
-                // Keyed on the filter so arriving from a different category
-                // rebuilds the screen instead of reusing the previous state.
-                key: ValueKey(state.uri.query),
-                initialAmenity: params['amenity'],
-                initialArea: params['area'],
-                initialOpenNow: params['openNow'] == '1',
-                initialSort: params['sort'],
-              );
-            },
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.explore,
+                builder: (context, state) {
+                  final params = state.uri.queryParameters;
+                  return ExploreScreen(
+                    // Keyed on the filter so arriving from a different category
+                    // rebuilds the screen instead of reusing the previous state.
+                    key: ValueKey(state.uri.query),
+                    initialAmenity: params['amenity'],
+                    initialArea: params['area'],
+                    initialOpenNow: params['openNow'] == '1',
+                    initialSort: params['sort'],
+                  );
+                },
+              ),
+            ],
           ),
-          GoRoute(
-            path: Routes.map,
-            builder: (context, state) => const MapScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.map,
+                builder: (context, state) => const MapScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: Routes.favorites,
-            builder: (context, state) => const FavoritesScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.favorites,
+                builder: (context, state) => const FavoritesScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: Routes.profile,
-            builder: (context, state) => const ProfileScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
           ),
         ],
       ),
