@@ -49,7 +49,7 @@ void main() {
       expect(find.text('Featured'), findsOneWidget);
     });
 
-    testWidgets('hides the rating badge when there are no reviews',
+    testWidgets('says a café is new rather than showing it a 0.0 rating',
         (tester) async {
       await tester.pumpApp(
         Scaffold(
@@ -57,7 +57,48 @@ void main() {
         ),
       );
 
+      // An unrated café used to show nothing in the corner, which read as a
+      // hole in the card rather than a fact about the café.
       expect(find.text('0.0'), findsNothing);
+      expect(find.text('New'), findsOneWidget);
+    });
+
+    testWidgets('shows how many ratings are behind the average',
+        (tester) async {
+      await tester.pumpApp(
+        Scaffold(body: CafeCard(cafe: buildCafe(rating: 4.7, reviews: 12), onTap: () {})),
+      );
+
+      expect(find.text('4.7'), findsOneWidget);
+      expect(find.text('(12)'), findsOneWidget);
+    });
+
+    testWidgets('never clips an amenity pill mid-word', (tester) async {
+      // Regression: three pills went into a non-scrolling ListView that simply
+      // cut the last one off — "City vie…" with no sign more existed.
+      await tester.pumpApp(
+        Scaffold(
+          body: SizedBox(
+            width: 272,
+            child: CafeCard(
+              cafe: buildCafe(
+                amenities: const [
+                  'Wi-Fi',
+                  'Outdoor seating',
+                  'Shisha',
+                  'City view',
+                ],
+              ),
+              compact: true,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      tester.expectNoOverflow();
+      // Whatever did not fit is counted, not silently dropped.
+      expect(find.textContaining('+'), findsWidgets);
     });
 
     testWidgets('says a café has no photo instead of showing a blank box',
