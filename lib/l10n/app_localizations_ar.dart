@@ -572,4 +572,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dataAttribution => 'مواقع المقاهي © مساهمو OpenStreetMap، ODbL.';
+
+  @override
+  String get preferences => 'التفضيلات';
 }

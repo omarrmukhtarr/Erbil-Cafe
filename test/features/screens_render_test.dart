@@ -240,6 +240,43 @@ void main() {
       expect(find.text('Sign in required'), findsOneWidget);
     });
 
+    testWidgets('a guest can still change the language and the theme',
+        (tester) async {
+      // The settings live on this page rather than behind it, and a guest who
+      // cannot read the interface needs the language picker most of all.
+      await tester.pumpApp(
+        BlocProvider.value(
+          value: sl<AuthCubit>(),
+          child: const ProfileScreen(),
+        ),
+        surfaceSize: const Size(390, 1200),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Preferences'), findsOneWidget);
+      expect(find.text('کوردی'), findsOneWidget);
+      expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('Dark'), findsOneWidget);
+    });
+
+    testWidgets('changing the language switches the interface', (tester) async {
+      await tester.pumpApp(
+        BlocProvider.value(
+          value: sl<AuthCubit>(),
+          child: const ProfileScreen(),
+        ),
+        surfaceSize: const Size(390, 1200),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('کوردی'));
+      await tester.pumpAndSettle();
+
+      // The page title is the proof: it comes from the localizations, so it
+      // only changes if the whole app took the new locale.
+      expect(find.text('پرۆفایل'), findsOneWidget);
+    });
+
     testWidgets('shows the signed-in user with their activity counts',
         (tester) async {
       final cubit = sl<AuthCubit>();
@@ -266,6 +303,9 @@ void main() {
       expect(find.text('Aram Hama'), findsOneWidget);
       expect(find.text('user@erbilcafe.app'), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
+
+      // Sign out sits under the settings now, so it is below the fold.
+      await tester.scrollUntilVisible(find.text('Sign out'), 200);
       expect(find.text('Sign out'), findsOneWidget);
     });
   });
