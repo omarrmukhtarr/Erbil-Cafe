@@ -209,5 +209,6 @@
   "reviewPublished": "سوپاس! نمرەکەت بڵاوکرایەوە.",
   "basedOnReviews": "{count, plural, =0{هێشتا نمرەی نییە} =1{لەسەر بنەمای ١ نمرە} other{لەسەر بنەمای {count} نمرە}}",
   "reviewVisibleToEveryone": "نمرەکەت دەستبەجێ بڵاو دەبێتەوە و هەموو کەس دەیبینێت.",
-  "dataAttribution": "شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL."
+  "dataAttribution": "شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL.",
+  "preferences": "هەڵبژاردەکان"
 }

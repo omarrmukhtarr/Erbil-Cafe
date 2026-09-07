@@ -209,5 +209,6 @@
   "reviewPublished": "شكرًا! تقييمك ظاهر الآن.",
   "basedOnReviews": "{count, plural, =0{لا تقييمات بعد} =1{بناءً على تقييم واحد} other{بناءً على {count} تقييم}}",
   "reviewVisibleToEveryone": "سيظهر تقييمك فورًا وسيراه الجميع.",
-  "dataAttribution": "مواقع المقاهي © مساهمو OpenStreetMap، ODbL."
+  "dataAttribution": "مواقع المقاهي © مساهمو OpenStreetMap، ODbL.",
+  "preferences": "التفضيلات"
 }

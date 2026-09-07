@@ -574,4 +574,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dataAttribution =>
       'Café locations © OpenStreetMap contributors, ODbL.';
+
+  @override
+  String get preferences => 'Preferences';
 }
