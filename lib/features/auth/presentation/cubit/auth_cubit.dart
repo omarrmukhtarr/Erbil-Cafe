@@ -108,6 +108,11 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<bool> updateProfile({String? name, String? phone, String? locale}) async {
+    // Guests reach this through the language picker on the profile tab, which
+    // is open to them on purpose. There is no account to write the choice to,
+    // and the request would only 401 — the device-level setting is enough.
+    if (!state.isAuthenticated) return false;
+
     try {
       final user = await _repository.updateProfile(
         name: name,
