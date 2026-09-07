@@ -194,5 +194,20 @@
   "friday": "هەینی",
   "saturday": "شەممە",
   "noPhotoYet": "هێشتا وێنە نییە",
-  "photoUnavailable": "وێنە بەردەست نییە"
+  "photoUnavailable": "وێنە بەردەست نییە",
+  "featuredSubtitle": "شوێنە هەڵبژێردراوەکان کە شایەنی سەردانن",
+  "openRightNow": "ئێستا کراوەیە",
+  "openRightNowSubtitle": "لەم کاتەدا خزمەت دەکەن",
+  "popularSubtitle": "ئەوەی هەولێر داوای دەکات",
+  "browseByArea": "بەپێی ناوچە",
+  "browseByAreaSubtitle": "بەشێکی شار هەڵبژێرە",
+  "newCafe": "نوێ",
+  "cafeCount": "{count, plural, =0{هیچ کافێیەک} =1{١ کافێ} other{{count} کافێ}}",
+  "rateThisCafe": "نمرە بەم کافێیە بدە",
+  "tapToRate": "ئەستێرەیەک دابگرە بۆ نمرەدان",
+  "yourReview": "پێداچوونەوەکەت",
+  "reviewPublished": "سوپاس! نمرەکەت بڵاوکرایەوە.",
+  "basedOnReviews": "{count, plural, =0{هێشتا نمرەی نییە} =1{لەسەر بنەمای ١ نمرە} other{لەسەر بنەمای {count} نمرە}}",
+  "reviewVisibleToEveryone": "نمرەکەت دەستبەجێ بڵاو دەبێتەوە و هەموو کەس دەیبینێت.",
+  "dataAttribution": "شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL."
 }

@@ -194,5 +194,34 @@
   "friday": "Friday",
   "saturday": "Saturday",
   "noPhotoYet": "No photo yet",
-  "photoUnavailable": "Photo unavailable"
+  "photoUnavailable": "Photo unavailable",
+  "featuredSubtitle": "Hand-picked places worth the trip",
+  "openRightNow": "Open right now",
+  "openRightNowSubtitle": "Serving at this hour",
+  "popularSubtitle": "What Erbil is ordering",
+  "browseByArea": "Browse by area",
+  "browseByAreaSubtitle": "Pick a part of the city",
+  "newCafe": "New",
+  "cafeCount": "{count, plural, =0{No cafés} =1{1 café} other{{count} cafés}}",
+  "@cafeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rateThisCafe": "Rate this café",
+  "tapToRate": "Tap a star to rate",
+  "yourReview": "Your review",
+  "reviewPublished": "Thanks! Your rating is live.",
+  "basedOnReviews": "{count, plural, =0{No ratings yet} =1{Based on 1 rating} other{Based on {count} ratings}}",
+  "@basedOnReviews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewVisibleToEveryone": "Your rating goes live straight away and everyone will see it.",
+  "dataAttribution": "Café locations © OpenStreetMap contributors, ODbL."
 }

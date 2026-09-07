@@ -67,6 +67,11 @@ class SettingsScreen extends StatelessWidget {
             '${l10n.appName} · v2.0.0\n${l10n.appTagline}',
             style: theme.textTheme.bodySmall,
           ),
+          const SizedBox(height: AppSpacing.md),
+          // Much of the café catalogue is imported from OpenStreetMap, whose
+          // ODbL licence requires this credit wherever the data is shown. It
+          // is a condition of using the data, not a courtesy.
+          Text(l10n.dataAttribution, style: theme.textTheme.labelSmall),
         ],
       ),
     );
