@@ -42,7 +42,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       // The route carries a slug, but creating a review needs the café's id.
       final cafe = await sl<CafeRepository>().detail(widget.slug);
 
-      await sl<ReviewRepository>().create(
+      final review = await sl<ReviewRepository>().create(
         cafe.cafe.id,
         rating: _rating.round(),
         comment: _comment.text.trim().isEmpty ? null : _comment.text.trim(),
@@ -50,9 +50,16 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
 
       if (!mounted) return;
 
+      // Ratings normally publish immediately; the server decides, so the
+      // confirmation reads the status back rather than assuming either way.
       final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.reviewPending)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            review.isPending ? l10n.reviewPending : l10n.reviewPublished,
+          ),
+        ),
+      );
       context.pop(true);
     } on Failure catch (f) {
       if (!mounted) return;
@@ -123,7 +130,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      l10n.reviewPending,
+                      l10n.reviewVisibleToEveryone,
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
