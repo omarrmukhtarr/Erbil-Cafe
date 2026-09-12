@@ -224,5 +224,28 @@
   },
   "reviewVisibleToEveryone": "Your rating goes live straight away and everyone will see it.",
   "dataAttribution": "Café locations © OpenStreetMap contributors, ODbL.",
-  "preferences": "Preferences"
+  "preferences": "Preferences",
+  "contactAndLinks": "Contact & links",
+  "website": "Website",
+  "whatsapp": "WhatsApp",
+  "instagram": "Instagram",
+  "address": "Address",
+  "seats": "{count, plural, =1{1 seat} other{{count} seats}}",
+  "@seats": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAllPhotos": "View all photos",
+  "photoCount": "{count, plural, =0{No photos} =1{1 photo} other{{count} photos}}",
+  "@photoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapStyle": "Map style"
 }

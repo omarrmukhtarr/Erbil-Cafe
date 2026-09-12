@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/di/injector.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
@@ -96,8 +98,10 @@ class _MapScreenState extends State<MapScreen> {
     final clusters = CafeClustering.cluster(_cafes, _zoom);
 
     // Cheap identity for "the same set of pins": if it has not changed, the
-    // bitmaps and marker set can be reused as-is.
-    final signature = Object.hashAll(clusters.map((c) => c.id));
+    // bitmaps and marker set can be reused as-is. Selection is part of that
+    // identity because the selected pin is drawn larger.
+    final signature =
+        Object.hash(Object.hashAll(clusters.map((c) => c.id)), _selected?.id);
     if (signature == _lastClusterSignature && _markers.isNotEmpty) return;
     _lastClusterSignature = signature;
 
@@ -113,6 +117,7 @@ class _MapScreenState extends State<MapScreen> {
             position: cluster.position,
             icon: await MapMarkers.pin(
               open: cafe.isOpenNow,
+              selected: cafe.id == _selected?.id,
               devicePixelRatio: ratio,
             ),
             anchor: const Offset(0.5, 1),
@@ -149,9 +154,17 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _focus(CafeMarker marker) async {
     setState(() => _selected = marker);
+    // Redraw so the chosen pin grows; the camera move is independent of it.
+    unawaited(_rebuildMarkers());
     await _controller?.animateCamera(
       CameraUpdate.newLatLngZoom(LatLng(marker.lat, marker.lng), 16),
     );
+  }
+
+  void _clearSelection() {
+    if (_selected == null) return;
+    setState(() => _selected = null);
+    unawaited(_rebuildMarkers());
   }
 
   Future<void> _onClusterTap(MapCluster cluster) async {
@@ -159,8 +172,9 @@ class _MapScreenState extends State<MapScreen> {
 
     // Spread across a neighbourhood: zooming will separate them, so do that.
     final bounds = _boundsOf(members);
-    final spread = (bounds.northeast.latitude - bounds.southwest.latitude).abs() +
-        (bounds.northeast.longitude - bounds.southwest.longitude).abs();
+    final spread =
+        (bounds.northeast.latitude - bounds.southwest.latitude).abs() +
+            (bounds.northeast.longitude - bounds.southwest.longitude).abs();
 
     // Effectively the same spot, or already as close as clustering goes:
     // listing them is the only way to reach each one.
@@ -224,7 +238,7 @@ class _MapScreenState extends State<MapScreen> {
                   AppSpacing.md,
                 ),
                 child: Text(
-                  '${members.length} ${l10n.allCafes.toLowerCase()}',
+                  l10n.cafeCount(members.length),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -317,9 +331,8 @@ class _MapScreenState extends State<MapScreen> {
                 mapToolbarEnabled: false,
                 padding: EdgeInsets.only(
                   top: topInset + AppSpacing.jumbo,
-                  bottom: _selected != null
-                      ? 190
-                      : AppSpacing.bottomBarClearance,
+                  bottom:
+                      _selected != null ? 190 : AppSpacing.bottomBarClearance,
                 ),
                 markers: _markers,
                 onMapCreated: (controller) => _controller = controller,
@@ -327,7 +340,7 @@ class _MapScreenState extends State<MapScreen> {
                 // Recluster when the camera settles, not on every frame of a
                 // pan — rebuilding markers mid-gesture stutters.
                 onCameraIdle: _rebuildMarkers,
-                onTap: (_) => setState(() => _selected = null),
+                onTap: (_) => _clearSelection(),
               ),
 
               Positioned(
@@ -339,7 +352,7 @@ class _MapScreenState extends State<MapScreen> {
                     _Pill(
                       dark: _theme.isDark,
                       child: Text(
-                        '${data.markers.length} ${l10n.allCafes.toLowerCase()}',
+                        l10n.cafeCount(data.markers.length),
                         style: TextStyle(
                           color: _theme.isDark
                               ? AppColors.onCard
@@ -381,17 +394,30 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
 
-              if (_selected != null)
-                Positioned(
-                  left: AppSpacing.page,
-                  right: AppSpacing.page,
-                  bottom: AppSpacing.bottomBarClearance,
-                  child: AppCard(
-                    onTap: () => context.push(Routes.cafe(_selected!.slug)),
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: _CafeRow(marker: _selected!, showChevron: true),
-                  ),
+              // The card rises from behind the tab bar rather than appearing
+              // on top of the map, so it reads as belonging to the pin that
+              // was just tapped.
+              AnimatedPositioned(
+                duration: AppMotion.medium,
+                curve: AppMotion.standard,
+                left: AppSpacing.page,
+                right: AppSpacing.page,
+                bottom:
+                    _selected != null ? AppSpacing.bottomBarClearance : -180,
+                child: AnimatedOpacity(
+                  duration: AppMotion.fast,
+                  opacity: _selected != null ? 1 : 0,
+                  child: _selected == null
+                      ? const SizedBox(height: 84)
+                      : AppCard(
+                          onTap: () =>
+                              context.push(Routes.cafe(_selected!.slug)),
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          child:
+                              _CafeRow(marker: _selected!, showChevron: true),
+                        ),
                 ),
+              ),
             ],
           );
         },
@@ -514,7 +540,22 @@ class _Pill extends StatelessWidget {
   }
 }
 
+/// The style sheet's contents, for a widget test.
+///
+/// The picker is an implementation detail of this screen and stays private;
+/// this is the one door into it, because the layout bug it had — the selected
+/// swatch collapsing to the width of its tick — is invisible to anything that
+/// does not measure the rendered boxes.
+@visibleForTesting
+Widget mapThemePickerForTest(MapTheme current) => _ThemePicker(current: current);
+
 /// Restores v1's map-theme picker, which the first rebuild had dropped.
+///
+/// The swatches are laid out on a grid rather than a [Wrap] of fixed-width
+/// boxes. The `Wrap` version collapsed the *selected* swatch to the width of
+/// its tick: a `Container` with no child fills the loose constraints a `Column`
+/// hands it, and one with a child shrinks to fit that child — so selecting a
+/// theme visibly shrank it to a sliver while its neighbours stayed full width.
 class _ThemePicker extends StatelessWidget {
   const _ThemePicker({required this.current});
 
@@ -523,6 +564,7 @@ class _ThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return SafeArea(
       child: Padding(
@@ -536,11 +578,17 @@ class _ThemePicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Map style', style: theme.textTheme.titleLarge),
+            Text(l10n.mapStyle, style: theme.textTheme.titleLarge),
             const Gap.lg(),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.md,
+            GridView.count(
+              crossAxisCount: 4,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: AppSpacing.md,
+              crossAxisSpacing: AppSpacing.md,
+              // Swatch plus its caption. Tighter than square, because the
+              // caption is one line and a square tile wastes half the sheet.
+              childAspectRatio: 0.82,
               children: [
                 for (final option in MapTheme.values)
                   _ThemeSwatch(
@@ -575,48 +623,122 @@ class _ThemeSwatch extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: InkWell(
+      label: option.label,
+      child: GestureDetector(
         onTap: onTap,
-        borderRadius: AppRadius.inputR,
-        child: SizedBox(
-          width: 84,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 58,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: AnimatedContainer(
+                duration: AppMotion.fast,
+                curve: AppMotion.standard,
                 decoration: BoxDecoration(
-                  color: option.swatch,
                   borderRadius: AppRadius.inputR,
                   border: Border.all(
-                    color: selected
-                        ? AppColors.accent
-                        : theme.colorScheme.outline,
+                    color:
+                        selected ? AppColors.accent : theme.colorScheme.outline,
                     width: selected ? 2.5 : 1,
                   ),
+                  // A ring around the whole swatch says "this one" without
+                  // covering the colour it is there to show.
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.accent.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : const [],
                 ),
-                child: selected
-                    ? const Icon(Icons.check_circle,
-                        color: AppColors.accent, size: 22)
-                    : null,
-              ),
-              const Gap.sm(),
-              Text(
-                option.label,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: selected ? AppColors.accent : null,
-                  fontWeight: selected ? FontWeight.w700 : null,
+                child: ClipRRect(
+                  borderRadius: AppRadius.inputR,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ColoredBox(color: option.swatch),
+
+                      // Two strokes in the style's own road colour: enough for
+                      // a flat rectangle to read as a piece of map.
+                      CustomPaint(painter: _SwatchRoads(option: option)),
+
+                      // The tick sits in the corner rather than the middle, so
+                      // it never hides the colour being chosen.
+                      PositionedDirectional(
+                        end: 4,
+                        top: 4,
+                        child: AnimatedScale(
+                          duration: AppMotion.fast,
+                          curve: AppMotion.spring,
+                          scale: selected ? 1 : 0,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: AppColors.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: const Icon(Icons.check_rounded,
+                                color: Colors.white, size: 13),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
               ),
-            ],
-          ),
+            ),
+            const Gap.sm(),
+            Text(
+              option.label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: selected ? AppColors.accent : null,
+                fontWeight: selected ? FontWeight.w700 : null,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+/// Two roads across a swatch, drawn in that style's own road colour.
+///
+/// A flat rectangle of beige tells you very little about what the map will
+/// look like; the same rectangle with a road through it is instantly a map.
+class _SwatchRoads extends CustomPainter {
+  const _SwatchRoads({required this.option});
+
+  final MapTheme option;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final road = Paint()
+      ..color = option.roadColor
+      ..strokeWidth = size.width * 0.09
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas
+      ..drawLine(
+        Offset(-2, size.height * 0.68),
+        Offset(size.width + 2, size.height * 0.34),
+        road,
+      )
+      ..drawLine(
+        Offset(size.width * 0.62, -2),
+        Offset(size.width * 0.34, size.height + 2),
+        road..strokeWidth = size.width * 0.06,
+      );
+  }
+
+  @override
+  bool shouldRepaint(_SwatchRoads oldDelegate) => oldDelegate.option != option;
 }
 
 /// Fallback when no Maps key is configured.
