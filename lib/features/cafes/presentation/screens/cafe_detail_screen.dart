@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/di/injector.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
@@ -14,6 +15,7 @@ import '../../../../core/utils/auth_guard.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
+import '../../../../core/widgets/photo_viewer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../favorites/data/favorites_repository.dart';
@@ -111,6 +113,47 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
     }
   }
 
+  /// Every photo of this café, cover included, in the order the dashboard
+  /// put them in.
+  ///
+  /// A café with no gallery still has a cover, and that cover is worth opening
+  /// full screen — so the cover stands in for the gallery when there is none
+  /// rather than leaving the tap dead.
+  static List<PhotoSource> _photosOf(CafeDetail detail) {
+    final photos = [
+      for (final image in detail.images)
+        PhotoSource(url: image.url, thumbUrl: image.thumbUrl, caption: image.caption),
+    ];
+
+    if (photos.isEmpty && detail.cafe.coverImage != null) {
+      photos.add(PhotoSource(url: detail.cafe.coverImage!));
+    }
+    return photos;
+  }
+
+  /// Whether there is anything to put in the contact card.
+  ///
+  /// Most OpenStreetMap cafés carry a coordinate and nothing else, and an
+  /// empty "Contact & links" heading is worse than no heading.
+  static bool _hasContactDetails(CafeDetail detail) =>
+      (detail.cafe.address.isNotEmpty) ||
+      (detail.website?.isNotEmpty ?? false) ||
+      (detail.instagram?.isNotEmpty ?? false) ||
+      (detail.whatsapp?.isNotEmpty ?? false) ||
+      detail.capacity > 0;
+
+  void _openPhotos(CafeDetail detail, int index) {
+    final photos = _photosOf(detail);
+    if (photos.isEmpty) return;
+
+    PhotoViewer.open(
+      context,
+      photos: photos,
+      initialIndex: index,
+      heroPrefix: 'cafe-photo-${detail.cafe.id}',
+    );
+  }
+
   Future<void> _open(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -161,8 +204,12 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
           return CustomScrollView(
             slivers: [
               // Full-bleed header with the content riding over it, as v1 did.
+              //
+              // 380 rather than 300: the café's own photo is the single most
+              // persuasive thing on this page and at 300 it was a strip behind
+              // the status bar. This gives it roughly the top 45% of a phone.
               SliverAppBar(
-                expandedHeight: 300,
+                expandedHeight: 380,
                 pinned: true,
                 stretch: true,
                 backgroundColor: theme.colorScheme.surface,
@@ -191,8 +238,41 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                   ),
                   const HGap.sm(),
                 ],
-                flexibleSpace: FlexibleSpaceBar(
-                  background: _HeaderImage(url: cafe.coverImage, id: cafe.id),
+                // The name moves into the bar as the photo scrolls away, so a
+                // collapsed header is never an anonymous cream strip.
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final collapsed = constraints.maxHeight <=
+                        kToolbarHeight + MediaQuery.paddingOf(context).top + 8;
+
+                    return FlexibleSpaceBar(
+                      titlePadding: const EdgeInsetsDirectional.only(
+                        start: 60,
+                        end: 60,
+                        bottom: 16,
+                      ),
+                      title: AnimatedOpacity(
+                        opacity: collapsed ? 1 : 0,
+                        duration: AppMotion.fast,
+                        child: Text(
+                          cafe.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ),
+                      background: _HeaderImage(
+                        url: cafe.coverImage ??
+                            (detail.images.isEmpty
+                                ? null
+                                : detail.images.first.url),
+                        id: cafe.id,
+                        photoCount: _photosOf(detail).length,
+                        onTap: () => _openPhotos(detail, 0),
+                        viewAllLabel: l10n.viewAllPhotos,
+                      ),
+                    );
+                  },
                 ),
               ),
 
@@ -239,37 +319,46 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                       ),
                     ],
 
-                    if (detail.images.length > 1) ...[
+                    if (detail.images.isNotEmpty) ...[
                       const Gap.section(),
-                      _Heading(l10n.gallery),
+                      Row(
+                        children: [
+                          Expanded(child: _Heading(l10n.gallery)),
+                          Text(
+                            l10n.photoCount(detail.images.length),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                       const Gap.md(),
+                      // 260×180 rather than 150×128. A café photo at 150pt
+                      // wide shows a wall and a corner of a table; at 260 it
+                      // shows the room, which is what the tap is deciding on.
                       SizedBox(
-                        height: 128,
+                        height: 180,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           clipBehavior: Clip.none,
+                          physics: const BouncingScrollPhysics(),
                           itemCount: detail.images.length,
                           separatorBuilder: (_, __) => const HGap.md(),
-                          itemBuilder: (context, index) {
-                            final image = detail.images[index];
-                            return ClipRRect(
-                              borderRadius: AppRadius.chipR,
-                              child: CachedNetworkImage(
-                                imageUrl: image.thumbUrl ?? image.url,
-                                width: 150,
-                                fit: BoxFit.cover,
-                                placeholder: (context, _) => Container(
-                                  width: 150,
-                                  color: AppColors.creamSunken,
-                                ),
-                                errorWidget: (context, _, __) => Container(
-                                  width: 150,
-                                  color: AppColors.creamSunken,
-                                ),
-                              ),
-                            );
-                          },
+                          itemBuilder: (context, index) => _GalleryTile(
+                            image: detail.images[index],
+                            heroTag: 'cafe-photo-${cafe.id}-$index',
+                            onTap: () => _openPhotos(detail, index),
+                          ),
                         ),
+                      ),
+                    ],
+
+                    if (_hasContactDetails(detail)) ...[
+                      const Gap.section(),
+                      _Heading(l10n.contactAndLinks),
+                      const Gap.md(),
+                      _ContactCard(
+                        detail: detail,
+                        l10n: l10n,
+                        onOpen: _open,
                       ),
                     ],
 
@@ -387,38 +476,282 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
 }
 
 class _HeaderImage extends StatelessWidget {
-  const _HeaderImage({required this.url, required this.id});
+  const _HeaderImage({
+    required this.url,
+    required this.id,
+    required this.photoCount,
+    required this.onTap,
+    required this.viewAllLabel,
+  });
 
   final String? url;
   final String id;
+  final int photoCount;
+  final VoidCallback onTap;
+  final String viewAllLabel;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Hero(
-          tag: 'cafe-image-$id',
-          child: url == null
-              ? const ColoredBox(
-                  color: AppColors.cardDarkAlt,
-                  child: Icon(Icons.local_cafe_outlined,
-                      size: 48, color: AppColors.onCardDisabled),
-                )
-              : CachedNetworkImage(
-                  imageUrl: url!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, _) =>
-                      const ColoredBox(color: AppColors.cardDarkAlt),
-                  errorWidget: (context, _, __) =>
-                      const ColoredBox(color: AppColors.cardDarkAlt),
+    return GestureDetector(
+      onTap: photoCount == 0 ? null : onTap,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Hero(
+            tag: 'cafe-image-$id',
+            child: url == null
+                ? const ColoredBox(
+                    color: AppColors.cardDarkAlt,
+                    child: Icon(Icons.local_cafe_outlined,
+                        size: 48, color: AppColors.onCardDisabled),
+                  )
+                : CachedNetworkImage(
+                    imageUrl: url!,
+                    fit: BoxFit.cover,
+                    fadeInDuration: AppMotion.fast,
+                    placeholder: (context, _) =>
+                        const ColoredBox(color: AppColors.cardDarkAlt),
+                    errorWidget: (context, _, __) =>
+                        const ColoredBox(color: AppColors.cardDarkAlt),
+                  ),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(gradient: AppColors.imageScrim),
+          ),
+
+          // Says the photo is worth touching. Without it the header reads as
+          // decoration and nobody finds the gallery behind it.
+          if (photoCount > 0)
+            PositionedDirectional(
+              end: AppSpacing.page,
+              bottom: AppSpacing.lg,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 7,
                 ),
-        ),
-        const DecoratedBox(
-          decoration: BoxDecoration(gradient: AppColors.imageScrim),
-        ),
-      ],
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: AppRadius.pillR,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.photo_library_outlined,
+                        size: 15, color: Colors.white),
+                    const HGap(6),
+                    Text(
+                      photoCount > 1 ? '$photoCount' : viewAllLabel,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
+  }
+}
+
+/// One photo in the horizontal gallery strip.
+class _GalleryTile extends StatelessWidget {
+  const _GalleryTile({
+    required this.image,
+    required this.heroTag,
+    required this.onTap,
+  });
+
+  final CafeImage image;
+  final String heroTag;
+  final VoidCallback onTap;
+
+  static const _width = 260.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: AppRadius.cardR,
+        child: SizedBox(
+          width: _width,
+          child: Hero(
+            tag: heroTag,
+            // The thumbnail is cropped and the full-screen photo is not, so
+            // the flight has to interpolate between two different shapes.
+            // Without this the image snaps to its uncropped aspect ratio on
+            // the first frame of the flight.
+            flightShuttleBuilder: (_, animation, __, ___, ____) => CachedNetworkImage(
+              imageUrl: image.thumbUrl ?? image.url,
+              fit: BoxFit.cover,
+            ),
+            child: CachedNetworkImage(
+              imageUrl: image.thumbUrl ?? image.url,
+              fit: BoxFit.cover,
+              memCacheWidth:
+                  (_width * MediaQuery.devicePixelRatioOf(context)).round(),
+              fadeInDuration: AppMotion.fast,
+              placeholder: (context, _) =>
+                  const ColoredBox(color: AppColors.creamSunken),
+              errorWidget: (context, _, __) => const ColoredBox(
+                color: AppColors.creamSunken,
+                child: Icon(Icons.image_not_supported_outlined,
+                    color: AppColors.onCreamMuted),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Address, links and capacity — everything the dashboard sets on a café that
+/// is not already a heading of its own.
+///
+/// These fields have been editable on the API since the beginning and the app
+/// simply never showed them, so a café owner filling in their website saw it
+/// go nowhere.
+class _ContactCard extends StatelessWidget {
+  const _ContactCard({
+    required this.detail,
+    required this.l10n,
+    required this.onOpen,
+  });
+
+  final CafeDetail detail;
+  final AppLocalizations l10n;
+  final void Function(String url) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final cafe = detail.cafe;
+
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      child: Column(
+        children: [
+          if (cafe.address.isNotEmpty)
+            _ContactRow(
+              icon: Icons.place_outlined,
+              label: l10n.address,
+              value: cafe.address,
+              onTap: () => onOpen(
+                'https://www.google.com/maps/search/?api=1'
+                '&query=${cafe.lat},${cafe.lng}',
+              ),
+            ),
+          if (detail.website?.isNotEmpty ?? false)
+            _ContactRow(
+              icon: Icons.language_outlined,
+              label: l10n.website,
+              value: _prettyUrl(detail.website!),
+              onTap: () => onOpen(detail.website!),
+            ),
+          if (detail.instagram?.isNotEmpty ?? false)
+            _ContactRow(
+              icon: Icons.camera_alt_outlined,
+              label: l10n.instagram,
+              value: '@${detail.instagram}',
+              onTap: () =>
+                  onOpen('https://instagram.com/${detail.instagram}'),
+            ),
+          if (detail.whatsapp?.isNotEmpty ?? false)
+            _ContactRow(
+              icon: Icons.chat_bubble_outline,
+              label: l10n.whatsapp,
+              value: detail.whatsapp!,
+              // wa.me wants the number with no punctuation at all.
+              onTap: () => onOpen(
+                'https://wa.me/${detail.whatsapp!.replaceAll(RegExp(r'[^0-9]'), '')}',
+              ),
+            ),
+          if (detail.capacity > 0)
+            _ContactRow(
+              icon: Icons.event_seat_outlined,
+              label: l10n.bookTable,
+              value: l10n.seats(detail.capacity),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// `https://www.barbera.krd/` reads as `barbera.krd`.
+  static String _prettyUrl(String url) => url
+      .replaceFirst(RegExp(r'^https?://'), '')
+      .replaceFirst(RegExp(r'^www\.'), '')
+      .replaceFirst(RegExp(r'/$'), '');
+}
+
+class _ContactRow extends StatelessWidget {
+  const _ContactRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: AppColors.accent),
+          const HGap.md(),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.onCardMuted,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Gap(3),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: AppColors.onCard,
+                    fontSize: 14,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onTap != null)
+            const Icon(Icons.north_east,
+                size: 15, color: AppColors.onCardMuted),
+        ],
+      ),
+    );
+
+    return onTap == null
+        ? row
+        : InkWell(
+            onTap: onTap,
+            borderRadius: AppRadius.chipR,
+            child: row,
+          );
   }
 }
 
