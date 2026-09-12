@@ -576,4 +576,48 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get preferences => 'هەڵبژاردەکان';
+
+  @override
+  String get contactAndLinks => 'پەیوەندی و بەستەرەکان';
+
+  @override
+  String get website => 'ماڵپەڕ';
+
+  @override
+  String get whatsapp => 'واتساپ';
+
+  @override
+  String get instagram => 'ئینستاگرام';
+
+  @override
+  String get address => 'ناونیشان';
+
+  @override
+  String seats(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count کورسی',
+      one: '١ کورسی',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewAllPhotos => 'بینینی هەموو وێنەکان';
+
+  @override
+  String photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count وێنە',
+      one: '١ وێنە',
+      zero: 'هیچ وێنەیەک',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapStyle => 'شێوازی نەخشە';
 }

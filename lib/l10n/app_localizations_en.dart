@@ -577,4 +577,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preferences => 'Preferences';
+
+  @override
+  String get contactAndLinks => 'Contact & links';
+
+  @override
+  String get website => 'Website';
+
+  @override
+  String get whatsapp => 'WhatsApp';
+
+  @override
+  String get instagram => 'Instagram';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String seats(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seats',
+      one: '1 seat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewAllPhotos => 'View all photos';
+
+  @override
+  String photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+      zero: 'No photos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapStyle => 'Map style';
 }
