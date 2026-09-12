@@ -22,6 +22,7 @@ class Cafe extends Equatable {
     required this.amenities,
     this.area,
     this.coverImage,
+    this.coverThumb,
     this.distanceKm,
     this.isFavorited = false,
   });
@@ -36,6 +37,7 @@ class Cafe extends Equatable {
         lat: (json['lat'] as num).toDouble(),
         lng: (json['lng'] as num).toDouble(),
         coverImage: json['coverImage'] as String?,
+        coverThumb: json['coverThumb'] as String?,
         priceRange: PriceRange.fromJson(json['priceRange'] as String?),
         ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 0,
         reviewCount: json['reviewCount'] as int? ?? 0,
@@ -58,6 +60,13 @@ class Cafe extends Equatable {
   final double lat;
   final double lng;
   final String? coverImage;
+
+  /// The 400px rendition of [coverImage], when the API holds one.
+  ///
+  /// A card is a few hundred points wide and has no use for the full size —
+  /// which is up to 1600px, and 7 MB once decoded. Null means the API has no
+  /// thumbnail for this cover, not that there is no cover.
+  final String? coverThumb;
   final PriceRange priceRange;
   final double ratingAvg;
   final int reviewCount;
@@ -80,6 +89,7 @@ class Cafe extends Equatable {
         lat: lat,
         lng: lng,
         coverImage: coverImage,
+        coverThumb: coverThumb,
         priceRange: priceRange,
         ratingAvg: ratingAvg,
         reviewCount: reviewCount,
