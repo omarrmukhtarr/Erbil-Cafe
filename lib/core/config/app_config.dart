@@ -37,5 +37,21 @@ abstract final class AppConfig {
   /// How long cached café and menu data is served before refetching.
   static const cacheTtl = Duration(minutes: 10);
 
+  /// Sentry DSN, supplied at build time.
+  ///
+  /// Empty disables error reporting entirely — a local checkout and every
+  /// widget test run without an account anywhere, the same stance the API
+  /// takes on `SENTRY_DSN` and `FCM_*`.
+  static const sentryDsn = String.fromEnvironment('SENTRY_DSN');
+
+  static bool get errorReportingEnabled => sentryDsn.isNotEmpty;
+
+  /// Names the build a crash came from, so a fixed bug stops being reported
+  /// by phones that have not updated yet.
+  static const releaseName = String.fromEnvironment(
+    'SENTRY_RELEASE',
+    defaultValue: 'erbilcafe@2.0.0',
+  );
+
   static const isProduction = bool.fromEnvironment('dart.vm.product');
 }

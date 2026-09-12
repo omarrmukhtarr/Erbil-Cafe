@@ -9,7 +9,9 @@ import '../l10n/app_localizations.dart';
 import '../l10n/kurdish_material_localizations.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/notifications/data/push_service.dart';
 import 'di/injector.dart';
+import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
 class ErbilCafeApp extends StatefulWidget {
@@ -26,6 +28,36 @@ class _ErbilCafeAppState extends State<ErbilCafeApp> {
 
   late Locale? _locale = _prefs.locale;
   late ThemeMode _themeMode = _prefs.themeMode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Wired here rather than in `main` because a tapped notification has to
+    // navigate, and the router only exists once the app is up. A notification
+    // that opened the app from cold is replayed by `getInitialMessage`, so
+    // nothing is lost by waiting for this frame.
+    sl<PushService>().listen(
+      onOpen: _openFromNotification,
+      locale: _locale?.languageCode,
+    );
+  }
+
+  /// Routes a tapped notification to whatever it is about.
+  ///
+  /// The payloads the API sends carry `reservationId` and `cafeId`. A booking
+  /// leads to the bookings list rather than to one booking, because there is
+  /// no single-booking screen — and a list where the booking is visible is a
+  /// better answer than a dead link.
+  void _openFromNotification(Map<String, dynamic> data) {
+    final cafeSlug = data['cafeSlug'] as String?;
+
+    if (data['reservationId'] != null) {
+      _router.go(Routes.bookings);
+    } else if (cafeSlug != null && cafeSlug.isNotEmpty) {
+      _router.go(Routes.cafe(cafeSlug));
+    }
+  }
 
   Future<void> _setLocale(Locale? locale) async {
     await _prefs.setLocale(locale);
