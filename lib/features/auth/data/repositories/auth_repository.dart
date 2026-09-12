@@ -49,6 +49,19 @@ class AuthRepository {
     await _tokens.clear();
   }
 
+  /// Closes the account for good.
+  ///
+  /// The server anonymises the row rather than dropping it — reviews and past
+  /// bookings have to survive as history, attributed to "Deleted user" — and
+  /// revokes every refresh token and device. Local storage is cleared either
+  /// way: once the server has accepted, there is no session left to keep, and
+  /// leaving tokens on the phone after a successful delete is worse than
+  /// losing them after a failed one.
+  Future<void> deleteAccount() async {
+    await _api.delete<void>('/users/me');
+    await _tokens.clear();
+  }
+
   Future<AppUser> me() async {
     final json = await _api.get<Map<String, dynamic>>('/users/me');
     return AppUser.fromJson(json);

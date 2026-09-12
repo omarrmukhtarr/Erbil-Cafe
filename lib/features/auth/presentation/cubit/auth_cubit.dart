@@ -93,6 +93,16 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState(status: AuthStatus.guest));
   }
 
+  /// Closes the account and drops back to browsing as a guest.
+  ///
+  /// Throws on failure rather than swallowing it: a delete that did not happen
+  /// must not look like one that did, so the screen shows the error and the
+  /// session stays.
+  Future<void> deleteAccount() async {
+    await _repository.deleteAccount();
+    emit(const AuthState(status: AuthStatus.guest));
+  }
+
   /// Called by the network layer when a refresh fails and the session is over.
   void onSessionExpired() {
     emit(const AuthState(status: AuthStatus.guest));
