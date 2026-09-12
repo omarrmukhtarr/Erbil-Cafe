@@ -48,6 +48,18 @@ enum MapTheme {
         MapTheme.aubergine => const Color(0xFF1D2C4D),
       };
 
+  /// The colour this style paints its roads, for the picker's swatch.
+  Color get roadColor => switch (this) {
+        MapTheme.erbil => const Color(0xFFFFFFFF),
+        MapTheme.erbilNight => const Color(0xFF30221F),
+        MapTheme.standard => const Color(0xFFFFFFFF),
+        MapTheme.retro => const Color(0xFFF8C967),
+        MapTheme.silver => const Color(0xFFFFFFFF),
+        MapTheme.dark => const Color(0xFF3C3C3C),
+        MapTheme.night => const Color(0xFF38414E),
+        MapTheme.aubergine => const Color(0xFF304A7D),
+      };
+
   static MapTheme fromName(String? name) => MapTheme.values.firstWhere(
         (t) => t.name == name,
         orElse: () => MapTheme.erbil,

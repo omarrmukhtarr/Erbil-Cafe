@@ -210,5 +210,14 @@
   "basedOnReviews": "{count, plural, =0{لا تقييمات بعد} =1{بناءً على تقييم واحد} other{بناءً على {count} تقييم}}",
   "reviewVisibleToEveryone": "سيظهر تقييمك فورًا وسيراه الجميع.",
   "dataAttribution": "مواقع المقاهي © مساهمو OpenStreetMap، ODbL.",
-  "preferences": "التفضيلات"
+  "preferences": "التفضيلات",
+  "contactAndLinks": "التواصل والروابط",
+  "website": "الموقع الإلكتروني",
+  "whatsapp": "واتساب",
+  "instagram": "إنستغرام",
+  "address": "العنوان",
+  "seats": "{count, plural, =1{مقعد واحد} other{{count} مقعد}}",
+  "viewAllPhotos": "عرض كل الصور",
+  "photoCount": "{count, plural, =0{لا توجد صور} =1{صورة واحدة} other{{count} صور}}",
+  "mapStyle": "نمط الخريطة"
 }

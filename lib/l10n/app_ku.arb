@@ -210,5 +210,14 @@
   "basedOnReviews": "{count, plural, =0{هێشتا نمرەی نییە} =1{لەسەر بنەمای ١ نمرە} other{لەسەر بنەمای {count} نمرە}}",
   "reviewVisibleToEveryone": "نمرەکەت دەستبەجێ بڵاو دەبێتەوە و هەموو کەس دەیبینێت.",
   "dataAttribution": "شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL.",
-  "preferences": "هەڵبژاردەکان"
+  "preferences": "هەڵبژاردەکان",
+  "contactAndLinks": "پەیوەندی و بەستەرەکان",
+  "website": "ماڵپەڕ",
+  "whatsapp": "واتساپ",
+  "instagram": "ئینستاگرام",
+  "address": "ناونیشان",
+  "seats": "{count, plural, =1{١ کورسی} other{{count} کورسی}}",
+  "viewAllPhotos": "بینینی هەموو وێنەکان",
+  "photoCount": "{count, plural, =0{هیچ وێنەیەک} =1{١ وێنە} other{{count} وێنە}}",
+  "mapStyle": "شێوازی نەخشە"
 }
