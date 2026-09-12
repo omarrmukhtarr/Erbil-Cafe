@@ -147,9 +147,10 @@ void main() {
       (tester) async {
     await pumpShell(tester);
 
-    // Categories and popular items are fetched by Home and by nothing else,
-    // so they are the honest measure of "did Home run its initState again".
-    verify(() => cafes.amenities()).called(1);
+    // Popular menu items are fetched by Home and by nothing else, so the
+    // count is an honest measure of "did Home run its initState again".
+    // Amenities and areas are no longer such a measure: Explore's filter bar
+    // asks for both too.
     verify(() => menus.popular()).called(1);
     final homeState = tester.state<State<HomeScreen>>(find.byType(HomeScreen));
 
@@ -162,7 +163,6 @@ void main() {
     expect(tester.state<State<HomeScreen>>(find.byType(HomeScreen)),
         same(homeState));
     // And so it did not go back to the network for what it already had.
-    verifyNever(() => cafes.amenities());
     verifyNever(() => menus.popular());
   });
 
