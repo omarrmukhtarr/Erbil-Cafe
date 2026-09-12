@@ -9,12 +9,27 @@ conventions that are easy to violate by accident.
   carried over from v1. Never invert it.
 - All colours, radii and text styles come from `lib/app/theme/` (`AppColors`,
   `AppRadius`, `AppTypography`). No colour literals in feature code.
+- **Durations and curves come from `AppMotion`**, same rule. There are three
+  durations on purpose; a fourth would be indistinguishable from its
+  neighbours. `FadeSlideIn` staggers a list's first screenful only — past that
+  the cards are below the fold when built, and a recycled row would replay the
+  animation every time it scrolled back.
 - Anything sitting on a dark card goes inside `core/widgets/app_card.dart`, which
   flips the text/icon ink once via a nested `Theme` — so children keep using
   `theme.textTheme.*` normally.
 
 ## Things that will bite you
 
+- **A `Container` with no child fills its constraints; one with a child shrinks
+  to fit.** This is what collapsed the selected map-style swatch to the width
+  of its tick while every unselected one stayed 84pt wide. Anything laid out as
+  "a fixed-size box that sometimes holds a badge" needs the size stated, not
+  inferred — `test/features/map_theme_picker_test.dart` measures both states.
+- **Café cards must use `coverThumb`, not `coverImage`.** The cover is up to
+  1600px on its longest edge and decodes to ~7 MB; a screenful of those is past
+  Flutter's 100 MB image cache, so it thrashes and re-decodes while scrolling.
+  The API sends a 400px rendition alongside it. `memCacheWidth` on top of that
+  covers cafés whose cover is an outside URL with no rendition.
 - **The tabs are a `StatefulShellRoute.indexedStack`, one navigator each.** Not
   a plain `ShellRoute` — that put all five tabs in one navigator, so switching
   tabs was a route replacement: iOS animated it like a push and disposed the
