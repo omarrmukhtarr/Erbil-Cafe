@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../app/di/injector.dart';
 import '../../../../core/error/failure.dart';
+import '../../../notifications/data/push_service.dart';
 import '../../data/models/user.dart';
 import '../../data/repositories/auth_repository.dart';
 
@@ -57,6 +61,9 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final user = await _repository.login(email: email, password: password);
       emit(AuthState(status: AuthStatus.authenticated, user: user));
+      // This device now belongs to this account. Fire-and-forget: a device
+      // that fails to register still works, it is just quiet.
+      unawaited(sl<PushService>().registerDevice(locale: user.locale));
       return true;
     } on Failure catch (f) {
       emit(AuthState(status: AuthStatus.guest, failure: f));
@@ -89,6 +96,10 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
+    // Detach the device first: after the tokens are gone the unregister call
+    // has nothing to authenticate with, and a shared phone would keep
+    // receiving the previous account's bookings.
+    await sl<PushService>().unregisterDevice();
     await _repository.logout();
     emit(const AuthState(status: AuthStatus.guest));
   }
@@ -99,6 +110,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// must not look like one that did, so the screen shows the error and the
   /// session stays.
   Future<void> deleteAccount() async {
+    await sl<PushService>().unregisterDevice();
     await _repository.deleteAccount();
     emit(const AuthState(status: AuthStatus.guest));
   }
