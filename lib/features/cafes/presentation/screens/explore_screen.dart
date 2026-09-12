@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di/injector.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/utils/auth_guard.dart';
@@ -60,7 +61,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           sort: widget.initialSort ?? 'rating',
         ),
       )
-      ..loadAreas();
+      ..loadFilterOptions();
 
     _scrollController.addListener(() {
       // Prefetch before the bottom so scrolling stays smooth.
@@ -130,10 +131,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ],
                   ),
                 ),
-
                 _FilterBar(cubit: _cubit, state: state),
                 const Gap.md(),
-
                 Expanded(
                   child: switch (state.status) {
                     ListStatus.loading => ListView.separated(
@@ -185,18 +184,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             }
 
                             final cafe = state.cafes[index];
-                            return CafeCard(
-                              cafe: cafe,
-                              onTap: () => context.push(Routes.cafe(cafe.slug)),
-                              onFavoriteTap: () => requireAuth(
-                                context,
-                                reason: l10n.signInToFavorite,
-                                action: () async {
-                                  final result = await sl<FavoritesRepository>()
-                                      .toggle(cafe.id);
-                                  _cubit.applyFavorite(cafe.id,
-                                      isFavorited: result);
-                                },
+                            // Only the first screenful staggers in. Past that
+                            // the cards are below the fold when they are
+                            // built, so the animation would be spent on
+                            // something nobody sees — and would replay every
+                            // time a recycled row scrolled back.
+                            return FadeSlideIn(
+                              index: index < 8 ? index : 0,
+                              child: CafeCard(
+                                cafe: cafe,
+                                onTap: () =>
+                                    context.push(Routes.cafe(cafe.slug)),
+                                onFavoriteTap: () => requireAuth(
+                                  context,
+                                  reason: l10n.signInToFavorite,
+                                  action: () async {
+                                    final result =
+                                        await sl<FavoritesRepository>()
+                                            .toggle(cafe.id);
+                                    _cubit.applyFavorite(cafe.id,
+                                        isFavorited: result);
+                                  },
+                                ),
                               ),
                             );
                           },
@@ -221,6 +230,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
 }
 
 /// Filter chips in one scrollable row above the results.
+///
+/// Every chip is a toggle — tapping an applied filter takes it off. There is
+/// deliberately no "all areas" chip any more: it looked like another area, and
+/// a chip that only ever clears is redundant once each chip clears itself. A
+/// single "Clear" chip leads the row while anything is applied, which also
+/// makes the applied state visible without reading every chip.
 class _FilterBar extends StatelessWidget {
   const _FilterBar({required this.cubit, required this.state});
 
@@ -236,36 +251,49 @@ class _FilterBar extends StatelessWidget {
       height: 38,
       child: ListView(
         scrollDirection: Axis.horizontal,
+        // The row is rebuilt on every filter change; caching it keeps the
+        // rebuild off the raster thread.
+        addRepaintBoundaries: false,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
         children: [
+          if (query.hasFilters) ...[
+            _Chip(
+              label: l10n.clearFilters,
+              selected: false,
+              icon: Icons.close_rounded,
+              onTap: cubit.clearFilters,
+            ),
+            const HGap.sm(),
+          ],
           _Chip(
             label: l10n.openNow,
             selected: query.openNow == true,
-            onTap: () => cubit.setOpenNow(query.openNow == true ? null : true),
+            onTap: cubit.toggleOpenNow,
           ),
           const HGap.sm(),
           for (final price in PriceRange.values) ...[
             _Chip(
               label: price.symbol,
               selected: query.priceRange == price,
-              onTap: () => cubit.setPriceRange(
-                query.priceRange == price ? null : price,
-              ),
+              onTap: () => cubit.togglePriceRange(price),
             ),
             const HGap.sm(),
           ],
-          _Chip(
-            label: l10n.allAreas,
-            selected: query.area == null,
-            onTap: () => cubit.setArea(null),
-          ),
-          for (final area in state.areas) ...[
-            const HGap.sm(),
+          for (final amenity in state.amenityOptions) ...[
             _Chip(
-              label: '${area.area} · ${area.count}',
-              selected: query.area == area.area,
-              onTap: () => cubit.setArea(area.area),
+              label: amenity.name,
+              selected: query.amenities.contains(amenity.key),
+              onTap: () => cubit.toggleAmenity(amenity.key),
             ),
+            const HGap.sm(),
+          ],
+          for (final area in state.areas) ...[
+            _Chip(
+              label: '${area.area} \u00b7 ${area.count}',
+              selected: query.area == area.area,
+              onTap: () => cubit.toggleArea(area.area),
+            ),
+            const HGap.sm(),
           ],
         ],
       ),
@@ -278,43 +306,81 @@ class _Chip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.icon,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final background =
+        selected ? AppColors.accent : theme.colorScheme.surfaceContainerHighest;
+    final ink = selected ? Colors.white : theme.colorScheme.onSurfaceVariant;
 
     return Center(
       child: Semantics(
         button: true,
         selected: selected,
-        child: Material(
-          color: selected
-              ? AppColors.accent
-              : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: AppRadius.pillR,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.sm,
-              ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: selected
-                      ? Colors.white
-                      : theme.colorScheme.onSurfaceVariant,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          // The colour crossfade tells you the tap landed before the new
+          // results arrive, which on a slow connection is most of a second.
+          child: AnimatedContainer(
+            duration: AppMotion.fast,
+            curve: AppMotion.standard,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: AppRadius.pillR,
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accent.withValues(alpha: 0.28),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : const [],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 14, color: ink),
+                  const HGap(5),
+                ],
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: ink,
+                  ),
                 ),
-              ),
+                // A tick that grows in rather than appearing, so a row of
+                // chips does not jump when one is selected.
+                ClipRect(
+                  child: AnimatedAlign(
+                    duration: AppMotion.fast,
+                    curve: AppMotion.standard,
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: selected && icon == null ? 1 : 0,
+                    child: const Padding(
+                      padding: EdgeInsetsDirectional.only(start: 5),
+                      child: Icon(Icons.check_rounded,
+                          size: 14, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

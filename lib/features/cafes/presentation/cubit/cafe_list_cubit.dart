@@ -15,6 +15,7 @@ class CafeListState extends Equatable {
     this.cafes = const [],
     this.query = const CafeQuery(),
     this.areas = const [],
+    this.amenityOptions = const [],
     this.nextCursor,
     this.hasMore = false,
     this.failure,
@@ -24,6 +25,10 @@ class CafeListState extends Equatable {
   final List<Cafe> cafes;
   final CafeQuery query;
   final List<AreaCount> areas;
+
+  /// Every amenity at least one café offers, most common first. Drives the
+  /// amenity chips in the filter bar.
+  final List<AmenityCount> amenityOptions;
   final String? nextCursor;
   final bool hasMore;
   final Failure? failure;
@@ -35,6 +40,7 @@ class CafeListState extends Equatable {
     List<Cafe>? cafes,
     CafeQuery? query,
     List<AreaCount>? areas,
+    List<AmenityCount>? amenityOptions,
     String? nextCursor,
     bool? hasMore,
     Failure? failure,
@@ -44,6 +50,7 @@ class CafeListState extends Equatable {
         cafes: cafes ?? this.cafes,
         query: query ?? this.query,
         areas: areas ?? this.areas,
+        amenityOptions: amenityOptions ?? this.amenityOptions,
         nextCursor: nextCursor,
         hasMore: hasMore ?? this.hasMore,
         failure: failure,
@@ -51,7 +58,7 @@ class CafeListState extends Equatable {
 
   @override
   List<Object?> get props =>
-      [status, cafes, query, areas, nextCursor, hasMore, failure];
+      [status, cafes, query, areas, amenityOptions, nextCursor, hasMore, failure];
 }
 
 class CafeListCubit extends Cubit<CafeListState> {
@@ -122,6 +129,26 @@ class CafeListCubit extends Cubit<CafeListState> {
   void setAmenities(List<String> amenities) =>
       load(query: state.query.copyWith(amenities: amenities, cursor: null));
 
+  /// Adds [key] if it is not applied, removes it if it is.
+  ///
+  /// Every chip in the filter bar is a toggle: the same tap that applies a
+  /// filter takes it off again. Before this, tapping an applied area chip did
+  /// nothing and the only way back was a separate "all areas" chip, which
+  /// people read as a seventh area rather than as "clear".
+  void toggleAmenity(String key) {
+    final next = [...state.query.amenities];
+    if (!next.remove(key)) next.add(key);
+    setAmenities(next);
+  }
+
+  void toggleArea(String area) =>
+      setArea(state.query.area == area ? null : area);
+
+  void togglePriceRange(PriceRange price) =>
+      setPriceRange(state.query.priceRange == price ? null : price);
+
+  void toggleOpenNow() => setOpenNow(state.query.openNow == true ? null : true);
+
   void setMinRating(double? rating) =>
       load(query: state.query.copyWith(minRating: rating, cursor: null));
 
@@ -133,9 +160,22 @@ class CafeListCubit extends Cubit<CafeListState> {
 
   void clearFilters() => load(query: const CafeQuery());
 
-  Future<void> loadAreas() async {
+  /// Loads the two lists the filter chips are built from, in one pass.
+  ///
+  /// Both are small, cacheable and independent of the current query, so they
+  /// are fetched once when the screen opens and never again.
+  Future<void> loadFilterOptions() async {
     try {
-      emit(state.copyWith(areas: await _repository.areas()));
+      final results = await Future.wait([
+        _repository.areas(),
+        _repository.amenities(),
+      ]);
+      if (isClosed) return;
+      emit(state.copyWith(
+        areas: results[0] as List<AreaCount>,
+        amenityOptions: results[1] as List<AmenityCount>,
+        nextCursor: state.nextCursor,
+      ));
     } on Failure {
       // Filter chips are a nicety; their absence must not break the listing.
     }

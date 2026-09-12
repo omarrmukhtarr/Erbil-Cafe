@@ -575,4 +575,48 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get preferences => 'التفضيلات';
+
+  @override
+  String get contactAndLinks => 'التواصل والروابط';
+
+  @override
+  String get website => 'الموقع الإلكتروني';
+
+  @override
+  String get whatsapp => 'واتساب';
+
+  @override
+  String get instagram => 'إنستغرام';
+
+  @override
+  String get address => 'العنوان';
+
+  @override
+  String seats(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مقعد',
+      one: 'مقعد واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewAllPhotos => 'عرض كل الصور';
+
+  @override
+  String photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count صور',
+      one: 'صورة واحدة',
+      zero: 'لا توجد صور',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapStyle => 'نمط الخريطة';
 }
