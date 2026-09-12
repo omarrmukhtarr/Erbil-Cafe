@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +15,7 @@ import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../cafes/data/repositories/cafe_repository.dart';
 import '../../data/models/reservation.dart';
 import '../../data/repositories/reservation_repository.dart';
+import '../../../notifications/data/push_service.dart';
 
 /// Book a table.
 ///
@@ -106,6 +109,15 @@ class _BookTableScreenState extends State<BookTableScreen> {
       );
 
       if (!mounted) return;
+
+      // The one moment where asking to send notifications explains itself:
+      // the café has to answer this booking, and the notification is how the
+      // answer arrives. iOS shows this dialog once per install, so spending it
+      // at cold start — on nothing in particular — wastes it for good.
+      unawaited(sl<PushService>().requestPermission().then((granted) {
+        if (granted) sl<PushService>().registerDevice();
+      }));
+
       await _showConfirmation(reservation);
     } on Failure catch (f) {
       if (!mounted) return;
