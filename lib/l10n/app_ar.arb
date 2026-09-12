@@ -219,5 +219,8 @@
   "seats": "{count, plural, =1{مقعد واحد} other{{count} مقعد}}",
   "viewAllPhotos": "عرض كل الصور",
   "photoCount": "{count, plural, =0{لا توجد صور} =1{صورة واحدة} other{{count} صور}}",
-  "mapStyle": "نمط الخريطة"
+  "mapStyle": "نمط الخريطة",
+  "deleteAccountExplain": "سيتم محو اسمك وبريدك الإلكتروني ورقم هاتفك. تُلغى حجوزاتك وتُزال المقاهي المحفوظة. أما تقييماتك فتبقى على صفحة المقهى باسم «مستخدم محذوف».",
+  "deleteAccountDone": "تم حذف حسابك.",
+  "deleteAccountAction": "احذف حسابي"
 }
