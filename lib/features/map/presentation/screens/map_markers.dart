@@ -13,29 +13,50 @@ import '../../../../app/theme/app_colors.dart';
 abstract final class MapMarkers {
   static final _cache = <String, BitmapDescriptor>{};
 
-  /// A café pin. [open] tints the dot so open cafés stand out at a glance.
+  /// The glyph inside every pin.
+  ///
+  /// The same cup the Home tab uses, so a pin on the map and the tab that
+  /// leads to cafés are recognisably the same thing. Drawn from the bundled
+  /// MaterialIcons font rather than an asset: it is already in the binary, it
+  /// is a vector at any pixel ratio, and it cannot fall out of sync with the
+  /// tab bar.
+  static const _cupGlyph = Icons.coffee_rounded;
+
+  /// A café pin, [selected] when it is the one whose card is open.
+  ///
+  /// [open] tints the cup and its ring, so which cafés are serving right now
+  /// is readable without tapping anything.
   static Future<BitmapDescriptor> pin({
     required bool open,
+    required bool selected,
     required double devicePixelRatio,
   }) {
-    return _cached('pin-$open-$devicePixelRatio', () async {
-      const width = 34.0;
-      const height = 46.0;
+    return _cached('pin-$open-$selected-$devicePixelRatio', () async {
+      // The selected pin is drawn half again as large. At 300 pins a selected
+      // one that is merely a different colour is genuinely hard to find again
+      // after panning.
+      final width = selected ? 46.0 : 36.0;
+      final height = selected ? 60.0 : 48.0;
 
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
       final scale = devicePixelRatio;
       canvas.scale(scale);
 
-      final body = Paint()..color = AppColors.cardDark;
+      // Selected inverts the fill so the cup reads as lit rather than outlined.
+      final bodyColour = selected ? AppColors.accent : AppColors.cardDark;
+      final accentColour = open ? AppColors.accent : AppColors.onCardDisabled;
+      final glyphColour = selected ? Colors.white : accentColour;
+
+      final body = Paint()..color = bodyColour;
       final ring = Paint()
-        ..color = open ? AppColors.accent : AppColors.onCardDisabled
+        ..color = selected ? AppColors.cream : accentColour
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5;
+        ..strokeWidth = selected ? 3 : 2.5;
 
       // Teardrop: a circle with a tail down to the anchor point.
-      const centre = Offset(width / 2, width / 2);
-      const radius = width / 2 - 2;
+      final centre = Offset(width / 2, width / 2);
+      final radius = width / 2 - 2;
 
       final tail = Path()
         ..moveTo(width / 2 - 7, width / 2 + 8)
@@ -52,11 +73,46 @@ abstract final class MapMarkers {
         )
         ..drawPath(tail, body)
         ..drawCircle(centre, radius, body)
-        ..drawCircle(centre, radius, ring)
-        ..drawCircle(centre, 5, Paint()..color = AppColors.cream);
+        ..drawCircle(centre, radius, ring);
+
+      _drawGlyph(
+        canvas,
+        glyph: _cupGlyph,
+        centre: centre,
+        size: radius * 1.15,
+        colour: glyphColour,
+      );
 
       return _toBitmap(recorder, width, height, scale);
     });
+  }
+
+  /// Paints an icon glyph centred on [centre].
+  static void _drawGlyph(
+    Canvas canvas, {
+    required IconData glyph,
+    required Offset centre,
+    required double size,
+    required Color colour,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(glyph.codePoint),
+        style: TextStyle(
+          fontSize: size,
+          fontFamily: glyph.fontFamily,
+          package: glyph.fontPackage,
+          color: colour,
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    painter.paint(
+      canvas,
+      Offset(centre.dx - painter.width / 2, centre.dy - painter.height / 2),
+    );
   }
 
   /// A cluster bubble whose size and shade grow with the count, so density is
