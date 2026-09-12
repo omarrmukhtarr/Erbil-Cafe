@@ -8,6 +8,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/error/failure.dart';
 import '../../../auth/data/models/user.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 
@@ -78,6 +79,14 @@ class ProfileScreen extends StatelessWidget {
                     style: const TextStyle(color: AppColors.error),
                   ),
                 ),
+
+                // Closing the account has to be reachable from inside the app,
+                // not only by writing to support: Apple rejects an app that
+                // creates accounts and offers no way out of one, and Google
+                // asks for the same. It sits below signing out and reads as
+                // the quieter of the two, because it is the rarer one.
+                const Gap.lg(),
+                const _DeleteAccountButton(),
               ],
             ],
           );
@@ -446,6 +455,89 @@ class _Options<T> extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// "Delete my account", and the confirmation that has to precede it.
+///
+/// The dialog says what actually happens rather than only warning that it
+/// cannot be undone — the surprising part is not that it is permanent, it is
+/// that reviews stay on the café under "Deleted user" and bookings are
+/// cancelled. Someone deleting an account over a booking they want gone
+/// deserves to know that before, not after.
+class _DeleteAccountButton extends StatefulWidget {
+  const _DeleteAccountButton();
+
+  @override
+  State<_DeleteAccountButton> createState() => _DeleteAccountButtonState();
+}
+
+class _DeleteAccountButtonState extends State<_DeleteAccountButton> {
+  bool _busy = false;
+
+  Future<void> _confirmAndDelete() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    final cubit = context.read<AuthCubit>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteAccountConfirm),
+        content: Text(l10n.deleteAccountExplain),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      await cubit.deleteAccount();
+      if (!mounted) return;
+
+      // Back to the home tab: every screen behind this one belonged to an
+      // account that no longer exists.
+      router.go(Routes.home);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.deleteAccountDone)));
+    } on Failure catch (f) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      messenger.showSnackBar(SnackBar(content: Text(f.message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return TextButton.icon(
+      onPressed: _busy ? null : _confirmAndDelete,
+      icon: _busy
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: AppColors.error),
+            )
+          : const Icon(Icons.person_remove_outlined,
+              size: 18, color: AppColors.error),
+      label: Text(
+        l10n.deleteAccountAction,
+        style: const TextStyle(color: AppColors.error),
+      ),
     );
   }
 }
