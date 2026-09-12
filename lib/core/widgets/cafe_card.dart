@@ -166,7 +166,12 @@ class _Photo extends StatelessWidget {
       children: [
         Hero(
           tag: 'cafe-image-${cafe.id}',
-          child: _CafeImage(url: cafe.coverImage, name: cafe.name),
+          child: _CafeImage(
+            // The thumbnail where there is one: a card is a few hundred
+            // points wide, and the full-size cover decodes to ~7 MB.
+            url: cafe.coverThumb ?? cafe.coverImage,
+            name: cafe.name,
+          ),
         ),
 
         // Scrim so the chips stay legible over a bright photo.
@@ -290,9 +295,17 @@ class _CafeImage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (url == null) return _NoPhoto(name: name, reason: _NoPhotoReason.missing);
 
+    // Decode at roughly the size it is drawn at, whatever the source turns
+    // out to be. Without this a café whose cover has no thumbnail — an
+    // outside URL, or a gallery that was reordered before the API started
+    // matching covers to renditions — quietly costs twelve times the memory
+    // of one that has.
+    final ratio = MediaQuery.devicePixelRatioOf(context);
+
     return CachedNetworkImage(
       imageUrl: url!,
       fit: BoxFit.cover,
+      memCacheWidth: (600 * ratio).round(),
       fadeInDuration: const Duration(milliseconds: 200),
       // A flat fill rather than a spinner — a grid of spinners is noisy.
       placeholder: (context, _) =>
