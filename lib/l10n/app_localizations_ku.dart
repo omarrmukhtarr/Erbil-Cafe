@@ -620,4 +620,14 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get mapStyle => 'شێوازی نەخشە';
+
+  @override
+  String get deleteAccountExplain =>
+      'ناو، ئیمەیڵ و ژمارەی مۆبایلەکەت دەسڕدرێنەوە. جێگەگرتنەکانت هەڵدەوەشێنرێنەوە و کافێ پاشەکەوتکراوەکانت لادەبرێن. ئەو پێداچوونەوانەی نووسیوتنە لەسەر کافێکە دەمێننەوە، بە ناوی «بەکارهێنەری سڕدراوە».';
+
+  @override
+  String get deleteAccountDone => 'هەژمارەکەت سڕدرایەوە.';
+
+  @override
+  String get deleteAccountAction => 'هەژمارەکەم بسڕەوە';
 }

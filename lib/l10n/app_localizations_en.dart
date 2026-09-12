@@ -621,4 +621,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapStyle => 'Map style';
+
+  @override
+  String get deleteAccountExplain =>
+      'Your name, email and phone number are erased. Your bookings are cancelled and your saved cafés are removed. Reviews you have written stay on the café, shown as “Deleted user”.';
+
+  @override
+  String get deleteAccountDone => 'Your account has been deleted.';
+
+  @override
+  String get deleteAccountAction => 'Delete my account';
 }

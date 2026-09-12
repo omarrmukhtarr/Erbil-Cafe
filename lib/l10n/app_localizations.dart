@@ -1209,6 +1209,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Map style'**
   String get mapStyle;
+
+  /// No description provided for @deleteAccountExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name, email and phone number are erased. Your bookings are cancelled and your saved cafés are removed. Reviews you have written stay on the café, shown as “Deleted user”.'**
+  String get deleteAccountExplain;
+
+  /// No description provided for @deleteAccountDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted.'**
+  String get deleteAccountDone;
+
+  /// No description provided for @deleteAccountAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteAccountAction;
 }
 
 class _AppLocalizationsDelegate

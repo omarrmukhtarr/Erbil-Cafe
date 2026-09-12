@@ -619,4 +619,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mapStyle => 'نمط الخريطة';
+
+  @override
+  String get deleteAccountExplain =>
+      'سيتم محو اسمك وبريدك الإلكتروني ورقم هاتفك. تُلغى حجوزاتك وتُزال المقاهي المحفوظة. أما تقييماتك فتبقى على صفحة المقهى باسم «مستخدم محذوف».';
+
+  @override
+  String get deleteAccountDone => 'تم حذف حسابك.';
+
+  @override
+  String get deleteAccountAction => 'احذف حسابي';
 }
