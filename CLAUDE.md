@@ -54,6 +54,19 @@ conventions that are easy to violate by accident.
   `ku` locale, and `MaterialApp` drops a locale unless *every* delegate supports
   it — that is why `ku` was previously unselectable. Those delegates serve
   Flutter's own strings from Arabic.
+- **Firebase is optional and must stay that way.** `PushService.init` catches
+  everything `Firebase.initializeApp` can throw — a missing
+  `google-services.json`, a plist from another project — because "no
+  notifications" must never become "no app". The simulator currently logs
+  `No app has been configured yet` and runs fine; that is the design.
+- **Notification permission is asked for after a booking, never at launch.**
+  iOS shows that dialog once per install. Spending it on first run, before the
+  user has anything to be notified about, spends it for good.
+- **`tool/check_secrets.sh` scans tracked files and history for API keys.** It
+  scans `git ls-files`, not the working tree: `Secrets.xcconfig` and
+  `local.properties` are git-ignored and are *meant* to hold a key locally, and
+  a check that cries wolf gets switched off. Four keys are already in the
+  public history — see `docs/KEY-ROTATION.md`; only revoking fixes that.
 - **The map must not be entered without an API key.** A missing key makes
   `GMSServices.provideAPIKey` never run and the crash is native and uncatchable.
   `core/platform/platform_config.dart` checks over a MethodChannel and the screen
