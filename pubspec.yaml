@@ -59,6 +59,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   # Native iOS 26 Liquid Glass widgets (trial)
   cupertino_native_better: ^1.6.0
+  sentry_flutter: ^8.14.2
 
 dev_dependencies:
   flutter_test:
