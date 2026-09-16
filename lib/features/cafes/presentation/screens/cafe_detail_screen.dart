@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,11 +16,11 @@ import '../../../../core/utils/auth_guard.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
+import '../../../../core/widgets/cafe_card.dart';
 import '../../../../core/widgets/photo_viewer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../favorites/data/favorites_repository.dart';
-import '../../../menu/data/repositories/menu_repository.dart';
+import '../../../favorites/presentation/toggle_favorite.dart';
 import '../../../reviews/data/models/review.dart';
 import '../../../reviews/data/repositories/review_repository.dart';
 import '../../data/models/cafe.dart';
@@ -30,10 +31,19 @@ import '../cubit/cafe_detail_cubit.dart';
 ///
 /// v1 had three of these — Barbera, Alreef and Nazdar — as separate files with
 /// their content hardcoded. One screen now serves every café.
+///
+/// Opened from a card, the page draws on the first frame from the card's own
+/// copy of the café ([preview]) and fills in gallery, contact details, hours
+/// and reviews as they arrive, each section fading in where a placeholder of
+/// the same shape stood. Opened from a link or a notification, there is no
+/// card, and the whole page starts as a placeholder instead.
 class CafeDetailScreen extends StatefulWidget {
-  const CafeDetailScreen({required this.slug, super.key});
+  const CafeDetailScreen({required this.slug, this.preview, super.key});
 
   final String slug;
+
+  /// The café as the card that opened this page knew it, if any.
+  final Cafe? preview;
 
   @override
   State<CafeDetailScreen> createState() => _CafeDetailScreenState();
@@ -45,13 +55,19 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
   /// Height of the pinned booking bar, so content can clear it.
   static const _ctaHeight = 96.0;
 
+  /// The rating the user just tapped, shown before the server confirms it.
+  ///
+  /// Stars used to stay empty until the request returned and the reviews had
+  /// been re-read — two round trips during which the tap looked ignored.
+  int? _pendingRating;
+
   @override
   void initState() {
     super.initState();
     _cubit = CafeDetailCubit(
       cafes: sl<CafeRepository>(),
-      menus: sl<MenuRepository>(),
       reviews: sl<ReviewRepository>(),
+      preview: widget.preview,
     )..load(widget.slug);
   }
 
@@ -81,6 +97,9 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
+    HapticFeedback.selectionClick();
+    setState(() => _pendingRating = stars);
+
     try {
       final review = mine == null
           ? await sl<ReviewRepository>().create(cafeId, rating: stars)
@@ -92,6 +111,7 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
       if (!mounted) return;
       await _cubit.reloadReviews();
       if (!mounted) return;
+      setState(() => _pendingRating = null);
 
       messenger.showSnackBar(
         SnackBar(
@@ -109,6 +129,8 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
       );
     } on Failure catch (f) {
       if (!mounted) return;
+      // The stars go back to what the server has.
+      setState(() => _pendingRating = null);
       messenger.showSnackBar(SnackBar(content: Text(f.message)));
     }
   }
@@ -170,13 +192,10 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
       body: BlocBuilder<CafeDetailCubit, CafeDetailState>(
         bloc: _cubit,
         builder: (context, state) {
-          if (state.status == DetailStatus.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.accent),
-            );
-          }
+          final cafe = state.cafe;
+          final detail = state.detail;
 
-          if (state.status == DetailStatus.failure) {
+          if (cafe == null && state.status == DetailStatus.failure) {
             return SafeArea(
               child: Column(
                 children: [
@@ -198,8 +217,12 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
             );
           }
 
-          final detail = state.detail!;
-          final cafe = detail.cafe;
+          // Opened from a link: nothing to draw yet but the page's shape.
+          if (cafe == null) {
+            return _PageSkeleton(onBack: () => context.pop());
+          }
+
+          final myReview = _myReview(state);
 
           return CustomScrollView(
             slivers: [
@@ -226,15 +249,9 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                         : Icons.favorite_border,
                     color: cafe.isFavorited ? AppColors.accent : Colors.white,
                     semanticLabel: l10n.favorites,
-                    onTap: () => requireAuth(
-                      context,
-                      reason: l10n.signInToFavorite,
-                      action: () async {
-                        final result =
-                            await sl<FavoritesRepository>().toggle(cafe.id);
-                        _cubit.applyFavorite(isFavorited: result);
-                      },
-                    ),
+                    // Saving works from the card's copy too; the page does not
+                    // have to finish loading before the heart does anything.
+                    onTap: () => toggleFavorite(context, cafe),
                   ),
                   const HGap.sm(),
                 ],
@@ -246,6 +263,10 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                         kToolbarHeight + MediaQuery.paddingOf(context).top + 8;
 
                     return FlexibleSpaceBar(
+                      stretchModes: const [
+                        StretchMode.zoomBackground,
+                        StretchMode.fadeTitle,
+                      ],
                       titlePadding: const EdgeInsetsDirectional.only(
                         start: 60,
                         end: 60,
@@ -263,12 +284,17 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                       ),
                       background: _HeaderImage(
                         url: cafe.coverImage ??
-                            (detail.images.isEmpty
+                            (detail == null || detail.images.isEmpty
                                 ? null
                                 : detail.images.first.url),
+                        // What the card was showing. Already decoded, so the
+                        // flight and the first frames have a real photo.
+                        thumbUrl: CafeCard.thumbUrl(cafe),
                         id: cafe.id,
-                        photoCount: _photosOf(detail).length,
-                        onTap: () => _openPhotos(detail, 0),
+                        photoCount: detail == null ? 0 : _photosOf(detail).length,
+                        onTap: detail == null
+                            ? null
+                            : () => _openPhotos(detail, 0),
                         viewAllLabel: l10n.viewAllPhotos,
                       ),
                     );
@@ -288,86 +314,95 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                   children: [
                     _TitleBlock(cafe: cafe, l10n: l10n),
 
-                    if (cafe.description.isNotEmpty) ...[
-                      const Gap.lg(),
-                      Text(cafe.description, style: theme.textTheme.bodyLarge),
-                    ],
-
-                    const Gap.xxl(),
-                    _QuickActions(
-                      phone: detail.phone,
-                      onCall: () => _open('tel:${detail.phone}'),
-                      onDirections: () => _open(
-                        'https://www.google.com/maps/dir/?api=1'
-                        '&destination=${cafe.lat},${cafe.lng}',
-                      ),
-                      onMenu: () => context.push(Routes.menu(widget.slug)),
-                      l10n: l10n,
+                    // A preview from the map carries no description; when the
+                    // detail brings one it opens up rather than shoving the
+                    // page down between two frames.
+                    AnimatedSize(
+                      duration: AppMotion.medium,
+                      curve: AppMotion.standard,
+                      alignment: AlignmentDirectional.topStart,
+                      child: cafe.description.isEmpty
+                          ? const SizedBox(width: double.infinity)
+                          : Padding(
+                              padding: const EdgeInsets.only(top: AppSpacing.lg),
+                              child: Text(
+                                cafe.description,
+                                style: theme.textTheme.bodyLarge,
+                              ),
+                            ),
                     ),
 
-                    if (cafe.amenities.isNotEmpty) ...[
-                      const Gap.section(),
-                      _Heading(l10n.amenities),
-                      const Gap.md(),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: [
-                          for (final amenity in cafe.amenities)
-                            _AmenityChip(label: amenity.name),
-                        ],
-                      ),
-                    ],
-
-                    if (detail.images.isNotEmpty) ...[
-                      const Gap.section(),
-                      Row(
-                        children: [
-                          Expanded(child: _Heading(l10n.gallery)),
-                          Text(
-                            l10n.photoCount(detail.images.length),
-                            style: theme.textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                      const Gap.md(),
-                      // 260×180 rather than 150×128. A café photo at 150pt
-                      // wide shows a wall and a corner of a table; at 260 it
-                      // shows the room, which is what the tap is deciding on.
-                      SizedBox(
-                        height: 180,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          clipBehavior: Clip.none,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: detail.images.length,
-                          separatorBuilder: (_, __) => const HGap.md(),
-                          itemBuilder: (context, index) => _GalleryTile(
-                            image: detail.images[index],
-                            heroTag: 'cafe-photo-${cafe.id}-$index',
-                            onTap: () => _openPhotos(detail, index),
-                          ),
+                    const Gap.xxl(),
+                    // The call tile needs the phone number, which only the
+                    // full detail carries; it slides in rather than pushing
+                    // its neighbours sideways between two frames.
+                    AnimatedSize(
+                      duration: AppMotion.medium,
+                      curve: AppMotion.standard,
+                      alignment: AlignmentDirectional.topStart,
+                      child: _QuickActions(
+                        phone: detail?.phone,
+                        onCall: () => _open('tel:${detail?.phone}'),
+                        onDirections: () => _open(
+                          'https://www.google.com/maps/dir/?api=1'
+                          '&destination=${cafe.lat},${cafe.lng}',
                         ),
-                      ),
-                    ],
-
-                    if (_hasContactDetails(detail)) ...[
-                      const Gap.section(),
-                      _Heading(l10n.contactAndLinks),
-                      const Gap.md(),
-                      _ContactCard(
-                        detail: detail,
+                        onMenu: () => context.push(Routes.menu(widget.slug)),
                         l10n: l10n,
-                        onOpen: _open,
                       ),
-                    ],
+                    ),
 
-                    if (detail.openingHours.isNotEmpty) ...[
-                      const Gap.section(),
-                      _Heading(l10n.openingHours),
-                      const Gap.md(),
-                      _OpeningHours(hours: detail.openingHours),
-                    ],
+                    AnimatedSize(
+                      duration: AppMotion.medium,
+                      curve: AppMotion.standard,
+                      alignment: AlignmentDirectional.topStart,
+                      child: cafe.amenities.isEmpty
+                          ? const SizedBox(width: double.infinity)
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Gap.section(),
+                                _Heading(l10n.amenities),
+                                const Gap.md(),
+                                Wrap(
+                                  spacing: AppSpacing.sm,
+                                  runSpacing: AppSpacing.sm,
+                                  children: [
+                                    for (final amenity in cafe.amenities)
+                                      _AmenityChip(label: amenity.name),
+                                  ],
+                                ),
+                              ],
+                            ),
+                    ),
+
+                    // Everything below needs the full detail. Until it lands a
+                    // placeholder holds the space, and the real sections fade
+                    // up into it rather than appearing between two frames.
+                    FadeSwitcher(
+                      child: detail != null
+                          ? _DetailSections(
+                              key: const ValueKey('detail'),
+                              detail: detail,
+                              l10n: l10n,
+                              onOpenPhoto: (index) =>
+                                  _openPhotos(detail, index),
+                              onOpen: _open,
+                            )
+                          : state.status == DetailStatus.failure
+                              ? Padding(
+                                  key: const ValueKey('failed'),
+                                  padding: const EdgeInsets.only(
+                                      top: AppSpacing.section),
+                                  child: ErrorView(
+                                    failure: state.failure!,
+                                    onRetry: () => _cubit.load(widget.slug),
+                                  ),
+                                )
+                              : const _SectionsSkeleton(
+                                  key: ValueKey('loading'),
+                                ),
+                    ),
 
                     // ─── Reviews ─────────────────────────────────
                     const Gap.section(),
@@ -391,37 +426,45 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
 
                     const Gap.sm(),
                     _QuickRate(
-                      myRating: _myReview(state)?.rating ?? 0,
+                      myRating: _pendingRating ?? myReview?.rating ?? 0,
                       onRate: (stars) => requireAuth(
                         context,
                         reason: l10n.signInToReview,
-                        action: () => _rate(
-                          stars,
-                          detail.cafe.id,
-                          _myReview(state),
-                        ),
+                        action: () => _rate(stars, cafe.id, myReview),
                       ),
                     ),
 
-                    if (state.summary.total > 0) ...[
-                      const Gap.md(),
-                      _RatingBreakdown(summary: state.summary),
-                    ],
-
-                    const Gap.lg(),
-
-                    if (state.reviews.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.xxl),
-                        child: Center(
-                          child: Text(l10n.noReviewsYet,
-                              style: theme.textTheme.bodySmall),
-                        ),
-                      )
-                    else
-                      for (final review in state.reviews.take(5))
-                        _ReviewTile(review: review),
+                    FadeSwitcher(
+                      child: !state.reviewsLoaded
+                          ? const _ReviewsSkeleton(key: ValueKey('loading'))
+                          : Column(
+                              key: const ValueKey('reviews'),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (state.summary.total > 0) ...[
+                                  const Gap.md(),
+                                  _RatingBreakdown(summary: state.summary),
+                                ],
+                                const Gap.lg(),
+                                if (state.reviews.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: AppSpacing.xxl),
+                                    child: Center(
+                                      child: Text(l10n.noReviewsYet,
+                                          style: theme.textTheme.bodySmall),
+                                    ),
+                                  )
+                                else
+                                  for (final (index, review)
+                                      in state.reviews.take(5).indexed)
+                                    FadeSlideIn(
+                                      index: index,
+                                      child: _ReviewTile(review: review),
+                                    ),
+                              ],
+                            ),
+                    ),
                   ],
                 ),
               ),
@@ -433,38 +476,43 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
       // The booking CTA v1 rendered as "Service Not Availabe For Now".
       bottomNavigationBar: BlocBuilder<CafeDetailCubit, CafeDetailState>(
         bloc: _cubit,
+        buildWhen: (previous, current) =>
+            (previous.cafe == null) != (current.cafe == null),
         builder: (context, state) {
-          if (state.detail == null) return const SizedBox.shrink();
+          if (state.cafe == null) return const SizedBox.shrink();
 
-          return Container(
-            // A solid strip so the CTA never sits on top of scrolling text.
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow.withValues(alpha: 0.12),
-                  blurRadius: 16,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.page,
-                  AppSpacing.md,
-                  AppSpacing.page,
-                  AppSpacing.md,
-                ),
-                child: ElevatedButton.icon(
-                  onPressed: () => requireAuth(
-                    context,
-                    reason: l10n.signInToBook,
-                    action: () async => context.push(Routes.book(widget.slug)),
+          return FadeSlideIn(
+            offset: 24,
+            child: Container(
+              // A solid strip so the CTA never sits on top of scrolling text.
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadow.withValues(alpha: 0.12),
+                    blurRadius: 16,
+                    offset: const Offset(0, -4),
                   ),
-                  icon: const Icon(Icons.event_seat_outlined, size: 20),
-                  label: Text(l10n.bookTable),
+                ],
+              ),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.page,
+                    AppSpacing.md,
+                    AppSpacing.page,
+                    AppSpacing.md,
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: () => requireAuth(
+                      context,
+                      reason: l10n.signInToBook,
+                      action: () async => context.push(Routes.book(widget.slug)),
+                    ),
+                    icon: const Icon(Icons.event_seat_outlined, size: 20),
+                    label: Text(l10n.bookTable),
+                  ),
                 ),
               ),
             ),
@@ -475,9 +523,185 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
   }
 }
 
+/// Gallery, contact card and opening hours — the sections only the full
+/// detail can fill.
+class _DetailSections extends StatelessWidget {
+  const _DetailSections({
+    required this.detail,
+    required this.l10n,
+    required this.onOpenPhoto,
+    required this.onOpen,
+    super.key,
+  });
+
+  final CafeDetail detail;
+  final AppLocalizations l10n;
+  final void Function(int index) onOpenPhoto;
+  final void Function(String url) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cafe = detail.cafe;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (detail.images.isNotEmpty) ...[
+          const Gap.section(),
+          Row(
+            children: [
+              Expanded(child: _Heading(l10n.gallery)),
+              Text(
+                l10n.photoCount(detail.images.length),
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
+          const Gap.md(),
+          // 260×180 rather than 150×128. A café photo at 150pt wide shows a
+          // wall and a corner of a table; at 260 it shows the room, which is
+          // what the tap is deciding on.
+          SizedBox(
+            height: 180,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              physics: const BouncingScrollPhysics(),
+              itemCount: detail.images.length,
+              separatorBuilder: (_, __) => const HGap.md(),
+              itemBuilder: (context, index) => FadeSlideIn(
+                index: index < 4 ? index : 0,
+                offset: 0,
+                child: _GalleryTile(
+                  image: detail.images[index],
+                  heroTag: 'cafe-photo-${cafe.id}-$index',
+                  onTap: () => onOpenPhoto(index),
+                ),
+              ),
+            ),
+          ),
+        ],
+
+        if (_CafeDetailScreenState._hasContactDetails(detail)) ...[
+          const Gap.section(),
+          _Heading(l10n.contactAndLinks),
+          const Gap.md(),
+          _ContactCard(detail: detail, l10n: l10n, onOpen: onOpen),
+        ],
+
+        if (detail.openingHours.isNotEmpty) ...[
+          const Gap.section(),
+          _Heading(l10n.openingHours),
+          const Gap.md(),
+          _OpeningHours(hours: detail.openingHours),
+        ],
+      ],
+    );
+  }
+}
+
+/// Stands where the gallery and contact card will be.
+class _SectionsSkeleton extends StatelessWidget {
+  const _SectionsSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SkeletonGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Gap.section(),
+          AppSkeleton(height: 20, width: 120),
+          Gap.md(),
+          Row(
+            children: [
+              Expanded(child: AppSkeleton(height: 180, radius: AppRadius.card)),
+              HGap.md(),
+              SizedBox(
+                width: 60,
+                child: AppSkeleton(height: 180, radius: AppRadius.card),
+              ),
+            ],
+          ),
+          Gap.section(),
+          AppSkeleton(height: 20, width: 150),
+          Gap.md(),
+          AppSkeleton(height: 120, radius: AppRadius.card),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewsSkeleton extends StatelessWidget {
+  const _ReviewsSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SkeletonGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Gap.lg(),
+          AppSkeleton(height: 96, radius: AppRadius.card),
+          Gap.md(),
+          AppSkeleton(height: 96, radius: AppRadius.card),
+        ],
+      ),
+    );
+  }
+}
+
+/// The whole page's shape, for a café opened without a card to draw from.
+class _PageSkeleton extends StatelessWidget {
+  const _PageSkeleton({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return Stack(
+      children: [
+        const SkeletonGroup(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppSkeleton(height: 380, radius: 0),
+              Padding(
+                padding: EdgeInsets.all(AppSpacing.page),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppSkeleton(height: 30, width: 220),
+                    Gap.md(),
+                    AppSkeleton(height: 14, width: 160),
+                    Gap.xxl(),
+                    AppSkeleton(height: 72, radius: AppRadius.card),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        SafeArea(
+          child: _CircleButton(
+            icon: Icons.arrow_back,
+            onTap: onBack,
+            semanticLabel: l10n.close,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _HeaderImage extends StatelessWidget {
   const _HeaderImage({
     required this.url,
+    required this.thumbUrl,
     required this.id,
     required this.photoCount,
     required this.onTap,
@@ -485,9 +709,12 @@ class _HeaderImage extends StatelessWidget {
   });
 
   final String? url;
+
+  /// The card's image, shown until the full-size cover has loaded.
+  final String? thumbUrl;
   final String id;
   final int photoCount;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final String viewAllLabel;
 
   @override
@@ -508,9 +735,25 @@ class _HeaderImage extends StatelessWidget {
                 : CachedNetworkImage(
                     imageUrl: url!,
                     fit: BoxFit.cover,
-                    fadeInDuration: AppMotion.fast,
-                    placeholder: (context, _) =>
-                        const ColoredBox(color: AppColors.cardDarkAlt),
+                    fadeInDuration: AppMotion.medium,
+                    // Full width of the phone, not the 1600px the cover can be.
+                    memCacheWidth: (MediaQuery.sizeOf(context).width *
+                            MediaQuery.devicePixelRatioOf(context))
+                        .round(),
+                    // The thumbnail the card already decoded, so the header is
+                    // a photo from the first frame and sharpens when the cover
+                    // arrives — instead of a dark box that pops.
+                    placeholder: (context, _) => thumbUrl == null ||
+                            thumbUrl == url
+                        ? const ColoredBox(color: AppColors.cardDarkAlt)
+                        : CachedNetworkImage(
+                            imageUrl: thumbUrl!,
+                            fit: BoxFit.cover,
+                            memCacheWidth: CafeCard.thumbCacheWidth(context),
+                            fadeInDuration: Duration.zero,
+                            placeholder: (context, _) =>
+                                const ColoredBox(color: AppColors.cardDarkAlt),
+                          ),
                     errorWidget: (context, _, __) =>
                         const ColoredBox(color: AppColors.cardDarkAlt),
                   ),
@@ -570,31 +813,35 @@ class _GalleryTile extends StatelessWidget {
   final String heroTag;
   final VoidCallback onTap;
 
-  static const _width = 260.0;
-
   @override
   Widget build(BuildContext context) {
+    // The same decode width the viewer asks for, so the flight and the
+    // viewer's placeholder both reuse this bitmap instead of decoding again.
+    final cacheWidth = PhotoViewer.thumbCacheWidth(context);
+
     return PressableScale(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: AppRadius.cardR,
         child: SizedBox(
-          width: _width,
+          width: PhotoViewer.thumbWidth,
           child: Hero(
             tag: heroTag,
             // The thumbnail is cropped and the full-screen photo is not, so
             // the flight has to interpolate between two different shapes.
             // Without this the image snaps to its uncropped aspect ratio on
             // the first frame of the flight.
-            flightShuttleBuilder: (_, animation, __, ___, ____) => CachedNetworkImage(
+            flightShuttleBuilder: (_, animation, __, ___, ____) =>
+                CachedNetworkImage(
               imageUrl: image.thumbUrl ?? image.url,
               fit: BoxFit.cover,
+              memCacheWidth: cacheWidth,
+              fadeInDuration: Duration.zero,
             ),
             child: CachedNetworkImage(
               imageUrl: image.thumbUrl ?? image.url,
               fit: BoxFit.cover,
-              memCacheWidth:
-                  (_width * MediaQuery.devicePixelRatioOf(context)).round(),
+              memCacheWidth: cacheWidth,
               fadeInDuration: AppMotion.fast,
               placeholder: (context, _) =>
                   const ColoredBox(color: AppColors.creamSunken),
@@ -1093,14 +1340,20 @@ class _QuickRate extends StatelessWidget {
                 radius: 18,
                 child: Padding(
                   padding: const EdgeInsets.all(2),
-                  child: Icon(
-                    stars <= myRating
-                        ? Icons.star_rounded
-                        : Icons.star_border_rounded,
-                    size: 26,
-                    color: stars <= myRating
-                        ? AppColors.accent
-                        : AppColors.onCardDisabled,
+                  child: SizedBox.square(
+                    dimension: 26,
+                    child: PopSwitcher(
+                      child: Icon(
+                        stars <= myRating
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        key: ValueKey(stars <= myRating),
+                        size: 26,
+                        color: stars <= myRating
+                            ? AppColors.accent
+                            : AppColors.onCardDisabled,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1153,12 +1406,20 @@ class _RatingBreakdown extends StatelessWidget {
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(999),
-                            child: LinearProgressIndicator(
-                              value: summary.fraction(stars),
-                              minHeight: 7,
-                              backgroundColor: AppColors.creamSunken,
-                              valueColor: const AlwaysStoppedAnimation(
-                                  AppColors.accent),
+                            // The bars fill from empty, and slide to their new
+                            // length when a rating changes them.
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(end: summary.fraction(stars)),
+                              duration: AppMotion.slow,
+                              curve: AppMotion.standard,
+                              builder: (context, value, _) =>
+                                  LinearProgressIndicator(
+                                value: value,
+                                minHeight: 7,
+                                backgroundColor: AppColors.creamSunken,
+                                valueColor: const AlwaysStoppedAnimation(
+                                    AppColors.accent),
+                              ),
                             ),
                           ),
                         ),
@@ -1321,7 +1582,9 @@ class _CircleButton extends StatelessWidget {
             child: SizedBox(
               width: 40,
               height: 40,
-              child: Icon(icon, color: color, size: 20),
+              child: PopSwitcher(
+                child: Icon(icon, key: ValueKey(icon), color: color, size: 20),
+              ),
             ),
           ),
         ),

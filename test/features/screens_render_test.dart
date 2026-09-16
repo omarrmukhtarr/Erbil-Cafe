@@ -281,6 +281,8 @@ void main() {
         (tester) async {
       final cubit = sl<AuthCubit>();
       when(() => auth.hasSession).thenAnswer((_) async => true);
+      // No profile saved on the device, so restoring waits for the API.
+      when(() => auth.cachedUser()).thenAnswer((_) async => null);
       when(() => auth.me()).thenAnswer(
         (_) async => const AppUser(
           id: 'u1',

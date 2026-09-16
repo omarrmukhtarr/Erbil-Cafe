@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/error/failure.dart';
+import '../../../favorites/data/favorite_sync.dart';
 import '../../data/models/cafe.dart';
 import '../../data/repositories/cafe_repository.dart';
 
@@ -35,6 +36,16 @@ class CafeListState extends Equatable {
 
   bool get isEmpty => status == ListStatus.success && cafes.isEmpty;
 
+  /// Loading with nothing on screen yet — the only time a skeleton is right.
+  ///
+  /// A filter change or a pull-to-refresh used to blank the list back to
+  /// skeletons, which read as the app starting over. The old results now stay
+  /// put (dimmed) until the new ones land.
+  bool get isFirstLoad => status == ListStatus.loading && cafes.isEmpty;
+
+  /// Loading while the previous results are still showing.
+  bool get isReloading => status == ListStatus.loading && cafes.isNotEmpty;
+
   CafeListState copyWith({
     ListStatus? status,
     List<Cafe>? cafes,
@@ -62,10 +73,20 @@ class CafeListState extends Equatable {
 }
 
 class CafeListCubit extends Cubit<CafeListState> {
-  CafeListCubit(this._repository) : super(const CafeListState());
+  CafeListCubit(this._repository) : super(const CafeListState()) {
+    _favorites = FavoriteSync.instance.changes.listen(
+      (change) => applyFavorite(change.cafeId, isFavorited: change.isFavorited),
+    );
+  }
 
   final CafeRepository _repository;
   Timer? _debounce;
+  late final StreamSubscription<FavoriteChange> _favorites;
+
+  /// When the last page request failed. The scroll listener asks for the next
+  /// page on every pixel near the bottom, so without a pause a dropped
+  /// connection turned into a request per frame.
+  DateTime? _loadMoreFailedAt;
 
   /// Guards against a slow earlier request overwriting a newer one's results.
   int _requestId = 0;
@@ -78,7 +99,7 @@ class CafeListCubit extends Cubit<CafeListState> {
 
     try {
       final page = await _repository.list(effective);
-      if (id != _requestId) return;
+      if (id != _requestId || isClosed) return;
 
       emit(state.copyWith(
         status: ListStatus.success,
@@ -87,13 +108,28 @@ class CafeListCubit extends Cubit<CafeListState> {
         hasMore: page.hasMore,
       ));
     } on Failure catch (f) {
-      if (id != _requestId) return;
+      if (id != _requestId || isClosed) return;
       emit(state.copyWith(status: ListStatus.failure, failure: f));
     }
   }
 
   Future<void> loadMore() async {
-    if (!state.hasMore || state.status == ListStatus.loadingMore) return;
+    if (!state.hasMore ||
+        state.status == ListStatus.loadingMore ||
+        state.status == ListStatus.loading) {
+      return;
+    }
+
+    final failedAt = _loadMoreFailedAt;
+    if (failedAt != null &&
+        DateTime.now().difference(failedAt) < const Duration(seconds: 4)) {
+      return;
+    }
+
+    // A filter applied while this page is in the air starts a new request
+    // id; the page that comes back belongs to the old query and must not be
+    // appended to the new results.
+    final id = _requestId;
 
     emit(state.copyWith(status: ListStatus.loadingMore, nextCursor: state.nextCursor));
 
@@ -101,14 +137,25 @@ class CafeListCubit extends Cubit<CafeListState> {
       final page = await _repository.list(
         state.query.copyWith(cursor: state.nextCursor),
       );
+      if (id != _requestId || isClosed) return;
+
+      _loadMoreFailedAt = null;
       emit(state.copyWith(
         status: ListStatus.success,
         cafes: [...state.cafes, ...page.items],
         nextCursor: page.nextCursor,
         hasMore: page.hasMore,
       ));
-    } on Failure catch (f) {
-      emit(state.copyWith(status: ListStatus.failure, failure: f));
+    } on Failure {
+      if (id != _requestId || isClosed) return;
+
+      // The page already on screen is still good, so this is not a failure of
+      // the list — just stop asking for a moment.
+      _loadMoreFailedAt = DateTime.now();
+      emit(state.copyWith(
+        status: ListStatus.success,
+        nextCursor: state.nextCursor,
+      ));
     }
   }
 
@@ -175,6 +222,9 @@ class CafeListCubit extends Cubit<CafeListState> {
         areas: results[0] as List<AreaCount>,
         amenityOptions: results[1] as List<AmenityCount>,
         nextCursor: state.nextCursor,
+        // Kept: the chips can arrive after the list failed, and dropping the
+        // failure here left the error view with nothing to show.
+        failure: state.failure,
       ));
     } on Failure {
       // Filter chips are a nicety; their absence must not break the listing.
@@ -183,7 +233,12 @@ class CafeListCubit extends Cubit<CafeListState> {
 
   /// Reflects a favourite toggled elsewhere without refetching the page.
   void applyFavorite(String cafeId, {required bool isFavorited}) {
+    if (isClosed) return;
+    final index = state.cafes.indexWhere((c) => c.id == cafeId);
+    if (index == -1 || state.cafes[index].isFavorited == isFavorited) return;
+
     emit(state.copyWith(
+      failure: state.failure,
       cafes: state.cafes
           .map((c) => c.id == cafeId ? c.copyWith(isFavorited: isFavorited) : c)
           .toList(),
@@ -194,6 +249,7 @@ class CafeListCubit extends Cubit<CafeListState> {
   @override
   Future<void> close() {
     _debounce?.cancel();
+    _favorites.cancel();
     return super.close();
   }
 }

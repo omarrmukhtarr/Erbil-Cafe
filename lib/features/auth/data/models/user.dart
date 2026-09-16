@@ -42,6 +42,21 @@ class AppUser extends Equatable {
   /// Only returned by `/users/me`.
   final UserStats? stats;
 
+  /// The same shape [AppUser.fromJson] reads, so a profile can be kept on the
+  /// device and restored without a network round trip.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'avatarUrl': avatarUrl,
+        'role': role,
+        'locale': locale,
+        'emailVerified': emailVerified,
+        'phoneVerified': phoneVerified,
+        if (stats != null) 'stats': stats!.toJson(),
+      };
+
   @override
   List<Object?> get props => [id, name, email, avatarUrl, locale];
 }
@@ -62,6 +77,12 @@ class UserStats extends Equatable {
   final int reviews;
   final int favorites;
   final int reservations;
+
+  Map<String, dynamic> toJson() => {
+        'reviews': reviews,
+        'favorites': favorites,
+        'reservations': reservations,
+      };
 
   @override
   List<Object?> get props => [reviews, favorites, reservations];

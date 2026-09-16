@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/di/injector.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
@@ -29,6 +30,7 @@ class MenuScreen extends StatefulWidget {
 
 class _MenuScreenState extends State<MenuScreen> {
   late Future<Menu> _future;
+  final _reveal = RevealTracker();
 
   @override
   void initState() {
@@ -51,12 +53,15 @@ class _MenuScreenState extends State<MenuScreen> {
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.page),
-              itemCount: 6,
-              separatorBuilder: (_, __) => const Gap.md(),
-              itemBuilder: (_, __) =>
-                  const AppSkeleton(height: 92, radius: AppRadius.card),
+            return SkeletonGroup(
+              child: ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(AppSpacing.page),
+                itemCount: 6,
+                separatorBuilder: (_, __) => const Gap.md(),
+                itemBuilder: (_, __) =>
+                    const AppSkeleton(height: 92, radius: AppRadius.card),
+              ),
             );
           }
 
@@ -78,46 +83,64 @@ class _MenuScreenState extends State<MenuScreen> {
             );
           }
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.page,
-              AppSpacing.sm,
-              AppSpacing.page,
-              AppSpacing.huge,
-            ),
-            children: [
-              for (final category in menu.categories)
-                if (category.items.isNotEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppSpacing.lg,
-                      bottom: AppSpacing.lg,
-                    ),
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            category.name,
-                            style: theme.textTheme.headlineMedium,
-                          ),
-                        ),
-                        const HGap.md(),
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            decoration: BoxDecoration(
-                              color: AppColors.onCream.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+          // Flattened into rows and built lazily. The menu was one eager
+          // ListView, so a café with eighty items laid out and decoded every
+          // thumbnail before the first one was on screen.
+          final rows = <Object>[
+            for (final category in menu.categories)
+              if (category.items.isNotEmpty) ...[category, ...category.items],
+          ];
+
+          return FadeSlideIn(
+            offset: 8,
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.page,
+                AppSpacing.sm,
+                AppSpacing.page,
+                AppSpacing.huge,
+              ),
+              itemCount: rows.length,
+              itemBuilder: (context, index) {
+                final row = rows[index];
+
+                if (row is MenuItem) {
+                  return FadeSlideIn(
+                    index: index,
+                    animate: _reveal.shouldAnimate(row.id, index),
+                    child: _MenuItemTile(item: row, currency: l10n.currencyIqd),
+                  );
+                }
+
+                final category = row as MenuCategory;
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.lg,
+                    bottom: AppSpacing.lg,
                   ),
-                  for (final item in category.items)
-                    _MenuItemTile(item: item, currency: l10n.currencyIqd),
-                ],
-            ],
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          category.name,
+                          style: theme.textTheme.headlineMedium,
+                        ),
+                      ),
+                      const HGap.md(),
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          decoration: BoxDecoration(
+                            color: AppColors.onCream.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -161,6 +184,10 @@ class _MenuItemTile extends StatelessWidget {
                     : CachedNetworkImage(
                         imageUrl: item.thumbUrl!,
                         fit: BoxFit.cover,
+                        // Drawn at 68pt; decode at that, not the upload size.
+                        memCacheWidth:
+                            (68 * MediaQuery.devicePixelRatioOf(context)).round(),
+                        fadeInDuration: AppMotion.fast,
                         placeholder: (context, _) =>
                             const ColoredBox(color: AppColors.cardDarkAlt),
                         errorWidget: (context, _, __) =>

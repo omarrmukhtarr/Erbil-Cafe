@@ -18,13 +18,16 @@ abstract final class AppConfig {
   ///
   /// Falls back to a local backend when no override is supplied. The Android
   /// emulator reaches the host through 10.0.2.2, while the iOS simulator shares
-  /// the host's own localhost — so the default has to be resolved at runtime
+  /// the host's own loopback — so the default has to be resolved at runtime
   /// rather than baked in as a constant.
   static String get apiUrl {
     if (_apiUrlOverride.isNotEmpty) return _apiUrlOverride;
     return defaultTargetPlatform == TargetPlatform.android
         ? 'http://10.0.2.2:3100/api/v1'
-        : 'http://localhost:3100/api/v1';
+        // 127.0.0.1, not localhost: the local API binds IPv4 only, and
+        // `localhost` resolves to ::1 first — every new connection was
+        // refused over IPv6 before falling back.
+        : 'http://127.0.0.1:3100/api/v1';
   }
 
   /// Only used by the web build; the native SDKs read the key from their own

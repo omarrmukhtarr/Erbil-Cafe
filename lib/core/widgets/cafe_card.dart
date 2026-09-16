@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_motion.dart';
 import '../../app/theme/app_radius.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../features/cafes/data/models/cafe.dart';
@@ -46,6 +46,18 @@ class CafeCard extends StatelessWidget {
   /// Height of the compact tile, so carousels can size themselves from one
   /// number instead of a magic constant guessed per call site.
   static const compactHeight = 278.0;
+
+  /// The width a card's photo is decoded at.
+  ///
+  /// Shared with the café page, which shows the card's thumbnail as its
+  /// placeholder: [ImageCache] keys on this number, so the page only gets the
+  /// already-decoded bitmap — and a photo in the first frame of the Hero
+  /// flight, instead of a dark box — if both ask for the same width.
+  static int thumbCacheWidth(BuildContext context) =>
+      (600 * MediaQuery.devicePixelRatioOf(context)).round();
+
+  /// The image a card shows for [cafe].
+  static String? thumbUrl(Cafe cafe) => cafe.coverThumb ?? cafe.coverImage;
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +181,7 @@ class _Photo extends StatelessWidget {
           child: _CafeImage(
             // The thumbnail where there is one: a card is a few hundred
             // points wide, and the full-size cover decodes to ~7 MB.
-            url: cafe.coverThumb ?? cafe.coverImage,
+            url: CafeCard.thumbUrl(cafe),
             name: cafe.name,
           ),
         ),
@@ -300,13 +312,11 @@ class _CafeImage extends StatelessWidget {
     // outside URL, or a gallery that was reordered before the API started
     // matching covers to renditions — quietly costs twelve times the memory
     // of one that has.
-    final ratio = MediaQuery.devicePixelRatioOf(context);
-
     return CachedNetworkImage(
       imageUrl: url!,
       fit: BoxFit.cover,
-      memCacheWidth: (600 * ratio).round(),
-      fadeInDuration: const Duration(milliseconds: 200),
+      memCacheWidth: CafeCard.thumbCacheWidth(context),
+      fadeInDuration: AppMotion.fast,
       // A flat fill rather than a spinner — a grid of spinners is noisy.
       placeholder: (context, _) =>
           const ColoredBox(color: AppColors.cardDarkAlt),
@@ -555,10 +565,13 @@ class _FavoriteButton extends StatelessWidget {
           child: SizedBox(
             width: 36,
             height: 36,
-            child: Icon(
-              isFavorited ? Icons.favorite : Icons.favorite_border,
-              size: 18,
-              color: AppColors.accent,
+            child: PopSwitcher(
+              child: Icon(
+                isFavorited ? Icons.favorite : Icons.favorite_border,
+                key: ValueKey(isFavorited),
+                size: 18,
+                color: AppColors.accent,
+              ),
             ),
           ),
         ),

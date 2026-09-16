@@ -1,4 +1,6 @@
+import '../../../../core/config/app_config.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/response_cache.dart';
 import '../models/cafe.dart';
 
 /// Query for the café listing. Mirrors the API's filter surface.
@@ -111,28 +113,46 @@ class CafeRepository {
   }
 
   /// Every active café as map pins. Small enough to fetch in one call.
-  Future<List<CafeMarker>> markers() async {
-    final json = await _api.get<List<dynamic>>('/cafes/map');
-    return json
-        .map((e) => CafeMarker.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
+  ///
+  /// Cached for less time than the rest of the catalogue: every pin carries
+  /// `isOpenNow`, and that goes stale on the hour.
+  Future<List<CafeMarker>> markers() => ResponseCache.shared.get(
+        '/cafes/map',
+        ttl: const Duration(minutes: 3),
+        fetch: () async {
+          final json = await _api.get<List<dynamic>>('/cafes/map');
+          return json
+              .map((e) => CafeMarker.fromJson(e as Map<String, dynamic>))
+              .toList();
+        },
+      );
 
   /// Amenities at least one café offers, most common first. Feeds the home
   /// screen's category strip.
-  Future<List<AmenityCount>> amenities() async {
-    final json = await _api.get<List<dynamic>>('/cafes/amenities');
-    return json
-        .map((e) => AmenityCount.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
+  ///
+  /// Home and Explore both build chips from this, usually within a second of
+  /// each other, so it is fetched once and shared.
+  Future<List<AmenityCount>> amenities() => ResponseCache.shared.get(
+        '/cafes/amenities',
+        ttl: AppConfig.cacheTtl,
+        fetch: () async {
+          final json = await _api.get<List<dynamic>>('/cafes/amenities');
+          return json
+              .map((e) => AmenityCount.fromJson(e as Map<String, dynamic>))
+              .toList();
+        },
+      );
 
-  Future<List<AreaCount>> areas() async {
-    final json = await _api.get<List<dynamic>>('/cafes/areas');
-    return json
-        .map((e) => AreaCount.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<AreaCount>> areas() => ResponseCache.shared.get(
+        '/cafes/areas',
+        ttl: AppConfig.cacheTtl,
+        fetch: () async {
+          final json = await _api.get<List<dynamic>>('/cafes/areas');
+          return json
+              .map((e) => AreaCount.fromJson(e as Map<String, dynamic>))
+              .toList();
+        },
+      );
 }
 
 class AreaCount {

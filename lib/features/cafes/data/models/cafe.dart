@@ -261,6 +261,26 @@ class CafeMarker extends Equatable {
   final int reviewCount;
   final bool isOpenNow;
 
+  /// What the map knows about this café, shaped as a [Cafe] so its page can
+  /// draw the header and title before the full detail arrives.
+  Cafe toPreview() => Cafe(
+        id: id,
+        slug: slug,
+        name: name,
+        description: '',
+        address: '',
+        area: area,
+        lat: lat,
+        lng: lng,
+        coverImage: coverImage,
+        priceRange: PriceRange.fromJson(null),
+        ratingAvg: ratingAvg,
+        reviewCount: reviewCount,
+        isFeatured: false,
+        isOpenNow: isOpenNow,
+        amenities: const [],
+      );
+
   @override
   List<Object?> get props => [id, lat, lng];
 }

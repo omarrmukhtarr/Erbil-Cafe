@@ -44,13 +44,7 @@ class AppCard extends StatefulWidget {
     final theme = Theme.of(context);
 
     return Theme(
-      data: theme.copyWith(
-        textTheme: theme.textTheme.apply(
-          bodyColor: AppColors.onCard,
-          displayColor: AppColors.onCard,
-        ),
-        iconTheme: const IconThemeData(color: AppColors.onCardMuted),
-      ),
+      data: _onCardTheme(theme),
       child: DefaultTextStyle.merge(
         style: const TextStyle(color: AppColors.onCard),
         child: IconTheme.merge(
@@ -60,6 +54,25 @@ class AppCard extends StatefulWidget {
       ),
     );
   }
+
+  /// The re-inked theme, derived once per page theme rather than per card.
+  ///
+  /// `textTheme.apply` builds fifteen new text styles and `copyWith` a whole
+  /// new [ThemeData]; a Home screen holds thirty-odd cards and rebuilt them
+  /// all on every favourite toggled. Worse, a fresh instance each time made
+  /// the nested [Theme] look changed, so everything under every card that
+  /// read the theme rebuilt with it. Keyed on the page theme, which is the
+  /// same instance for as long as the app's theme and locale are.
+  static final _onCardThemes = Expando<ThemeData>('onCardTheme');
+
+  static ThemeData _onCardTheme(ThemeData theme) =>
+      _onCardThemes[theme] ??= theme.copyWith(
+        textTheme: theme.textTheme.apply(
+          bodyColor: AppColors.onCard,
+          displayColor: AppColors.onCard,
+        ),
+        iconTheme: const IconThemeData(color: AppColors.onCardMuted),
+      );
 }
 
 class _AppCardState extends State<AppCard> {

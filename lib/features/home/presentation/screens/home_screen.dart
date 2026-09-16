@@ -5,17 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di/injector.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../../../core/utils/auth_guard.dart';
+import '../../../../core/network/response_cache.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../core/widgets/cafe_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../cafes/data/models/cafe.dart';
 import '../../../cafes/data/repositories/cafe_repository.dart';
 import '../../../cafes/presentation/cubit/cafe_list_cubit.dart';
-import '../../../favorites/data/favorites_repository.dart';
+import '../../../favorites/presentation/toggle_favorite.dart';
 import '../../../menu/data/models/menu.dart';
 import '../../../menu/data/repositories/menu_repository.dart';
 import '../widgets/area_strip.dart';
@@ -47,6 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<AmenityCount>> _categories;
   late Future<List<AreaCount>> _areas;
 
+  final _popularReveal = RevealTracker();
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refresh() async {
     final cafes = sl<CafeRepository>();
+    // A pull is an explicit "show me what is new"; the catalogue cache is what
+    // it is asking to get past.
+    ResponseCache.shared.clear();
     setState(() {
       _popular = sl<MenuRepository>().popular();
       _categories = cafes.amenities();
@@ -78,18 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     await Future.wait([_featured.load(), _openNow.load()]);
   }
-
-  /// Saves a café and reflects it in whichever carousels are showing it.
-  void _toggleFavorite(Cafe cafe, String reason) => requireAuth(
-        context,
-        reason: reason,
-        action: () async {
-          final result = await sl<FavoritesRepository>().toggle(cafe.id);
-          for (final cubit in [_featured, _openNow]) {
-            cubit.applyFavorite(cafe.id, isFavorited: result);
-          }
-        },
-      );
 
   @override
   Widget build(BuildContext context) {
@@ -112,14 +105,21 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(
                 child: FutureBuilder<List<AmenityCount>>(
                   future: _categories,
-                  builder: (context, snapshot) => CategoryStrip(
-                    categories: snapshot.data ?? const [],
-                    loading:
-                        snapshot.connectionState == ConnectionState.waiting,
-                    onOpenNow: () =>
-                        context.go(Routes.exploreWith(openNow: true)),
-                    onCategory: (key) =>
-                        context.go(Routes.exploreWith(amenity: key)),
+                  builder: (context, snapshot) => FadeSwitcher(
+                    child: CategoryStrip(
+                      // Keyed on loading so the switcher sees the skeleton and
+                      // the real strip as two different things to fade between.
+                      key: ValueKey(!snapshot.hasData),
+                      categories: snapshot.data ?? const [],
+                      // A refresh keeps the strip it already has on screen.
+                      loading:
+                          snapshot.connectionState == ConnectionState.waiting &&
+                              !snapshot.hasData,
+                      onOpenNow: () =>
+                          context.go(Routes.exploreWith(openNow: true)),
+                      onCategory: (key) =>
+                          context.go(Routes.exploreWith(amenity: key)),
+                    ),
                   ),
                 ),
               ),
@@ -134,12 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SliverToBoxAdapter(
-                child: _CafeCarousel(
-                  cubit: _featured,
-                  cardWidth: 272,
-                  onFavorite: (cafe) =>
-                      _toggleFavorite(cafe, l10n.signInToFavorite),
-                ),
+                child: _CafeCarousel(cubit: _featured, cardWidth: 272),
               ),
 
               // ─── Open right now ───────────────────────────────────
@@ -154,23 +149,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       return const SizedBox.shrink();
                     }
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SectionHeader(
-                          title: l10n.openRightNow,
-                          subtitle: l10n.openRightNowSubtitle,
-                          actionLabel: l10n.seeAll,
-                          onAction: () =>
-                              context.go(Routes.exploreWith(openNow: true)),
-                        ),
-                        _CafeCarousel(
-                          cubit: _openNow,
-                          cardWidth: 272,
-                          onFavorite: (cafe) =>
-                              _toggleFavorite(cafe, l10n.signInToFavorite),
-                        ),
-                      ],
+                    return FadeSlideIn(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SectionHeader(
+                            title: l10n.openRightNow,
+                            subtitle: l10n.openRightNowSubtitle,
+                            actionLabel: l10n.seeAll,
+                            onAction: () =>
+                                context.go(Routes.exploreWith(openNow: true)),
+                          ),
+                          _CafeCarousel(cubit: _openNow, cardWidth: 272),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -187,16 +179,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: FutureBuilder<List<PopularItem>>(
                   future: _popular,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox(
-                        height: PopularTile.height,
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: AppSpacing.page),
-                          child: AppSkeleton(
-                            height: PopularTile.imageHeight,
-                            radius: AppRadius.card,
-                          ),
+                    if (!snapshot.hasData &&
+                        snapshot.connectionState == ConnectionState.waiting) {
+                      return const FadeSwitcher(
+                        child: SizedBox(
+                          key: ValueKey('popular-loading'),
+                          height: PopularTile.height,
+                          child: _PopularSkeleton(),
                         ),
                       );
                     }
@@ -204,17 +193,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     final items = snapshot.data ?? const <PopularItem>[];
                     if (items.isEmpty) return const SizedBox.shrink();
 
-                    return SizedBox(
-                      height: PopularTile.height,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        clipBehavior: Clip.none,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.page),
-                        itemCount: items.length,
-                        separatorBuilder: (_, __) => const HGap.md(),
-                        itemBuilder: (context, index) =>
-                            PopularTile(item: items[index]),
+                    return FadeSwitcher(
+                      child: SizedBox(
+                        key: const ValueKey('popular'),
+                        height: PopularTile.height,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          clipBehavior: Clip.none,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.page),
+                          itemCount: items.length,
+                          separatorBuilder: (_, __) => const HGap.md(),
+                          itemBuilder: (context, index) => FadeSlideIn(
+                            index: index,
+                            animate: _popularReveal.shouldAnimate(
+                              items[index].item.id,
+                              index,
+                            ),
+                            child: PopularTile(item: items[index]),
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -229,19 +227,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     final areas = snapshot.data ?? const <AreaCount>[];
                     if (areas.isEmpty) return const SizedBox.shrink();
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SectionHeader(
-                          title: l10n.browseByArea,
-                          subtitle: l10n.browseByAreaSubtitle,
-                        ),
-                        AreaStrip(
-                          areas: areas,
-                          onTap: (area) =>
-                              context.go(Routes.exploreWith(area: area)),
-                        ),
-                      ],
+                    return FadeSlideIn(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SectionHeader(
+                            title: l10n.browseByArea,
+                            subtitle: l10n.browseByAreaSubtitle,
+                          ),
+                          AreaStrip(
+                            areas: areas,
+                            onTap: (area) =>
+                                context.go(Routes.exploreWith(area: area)),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -311,33 +311,44 @@ class _Greeting extends StatelessWidget {
 ///
 /// Both café sections on this page are the same carousel over a different
 /// query, so the skeleton, the empty case and the fixed height live here once.
-class _CafeCarousel extends StatelessWidget {
-  const _CafeCarousel({
-    required this.cubit,
-    required this.cardWidth,
-    required this.onFavorite,
-  });
+class _CafeCarousel extends StatefulWidget {
+  const _CafeCarousel({required this.cubit, required this.cardWidth});
 
   final CafeListCubit cubit;
   final double cardWidth;
-  final void Function(Cafe cafe) onFavorite;
+
+  @override
+  State<_CafeCarousel> createState() => _CafeCarouselState();
+}
+
+class _CafeCarouselState extends State<_CafeCarousel> {
+  final _reveal = RevealTracker();
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CafeListCubit, CafeListState>(
-      bloc: cubit,
+      bloc: widget.cubit,
       builder: (context, state) {
-        if (state.status == ListStatus.loading) {
-          return SizedBox(
-            height: CafeCard.compactHeight,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
-              itemCount: 2,
-              separatorBuilder: (_, __) => const HGap.lg(),
-              itemBuilder: (context, _) => SizedBox(
-                width: cardWidth,
-                child: const CafeCardSkeleton(compact: true),
+        // Only a first load shows skeletons. A pull-to-refresh keeps the cards
+        // it has until the new ones arrive.
+        if (state.isFirstLoad || state.status == ListStatus.initial) {
+          return FadeSwitcher(
+            child: SizedBox(
+              key: const ValueKey('loading'),
+              height: CafeCard.compactHeight,
+              child: SkeletonGroup(
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+                  itemCount: 2,
+                  separatorBuilder: (_, __) => const HGap.lg(),
+                  itemBuilder: (context, _) => SizedBox(
+                    width: widget.cardWidth,
+                    child: const CafeCardSkeleton(compact: true),
+                  ),
+                ),
               ),
             ),
           );
@@ -345,29 +356,71 @@ class _CafeCarousel extends StatelessWidget {
 
         if (state.cafes.isEmpty) return const SizedBox.shrink();
 
-        return SizedBox(
-          height: CafeCard.compactHeight,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
-            itemCount: state.cafes.length,
-            separatorBuilder: (_, __) => const HGap.lg(),
-            itemBuilder: (context, index) {
-              final cafe = state.cafes[index];
-              return SizedBox(
-                width: cardWidth,
-                child: CafeCard(
-                  cafe: cafe,
-                  compact: true,
-                  onTap: () => context.push(Routes.cafe(cafe.slug)),
-                  onFavoriteTap: () => onFavorite(cafe),
-                ),
-              );
-            },
+        return FadeSwitcher(
+          child: SizedBox(
+            key: const ValueKey('cafes'),
+            height: CafeCard.compactHeight,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+              itemCount: state.cafes.length,
+              separatorBuilder: (_, __) => const HGap.lg(),
+              itemBuilder: (context, index) {
+                final cafe = state.cafes[index];
+                return FadeSlideIn(
+                  index: index,
+                  animate: _reveal.shouldAnimate(cafe.id, index),
+                  child: SizedBox(
+                    width: widget.cardWidth,
+                    child: CafeCard(
+                      cafe: cafe,
+                      compact: true,
+                      onTap: () =>
+                          context.push(Routes.cafe(cafe.slug), extra: cafe),
+                      onFavoriteTap: () => toggleFavorite(context, cafe),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+/// Tile-shaped placeholders for the popular row.
+class _PopularSkeleton extends StatelessWidget {
+  const _PopularSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonGroup(
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+        itemCount: 3,
+        separatorBuilder: (_, __) => const HGap.md(),
+        itemBuilder: (context, _) => const SizedBox(
+          width: PopularTile.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppSkeleton(
+                height: PopularTile.imageHeight,
+                radius: AppRadius.card,
+              ),
+              Gap.md(),
+              AppSkeleton(height: 14, width: 110),
+              Gap.sm(),
+              AppSkeleton(height: 11, width: 80),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

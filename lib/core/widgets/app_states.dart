@@ -12,6 +12,11 @@ import 'cafe_card.dart';
 ///
 /// v1 showed a bare spinner; a skeleton shaped like the content it stands in
 /// for reads as faster and avoids the layout jump when data lands.
+///
+/// On its own a skeleton carries its own shimmer. Inside a [SkeletonGroup] it
+/// is a plain box, and the group shimmers once across all of them — which is
+/// both cheaper and what the eye expects: one sweep of light across a loading
+/// section, not a dozen out of step with each other.
 class AppSkeleton extends StatelessWidget {
   const AppSkeleton({
     this.height = 16,
@@ -26,25 +31,75 @@ class AppSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
+    final colors = _SkeletonColors.of(context);
 
-    // On cream the skeleton must be darker than the page; on ink, lighter.
-    final base = isLight ? AppColors.creamSunken : AppColors.cardDarkAlt;
-    final highlight = isLight ? AppColors.creamRaised : const Color(0xFF2A2E37);
-
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
-      child: Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: base,
-          borderRadius: BorderRadius.circular(radius),
-        ),
+    final box = Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        color: colors.base,
+        borderRadius: BorderRadius.circular(radius),
       ),
     );
+
+    if (SkeletonGroup._inside(context)) return box;
+
+    return Shimmer.fromColors(
+      baseColor: colors.base,
+      highlightColor: colors.highlight,
+      child: box,
+    );
   }
+}
+
+/// One shimmer for every [AppSkeleton] beneath it.
+///
+/// Each `Shimmer` is its own looping animation and its own shader mask
+/// repainting its subtree sixty times a second; a loading Explore list had
+/// twelve of them running at once.
+class SkeletonGroup extends StatelessWidget {
+  const SkeletonGroup({required this.child, super.key});
+
+  final Widget child;
+
+  static bool _inside(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_SkeletonScope>() != null;
+
+  @override
+  Widget build(BuildContext context) {
+    // Nested groups share the outer shimmer.
+    if (_inside(context)) return child;
+
+    final colors = _SkeletonColors.of(context);
+
+    return Shimmer.fromColors(
+      baseColor: colors.base,
+      highlightColor: colors.highlight,
+      child: _SkeletonScope(child: child),
+    );
+  }
+}
+
+class _SkeletonScope extends InheritedWidget {
+  const _SkeletonScope({required super.child});
+
+  @override
+  bool updateShouldNotify(_SkeletonScope oldWidget) => false;
+}
+
+class _SkeletonColors {
+  const _SkeletonColors(this.base, this.highlight);
+
+  /// On cream the skeleton must be darker than the page; on ink, lighter.
+  static _SkeletonColors of(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    return isLight
+        ? const _SkeletonColors(AppColors.creamSunken, AppColors.creamRaised)
+        : const _SkeletonColors(AppColors.cardDarkAlt, Color(0xFF2A2E37));
+  }
+
+  final Color base;
+  final Color highlight;
 }
 
 /// Card-shaped skeleton used while a café list loads.
@@ -55,19 +110,21 @@ class CafeCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AppSkeleton(
-          height: compact ? CafeCard.imageHeightCompact : 190,
-          radius: AppRadius.card,
-        ),
-        const Gap.md(),
-        const AppSkeleton(height: 18, width: 170),
-        const Gap.sm(),
-        const AppSkeleton(height: 13, width: 120),
-      ],
+    return SkeletonGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppSkeleton(
+            height: compact ? CafeCard.imageHeightCompact : 190,
+            radius: AppRadius.card,
+          ),
+          const Gap.md(),
+          const AppSkeleton(height: 18, width: 170),
+          const Gap.sm(),
+          const AppSkeleton(height: 13, width: 120),
+        ],
+      ),
     );
   }
 }

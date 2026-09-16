@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../models/user.dart';
@@ -64,7 +68,27 @@ class AuthRepository {
 
   Future<AppUser> me() async {
     final json = await _api.get<Map<String, dynamic>>('/users/me');
-    return AppUser.fromJson(json);
+    return _remember(AppUser.fromJson(json));
+  }
+
+  /// The profile saved at the last sign-in or refresh, if there is one.
+  ///
+  /// Lets the app open signed in straight away instead of holding the first
+  /// frame on `/users/me`. Anything unreadable counts as nothing saved.
+  Future<AppUser?> cachedUser() async {
+    try {
+      final raw = await _tokens.readUser();
+      if (raw == null) return null;
+      return AppUser.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (error) {
+      debugPrint('Ignoring unreadable cached profile: $error');
+      return null;
+    }
+  }
+
+  Future<AppUser> _remember(AppUser user) async {
+    await _tokens.saveUser(jsonEncode(user.toJson()));
+    return user;
   }
 
   Future<bool> get hasSession => _tokens.hasSession;
@@ -115,7 +139,7 @@ class AuthRepository {
         if (locale != null) 'locale': locale,
       },
     );
-    return AppUser.fromJson(json);
+    return _remember(AppUser.fromJson(json));
   }
 
   Future<void> changePassword({
@@ -132,6 +156,6 @@ class AuthRepository {
       accessToken: json['accessToken'] as String,
       refreshToken: json['refreshToken'] as String,
     );
-    return AppUser.fromJson(json['user'] as Map<String, dynamic>);
+    return _remember(AppUser.fromJson(json['user'] as Map<String, dynamic>));
   }
 }
