@@ -571,7 +571,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reviewVisibleToEveryone => 'سيظهر تقييمك فورًا وسيراه الجميع.';
 
   @override
-  String get dataAttribution => 'مواقع المقاهي © مساهمو OpenStreetMap، ODbL.';
+  String get dataAttribution =>
+      'بيانات المقاهي © مساهمو OpenStreetMap (ODbL) ومؤسسة Overture Maps (CDLA Permissive 2.0، Apache 2.0).';
 
   @override
   String get preferences => 'التفضيلات';
@@ -581,6 +582,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get website => 'الموقع الإلكتروني';
+
+  @override
+  String get facebook => 'فيسبوك';
 
   @override
   String get whatsapp => 'واتساب';

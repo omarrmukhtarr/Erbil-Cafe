@@ -573,7 +573,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataAttribution =>
-      'Café locations © OpenStreetMap contributors, ODbL.';
+      'Café data © OpenStreetMap contributors (ODbL) and Overture Maps Foundation (CDLA Permissive 2.0, Apache 2.0).';
 
   @override
   String get preferences => 'Preferences';
@@ -583,6 +583,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get website => 'Website';
+
+  @override
+  String get facebook => 'Facebook';
 
   @override
   String get whatsapp => 'WhatsApp';
