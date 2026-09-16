@@ -178,6 +178,7 @@ class CafeDetailCubit extends Cubit<CafeDetailState> {
         phone: detail.phone,
         whatsapp: detail.whatsapp,
         instagram: detail.instagram,
+        facebook: detail.facebook,
         website: detail.website,
       ),
     ));

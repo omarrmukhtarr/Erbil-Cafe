@@ -572,7 +572,7 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get dataAttribution =>
-      'شوێنی کافێکان © بەشداربووانی OpenStreetMap، ODbL.';
+      'زانیاری کافێکان © بەشداربووانی OpenStreetMap (ODbL) و Overture Maps Foundation (CDLA Permissive 2.0، Apache 2.0).';
 
   @override
   String get preferences => 'هەڵبژاردەکان';
@@ -582,6 +582,9 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get website => 'ماڵپەڕ';
+
+  @override
+  String get facebook => 'فەیسبووک';
 
   @override
   String get whatsapp => 'واتساپ';
