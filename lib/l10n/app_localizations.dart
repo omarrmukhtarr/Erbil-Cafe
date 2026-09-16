@@ -1147,7 +1147,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataAttribution.
   ///
   /// In en, this message translates to:
-  /// **'Café locations © OpenStreetMap contributors, ODbL.'**
+  /// **'Café data © OpenStreetMap contributors (ODbL) and Overture Maps Foundation (CDLA Permissive 2.0, Apache 2.0).'**
   String get dataAttribution;
 
   /// No description provided for @preferences.
@@ -1167,6 +1167,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Website'**
   String get website;
+
+  /// No description provided for @facebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook'**
+  String get facebook;
 
   /// No description provided for @whatsapp.
   ///
