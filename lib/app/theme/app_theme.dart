@@ -252,7 +252,11 @@ abstract final class AppTheme {
         contentPadding: EdgeInsets.zero,
       ),
 
-      splashFactory: InkSparkle.splashFactory,
+      // No `splashFactory`: each platform keeps its own. InkSparkle was forced
+      // here, and it is a fragment shader — on iOS that meant compiling a
+      // shader on the first tap of every launch, a visible hitch on the one
+      // interaction that most needs to feel instant. Android still gets the
+      // sparkle, because that is Flutter's default there.
       visualDensity: VisualDensity.standard,
     );
   }

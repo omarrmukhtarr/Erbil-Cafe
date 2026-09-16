@@ -5,6 +5,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../config/app_config.dart';
 import '../error/failure.dart';
 import 'auth_interceptor.dart';
+import 'response_cache.dart';
 
 /// Thin wrapper over Dio that turns transport errors into [Failure]s, so
 /// repositories never deal with [DioException] directly.
@@ -49,8 +50,12 @@ class ApiClient {
   /// Updates the language sent on every subsequent request.
   void setLocale(String languageCode) {
     // The API accepts `ckb` for Sorani; `ku` is the macrolanguage.
-    _dio.options.headers['Accept-Language'] =
-        languageCode == 'ku' ? 'ckb' : languageCode;
+    final header = languageCode == 'ku' ? 'ckb' : languageCode;
+    if (_dio.options.headers['Accept-Language'] == header) return;
+
+    _dio.options.headers['Accept-Language'] = header;
+    // Cached café text is in the old language.
+    ResponseCache.shared.clear();
   }
 
   Future<T> get<T>(String path, {Map<String, dynamic>? query}) =>

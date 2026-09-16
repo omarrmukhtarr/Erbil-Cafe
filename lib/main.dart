@@ -60,13 +60,20 @@ Future<void> _start() async {
   // settled state and cannot bounce a signed-in user to sign-in.
   await sl<AuthCubit>().restore();
 
-  // Start Firebase, but never block the first frame on it and never let it
-  // stop the app: a missing google-services.json means "no notifications",
-  // not "no café app". Permission is asked for later, after a booking.
-  await sl<PushService>().init();
-  if (sl<AuthCubit>().state.isAuthenticated) {
-    unawaited(sl<PushService>().registerDevice());
-  }
+  // Start Firebase, but never let it stop the app: a missing
+  // google-services.json means "no notifications", not "no café app".
+  // Permission is asked for later, after a booking.
+  //
+  // Not awaited. The comment here always said the first frame must not wait
+  // on Firebase, and the code waited on it anyway; `listen` in the app's
+  // first frame awaits the same start-up instead.
+  unawaited(
+    sl<PushService>().init().then((_) {
+      if (sl<AuthCubit>().state.isAuthenticated) {
+        return sl<PushService>().registerDevice();
+      }
+    }),
+  );
 
   runApp(const ErbilCafeApp());
 }

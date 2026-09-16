@@ -39,9 +39,13 @@ class PushService {
   ///
   /// Does **not** ask for permission — that happens in [requestPermission],
   /// at a moment the user can connect to a reason.
-  Future<void> init() async {
-    if (_initialised) return;
+  Future<void> init() => _starting ??= _start();
 
+  /// The one start-up, shared by everyone who asks — `main` kicks it off
+  /// without waiting, and [listen] waits for it.
+  Future<void>? _starting;
+
+  Future<void> _start() async {
     try {
       await Firebase.initializeApp();
       _initialised = true;
@@ -60,6 +64,7 @@ class PushService {
   /// when the café answers" is the obvious next sentence — and never at first
   /// launch, where it is a dialog about nothing.
   Future<bool> requestPermission() async {
+    await init();
     if (!_initialised) return false;
 
     try {
@@ -78,6 +83,7 @@ class PushService {
   /// reissues on reinstall, restore from backup, and occasionally on its own.
   /// The API upserts, so registering twice costs nothing.
   Future<void> registerDevice({String? locale}) async {
+    await init();
     if (!_initialised) return;
 
     try {
@@ -126,6 +132,7 @@ class PushService {
     required void Function(Map<String, dynamic> data) onOpen,
     String? locale,
   }) async {
+    await init();
     if (!_initialised) return;
     _onOpen = onOpen;
 

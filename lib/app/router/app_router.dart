@@ -12,6 +12,7 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/auth/presentation/screens/sign_up_screen.dart';
+import '../../features/cafes/data/models/cafe.dart';
 import '../../features/cafes/presentation/screens/cafe_detail_screen.dart';
 import '../../features/cafes/presentation/screens/explore_screen.dart';
 import '../../features/favorites/presentation/screens/favorites_screen.dart';
@@ -230,8 +231,13 @@ GoRouter createRouter({
       GoRoute(
         path: '/cafe/:slug',
         parentNavigatorKey: _rootKey,
-        builder: (context, state) =>
-            CafeDetailScreen(slug: state.pathParameters['slug']!),
+        builder: (context, state) => CafeDetailScreen(
+          slug: state.pathParameters['slug']!,
+          // The card that was tapped, when there was one — lets the page
+          // draw its header on the first frame. A deep link or a notification
+          // has no card, and the page loads as before.
+          preview: state.extra is Cafe ? state.extra! as Cafe : null,
+        ),
         routes: [
           GoRoute(
             path: 'menu',

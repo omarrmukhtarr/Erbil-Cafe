@@ -4,7 +4,10 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../app/di/injector.dart';
 import '../../../app/router/app_router.dart';
+import 'dart:math' as math;
+
 import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/app_motion.dart';
 import '../../../app/theme/app_radius.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/storage/app_preferences.dart';
@@ -37,7 +40,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
     final pages = [
       (
@@ -80,35 +82,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 onPageChanged: (index) => setState(() => _page = index),
                 itemBuilder: (context, index) {
                   final page = pages[index];
-                  return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.xxxl),
-                          decoration: const BoxDecoration(
-                            gradient: AppColors.accentGradient,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(page.icon, size: 56, color: Colors.white),
-                        ),
-                        const SizedBox(height: AppSpacing.huge),
-                        Text(
-                          page.title,
-                          style: theme.textTheme.headlineMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          page.body,
-                          style: theme.textTheme.bodyLarge
-                              ?.copyWith(color: AppColors.onCreamMuted),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                  return _OnboardingPage(
+                    controller: _controller,
+                    index: index,
+                    icon: page.icon,
+                    title: page.title,
+                    body: page.body,
                   );
                 },
               ),
@@ -135,15 +114,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onPressed: isLast
                           ? _finish
                           : () => _controller.nextPage(
-                                duration: const Duration(milliseconds: 320),
-                                curve: Curves.easeOutCubic,
+                                duration: AppMotion.slow,
+                                curve: AppMotion.standard,
                               ),
                       style: ElevatedButton.styleFrom(
                         shape: const RoundedRectangleBorder(
                           borderRadius: AppRadius.pillR,
                         ),
                       ),
-                      child: Text(isLast ? l10n.getStarted : l10n.next),
+                      child: AnimatedSwitcher(
+                        duration: AppMotion.fast,
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(
+                          opacity: animation,
+                          child: SizeTransition(
+                            sizeFactor: animation,
+                            axis: Axis.horizontal,
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          isLast ? l10n.getStarted : l10n.next,
+                          key: ValueKey(isLast),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -152,6 +146,113 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// One onboarding page, moving with the swipe.
+///
+/// Everything used to slide across as a single flat card. Here the icon, the
+/// title and the body travel at different speeds and the icon grows as its
+/// page settles, so the swipe has depth — and because it is driven by the
+/// page position, not a timer, it follows the finger exactly and reverses if
+/// the swipe does.
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({
+    required this.controller,
+    required this.index,
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final PageController controller;
+  final int index;
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final width = MediaQuery.sizeOf(context).width;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+
+    final iconCircle = Container(
+      padding: const EdgeInsets.all(AppSpacing.xxxl),
+      decoration: BoxDecoration(
+        gradient: AppColors.accentGradient,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accent.withValues(alpha: 0.35),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Icon(icon, size: 56, color: Colors.white),
+    );
+
+    final titleText = Text(
+      title,
+      style: theme.textTheme.headlineMedium,
+      textAlign: TextAlign.center,
+    );
+
+    final bodyText = Text(
+      body,
+      style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.onCreamMuted),
+      textAlign: TextAlign.center,
+    );
+
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        // -1 … 0 … 1: how far this page is from the centre of the screen.
+        final page = controller.hasClients &&
+                controller.position.haveDimensions
+            ? controller.page ?? controller.initialPage.toDouble()
+            : controller.initialPage.toDouble();
+        final delta = (index - page).clamp(-1.0, 1.0);
+        final distance = delta.abs();
+        final direction = rtl ? -1.0 : 1.0;
+
+        // The page itself moves at full speed; these add to it.
+        Widget layer(Widget child, double parallax, {double scale = 1}) {
+          return Transform.translate(
+            offset: Offset(delta * width * parallax * direction, 0),
+            child: Transform.scale(scale: scale, child: child),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FadeTransition(
+                opacity: AlwaysStoppedAnimation(1 - distance * 0.6),
+                child: layer(
+                  Transform.rotate(
+                    angle: delta * math.pi / 14,
+                    child: iconCircle,
+                  ),
+                  -0.25,
+                  scale: 1 - distance * 0.35,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.huge),
+              layer(titleText, 0.15),
+              const SizedBox(height: AppSpacing.lg),
+              FadeTransition(
+                opacity: AlwaysStoppedAnimation(1 - distance),
+                child: layer(bodyText, 0.3),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,9 +55,24 @@ class _MapScreenState extends State<MapScreen> {
   );
 
   GoogleMapController? _controller;
-  late Future<_MapData> _future;
+  late Future<bool> _mapsAvailable;
+
+  /// Pins, loaded alongside the map rather than before it. The map used to
+  /// wait behind a spinner for every café to download; the platform view is
+  /// the slow part to create, so it now starts at once and the pins drop in.
+  List<CafeMarker>? _pins;
+  Failure? _pinsFailure;
 
   CafeMarker? _selected;
+
+  /// The café the card was last showing. Kept after deselecting so the card
+  /// slides away with its content, instead of emptying and then moving.
+  CafeMarker? _lastSelected;
+
+  /// A marker rebuild in progress. Camera-idle can fire again while one is
+  /// awaiting bitmaps, and the older one finishing last used to put back a
+  /// stale set of pins.
+  int _rebuildGeneration = 0;
   late MapTheme _theme;
   double _zoom = _erbil.zoom;
 
@@ -71,29 +87,28 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _theme = MapTheme.fromName(sl<AppPreferences>().mapTheme);
-    _future = _load();
+    _mapsAvailable = PlatformConfig.mapsConfigured();
+    _loadPins();
   }
 
-  Future<_MapData> _load() async {
-    final results = await Future.wait([
-      PlatformConfig.mapsConfigured(),
-      sl<CafeRepository>().markers(),
-    ]);
+  Future<void> _loadPins() async {
+    if (_pinsFailure != null) setState(() => _pinsFailure = null);
 
-    final data = _MapData(
-      mapsAvailable: results[0] as bool,
-      markers: results[1] as List<CafeMarker>,
-    );
-
-    _cafes = data.markers;
-    if (data.mapsAvailable && mounted) {
-      await _rebuildMarkers();
+    try {
+      final pins = await sl<CafeRepository>().markers();
+      if (!mounted) return;
+      _cafes = pins;
+      setState(() => _pins = pins);
+      if (await _mapsAvailable && mounted) await _rebuildMarkers();
+    } on Failure catch (failure) {
+      if (!mounted) return;
+      setState(() => _pinsFailure = failure);
     }
-    return data;
   }
 
   Future<void> _rebuildMarkers() async {
     if (_cafes.isEmpty) return;
+    final generation = ++_rebuildGeneration;
 
     final clusters = CafeClustering.cluster(_cafes, _zoom);
 
@@ -142,7 +157,7 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
 
-    if (!mounted) return;
+    if (!mounted || generation != _rebuildGeneration) return;
     setState(() => _markers = markers);
   }
 
@@ -153,7 +168,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _focus(CafeMarker marker) async {
-    setState(() => _selected = marker);
+    HapticFeedback.selectionClick();
+    setState(() => _selected = _lastSelected = marker);
     // Redraw so the chosen pin grows; the camera move is independent of it.
     unawaited(_rebuildMarkers());
     await _controller?.animateCamera(
@@ -259,7 +275,10 @@ class _MapScreenState extends State<MapScreen> {
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       onTap: () {
                         Navigator.of(context).pop();
-                        context.push(Routes.cafe(cafe.slug));
+                        context.push(
+                          Routes.cafe(cafe.slug),
+                          extra: cafe.toPreview(),
+                        );
                       },
                       child: _CafeRow(marker: cafe),
                     );
@@ -291,35 +310,34 @@ class _MapScreenState extends State<MapScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      body: FutureBuilder<_MapData>(
-        future: _future,
+      body: FutureBuilder<bool>(
+        future: _mapsAvailable,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.accent),
-            );
+          // A platform-channel round trip, not a download — a few frames.
+          if (!snapshot.hasData) {
+            return const ColoredBox(color: AppColors.creamSunken);
           }
-
-          if (snapshot.hasError) {
-            final error = snapshot.error;
-            return SafeArea(
-              child: ErrorView(
-                failure: error is Failure
-                    ? error
-                    : const ServerFailure('Could not load the map'),
-                onRetry: () => setState(() => _future = _load()),
-              ),
-            );
-          }
-
-          final data = snapshot.data!;
 
           // No key: list the cafés rather than crash on a map we cannot draw.
-          if (!data.mapsAvailable) {
-            return _MapUnavailable(markers: data.markers);
+          if (!snapshot.data!) {
+            final pins = _pins;
+            if (pins == null) {
+              return _pinsFailure == null
+                  ? const Center(
+                      child: CircularProgressIndicator(color: AppColors.accent),
+                    )
+                  : SafeArea(
+                      child: ErrorView(
+                        failure: _pinsFailure!,
+                        onRetry: _loadPins,
+                      ),
+                    );
+            }
+            return _MapUnavailable(markers: pins);
           }
 
           final topInset = MediaQuery.paddingOf(context).top;
+          final shown = _selected ?? _lastSelected;
 
           return Stack(
             children: [
@@ -351,14 +369,40 @@ class _MapScreenState extends State<MapScreen> {
                   children: [
                     _Pill(
                       dark: _theme.isDark,
-                      child: Text(
-                        l10n.cafeCount(data.markers.length),
-                        style: TextStyle(
-                          color: _theme.isDark
-                              ? AppColors.onCard
-                              : AppColors.onCream,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                      onTap: _pinsFailure == null ? null : _loadPins,
+                      // The count stands in for a loading state: a small
+                      // spinner in the pill while pins download, the number
+                      // once they land, and a retry if they did not.
+                      child: AnimatedSize(
+                        duration: AppMotion.fast,
+                        curve: AppMotion.standard,
+                        child: AnimatedSwitcher(
+                          duration: AppMotion.fast,
+                          child: _pins != null
+                              ? Text(
+                                  l10n.cafeCount(_pins!.length),
+                                  key: const ValueKey('count'),
+                                  style: _pillText,
+                                )
+                              : _pinsFailure != null
+                                  ? Row(
+                                      key: const ValueKey('retry'),
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.refresh,
+                                            size: 16, color: _pillInk),
+                                        const HGap(6),
+                                        Text(l10n.retry, style: _pillText),
+                                      ],
+                                    )
+                                  : SizedBox.square(
+                                      key: const ValueKey('loading'),
+                                      dimension: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: _pillInk,
+                                      ),
+                                    ),
                         ),
                       ),
                     ),
@@ -369,24 +413,9 @@ class _MapScreenState extends State<MapScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.layers_outlined,
-                            size: 16,
-                            color: _theme.isDark
-                                ? AppColors.onCard
-                                : AppColors.onCream,
-                          ),
+                          Icon(Icons.layers_outlined, size: 16, color: _pillInk),
                           const HGap(6),
-                          Text(
-                            _theme.label,
-                            style: TextStyle(
-                              color: _theme.isDark
-                                  ? AppColors.onCard
-                                  : AppColors.onCream,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          Text(_theme.label, style: _pillText),
                         ],
                       ),
                     ),
@@ -396,10 +425,11 @@ class _MapScreenState extends State<MapScreen> {
 
               // The card rises from behind the tab bar rather than appearing
               // on top of the map, so it reads as belonging to the pin that
-              // was just tapped.
+              // was just tapped. It keeps showing the last café on the way
+              // back down.
               AnimatedPositioned(
                 duration: AppMotion.medium,
-                curve: AppMotion.standard,
+                curve: _selected != null ? AppMotion.spring : AppMotion.standard,
                 left: AppSpacing.page,
                 right: AppSpacing.page,
                 bottom:
@@ -407,14 +437,27 @@ class _MapScreenState extends State<MapScreen> {
                 child: AnimatedOpacity(
                   duration: AppMotion.fast,
                   opacity: _selected != null ? 1 : 0,
-                  child: _selected == null
+                  child: shown == null
                       ? const SizedBox(height: 84)
-                      : AppCard(
-                          onTap: () =>
-                              context.push(Routes.cafe(_selected!.slug)),
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child:
-                              _CafeRow(marker: _selected!, showChevron: true),
+                      : IgnorePointer(
+                          ignoring: _selected == null,
+                          child: AppCard(
+                            onTap: () => context.push(
+                              Routes.cafe(shown.slug),
+                              extra: shown.toPreview(),
+                            ),
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            // Crossfades when a different pin is tapped while
+                            // the card is already up.
+                            child: AnimatedSwitcher(
+                              duration: AppMotion.fast,
+                              child: _CafeRow(
+                                key: ValueKey(shown.id),
+                                marker: shown,
+                                showChevron: true,
+                              ),
+                            ),
+                          ),
                         ),
                 ),
               ),
@@ -424,18 +467,19 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-}
 
-class _MapData {
-  const _MapData({required this.mapsAvailable, required this.markers});
+  Color get _pillInk => _theme.isDark ? AppColors.onCard : AppColors.onCream;
 
-  final bool mapsAvailable;
-  final List<CafeMarker> markers;
+  TextStyle get _pillText => TextStyle(
+        color: _pillInk,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      );
 }
 
 /// Shared row for the selected-pin card and the cluster sheet.
 class _CafeRow extends StatelessWidget {
-  const _CafeRow({required this.marker, this.showChevron = false});
+  const _CafeRow({required this.marker, this.showChevron = false, super.key});
 
   final CafeMarker marker;
   final bool showChevron;

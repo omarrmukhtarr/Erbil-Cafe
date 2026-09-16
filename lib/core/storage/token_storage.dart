@@ -11,6 +11,7 @@ class TokenStorage {
 
   static const _accessKey = 'erbilcafe.access_token';
   static const _refreshKey = 'erbilcafe.refresh_token';
+  static const _userKey = 'erbilcafe.user';
 
   /// Cached in memory so the common path does not hit the keystore on every
   /// request — secure storage reads cross a platform channel.
@@ -33,11 +34,21 @@ class TokenStorage {
     ]);
   }
 
+  /// The signed-in user's profile as the API last returned it.
+  ///
+  /// Kept beside the tokens (not in SharedPreferences) because it holds an
+  /// email address and a phone number.
+  Future<String?> readUser() => _storage.read(key: _userKey);
+
+  Future<void> saveUser(String json) =>
+      _storage.write(key: _userKey, value: json);
+
   Future<void> clear() async {
     _cachedAccess = null;
     await Future.wait([
       _storage.delete(key: _accessKey),
       _storage.delete(key: _refreshKey),
+      _storage.delete(key: _userKey),
     ]);
   }
 

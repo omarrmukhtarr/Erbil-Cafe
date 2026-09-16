@@ -38,20 +38,49 @@ class AuthCubit extends Cubit<AuthState> {
 
   final AuthRepository _repository;
 
-  /// Restores the session at startup. A stored refresh token is not proof of a
-  /// live session — it may have been revoked — so the profile is fetched to
-  /// confirm before the user is treated as signed in.
+  /// Restores the session at startup.
+  ///
+  /// This used to hold the splash screen on `/users/me` for every signed-in
+  /// launch — as long as the network took, up to the 15-second connect
+  /// timeout — and then sign the user *out* if that request failed for any
+  /// reason, including simply being offline. Opening the app on the metro
+  /// cost you your session.
+  ///
+  /// Now a saved profile opens the app signed in at once, and the profile is
+  /// confirmed in the background. Only the server saying the session is over
+  /// signs anyone out; a network error leaves them as they were.
   Future<void> restore() async {
     if (!await _repository.hasSession) {
       emit(const AuthState(status: AuthStatus.guest));
       return;
     }
 
+    final cached = await _repository.cachedUser();
+    if (cached != null) {
+      emit(AuthState(status: AuthStatus.authenticated, user: cached));
+      unawaited(_confirmSession());
+      return;
+    }
+
+    // Signed in before profiles were saved on the device: nothing to show
+    // yet, so this one launch still waits.
+    await _confirmSession();
+  }
+
+  Future<void> _confirmSession() async {
     try {
       final user = await _repository.me();
+      if (isClosed) return;
       emit(AuthState(status: AuthStatus.authenticated, user: user));
-    } on Failure {
+    } on UnauthorizedFailure {
+      // The auth interceptor has already tried a refresh; the session is over.
       await _repository.logout();
+      if (isClosed) return;
+      emit(const AuthState(status: AuthStatus.guest));
+    } on Failure {
+      if (isClosed || state.isAuthenticated) return;
+      // No saved profile and no network. Browse as a guest for now, but keep
+      // the tokens: the next launch with a connection signs straight back in.
       emit(const AuthState(status: AuthStatus.guest));
     }
   }

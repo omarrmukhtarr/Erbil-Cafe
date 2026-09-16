@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di/injector.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
@@ -23,6 +24,7 @@ class MyBookingsScreen extends StatefulWidget {
 
 class _MyBookingsScreenState extends State<MyBookingsScreen> {
   late Future<Paginated<Reservation>> _future;
+  final _reveal = RevealTracker();
 
   @override
   void initState() {
@@ -81,17 +83,25 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       body: FutureBuilder<Paginated<Reservation>>(
         future: _future,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.page),
-              itemCount: 3,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (_, __) =>
-                  const AppSkeleton(height: 120, radius: AppRadius.card),
+          // Skeletons only on the first load. Cancelling a booking reloads
+          // the list, and the old list stays up until the new one arrives
+          // instead of flashing back to placeholders.
+          if (!snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.waiting) {
+            return SkeletonGroup(
+              child: ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(AppSpacing.page),
+                itemCount: 3,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.md),
+                itemBuilder: (_, __) =>
+                    const AppSkeleton(height: 120, radius: AppRadius.card),
+              ),
             );
           }
 
-          if (snapshot.hasError) {
+          if (snapshot.hasError && !snapshot.hasData) {
             final error = snapshot.error;
             return ErrorView(
               failure: error is Failure
@@ -122,11 +132,23 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
               padding: const EdgeInsets.all(AppSpacing.page),
               itemCount: bookings.length,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (context, index) => _BookingCard(
-                reservation: bookings[index],
-                onCancel: () => _cancel(bookings[index]),
-                onTapCafe: () =>
-                    context.push(Routes.cafe(bookings[index].cafeSlug)),
+              itemBuilder: (context, index) => FadeSlideIn(
+                index: index,
+                animate: _reveal.shouldAnimate(bookings[index].id, index),
+                // A status that changes — pending to confirmed, or cancelled
+                // from here — crossfades rather than snapping.
+                child: AnimatedSwitcher(
+                  duration: AppMotion.medium,
+                  child: _BookingCard(
+                    key: ValueKey(
+                      '${bookings[index].id}-${bookings[index].status}',
+                    ),
+                    reservation: bookings[index],
+                    onCancel: () => _cancel(bookings[index]),
+                    onTapCafe: () =>
+                        context.push(Routes.cafe(bookings[index].cafeSlug)),
+                  ),
+                ),
               ),
             ),
           );
@@ -161,6 +183,7 @@ class _BookingCard extends StatelessWidget {
     required this.reservation,
     required this.onCancel,
     required this.onTapCafe,
+    super.key,
   });
 
   final Reservation reservation;

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
@@ -152,7 +153,9 @@ class _ItemImage extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: url!,
       fit: BoxFit.cover,
-      fadeInDuration: const Duration(milliseconds: 200),
+      memCacheWidth:
+          (PopularTile.width * MediaQuery.devicePixelRatioOf(context)).round(),
+      fadeInDuration: AppMotion.fast,
       placeholder: (context, _) => const ColoredBox(color: AppColors.cardDarkAlt),
       errorWidget: (context, _, __) => const _NoImage(),
     );

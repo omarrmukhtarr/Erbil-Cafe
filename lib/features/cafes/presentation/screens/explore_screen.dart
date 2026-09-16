@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,11 +9,10 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../../../core/utils/auth_guard.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../core/widgets/cafe_card.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../favorites/data/favorites_repository.dart';
+import '../../../favorites/presentation/toggle_favorite.dart';
 import '../../data/models/cafe.dart';
 import '../../data/repositories/cafe_repository.dart';
 import '../cubit/cafe_list_cubit.dart';
@@ -46,6 +46,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   late final CafeListCubit _cubit;
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  final _reveal = RevealTracker();
 
   @override
   void initState() {
@@ -80,6 +81,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
     super.dispose();
   }
 
+  /// A new set of results replaces the old: start at the top, and let the
+  /// cards make their entrance again.
+  void _onState(BuildContext context, CafeListState state) {
+    _reveal.reset();
+    if (_scrollController.hasClients && _scrollController.offset > 0) {
+      _scrollController.jumpTo(0);
+    }
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _cubit.search('');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -88,64 +103,88 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: BlocBuilder<CafeListCubit, CafeListState>(
-          bloc: _cubit,
-          builder: (context, state) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.page,
-                    AppSpacing.lg,
-                    AppSpacing.page,
-                    AppSpacing.md,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.explore, style: theme.textTheme.displayLarge),
-                      const Gap.md(),
-                      TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          _cubit.search(value);
-                          setState(() {}); // toggles the clear button
-                        },
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          hintText: l10n.searchHint,
-                          prefixIcon: const Icon(Icons.search, size: 20),
-                          suffixIcon: _searchController.text.isEmpty
-                              ? null
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.page,
+                AppSpacing.lg,
+                AppSpacing.page,
+                AppSpacing.md,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.explore, style: theme.textTheme.displayLarge),
+                  const Gap.md(),
+                  // Outside the BlocBuilder, and the clear button listens to
+                  // the controller itself: typing used to setState the whole
+                  // screen — every visible card — on each keystroke.
+                  TextField(
+                    controller: _searchController,
+                    onChanged: _cubit.search,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchHint,
+                      prefixIcon: const Icon(Icons.search, size: 20),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _searchController,
+                        builder: (context, value, _) => AnimatedSwitcher(
+                          duration: AppMotion.fast,
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(scale: animation, child: child),
+                          child: value.text.isEmpty
+                              ? const SizedBox.shrink()
                               : IconButton(
                                   icon: const Icon(Icons.close, size: 18),
                                   tooltip: l10n.clearFilters,
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    _cubit.search('');
-                                    setState(() {});
-                                  },
+                                  onPressed: _clearSearch,
                                 ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                _FilterBar(cubit: _cubit, state: state),
-                const Gap.md(),
-                Expanded(
-                  child: switch (state.status) {
-                    ListStatus.loading => ListView.separated(
-                        padding: _listPadding,
-                        itemCount: 4,
-                        separatorBuilder: (_, __) => const Gap.xxl(),
-                        itemBuilder: (_, __) => const CafeCardSkeleton(),
+                ],
+              ),
+            ),
+            BlocBuilder<CafeListCubit, CafeListState>(
+              bloc: _cubit,
+              buildWhen: (previous, current) =>
+                  previous.query != current.query ||
+                  previous.areas != current.areas ||
+                  previous.amenityOptions != current.amenityOptions,
+              builder: (context, state) =>
+                  _FilterBar(cubit: _cubit, state: state),
+            ),
+            const Gap.md(),
+            Expanded(
+              child: BlocConsumer<CafeListCubit, CafeListState>(
+                bloc: _cubit,
+                listenWhen: (previous, current) =>
+                    previous.status == ListStatus.loading &&
+                    current.status == ListStatus.success,
+                listener: _onState,
+                builder: (context, state) {
+                  final Widget body = switch (state.status) {
+                    _ when state.isFirstLoad ||
+                        state.status == ListStatus.initial =>
+                      SkeletonGroup(
+                        key: const ValueKey('loading'),
+                        child: ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: _listPadding,
+                          itemCount: 4,
+                          separatorBuilder: (_, __) => const Gap.xxl(),
+                          itemBuilder: (_, __) => const CafeCardSkeleton(),
+                        ),
                       ),
                     ListStatus.failure when state.cafes.isEmpty => ErrorView(
+                        key: const ValueKey('error'),
                         failure: state.failure!,
                         onRetry: () => _cubit.load(),
                       ),
                     _ when state.isEmpty => EmptyView(
+                        key: const ValueKey('empty'),
                         icon: Icons.search_off,
                         title: l10n.noResults,
                         message: l10n.noResultsBody,
@@ -154,68 +193,25 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 onPressed: () {
                                   _searchController.clear();
                                   _cubit.clearFilters();
-                                  setState(() {});
                                 },
                                 child: Text(l10n.clearFilters),
                               )
                             : null,
                       ),
-                    _ => RefreshIndicator(
-                        color: AppColors.accent,
-                        backgroundColor:
-                            theme.colorScheme.surfaceContainerHighest,
+                    _ => _Results(
+                        key: const ValueKey('results'),
+                        state: state,
+                        controller: _scrollController,
+                        reveal: _reveal,
                         onRefresh: () => _cubit.load(),
-                        child: ListView.separated(
-                          controller: _scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: _listPadding,
-                          itemCount: state.cafes.length +
-                              (state.status == ListStatus.loadingMore ? 1 : 0),
-                          separatorBuilder: (_, __) => const Gap.xxl(),
-                          itemBuilder: (context, index) {
-                            if (index >= state.cafes.length) {
-                              return const Padding(
-                                padding: EdgeInsets.all(AppSpacing.xl),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                      color: AppColors.accent),
-                                ),
-                              );
-                            }
-
-                            final cafe = state.cafes[index];
-                            // Only the first screenful staggers in. Past that
-                            // the cards are below the fold when they are
-                            // built, so the animation would be spent on
-                            // something nobody sees — and would replay every
-                            // time a recycled row scrolled back.
-                            return FadeSlideIn(
-                              index: index < 8 ? index : 0,
-                              child: CafeCard(
-                                cafe: cafe,
-                                onTap: () =>
-                                    context.push(Routes.cafe(cafe.slug)),
-                                onFavoriteTap: () => requireAuth(
-                                  context,
-                                  reason: l10n.signInToFavorite,
-                                  action: () async {
-                                    final result =
-                                        await sl<FavoritesRepository>()
-                                            .toggle(cafe.id);
-                                    _cubit.applyFavorite(cafe.id,
-                                        isFavorited: result);
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ),
                       ),
-                  },
-                ),
-              ],
-            );
-          },
+                  };
+
+                  return FadeSwitcher(child: body);
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -227,6 +223,99 @@ class _ExploreScreenState extends State<ExploreScreen> {
     AppSpacing.page,
     AppSpacing.bottomBarClearance,
   );
+}
+
+/// The café list, dimmed under a thin progress bar while a new filter loads.
+class _Results extends StatelessWidget {
+  const _Results({
+    required this.state,
+    required this.controller,
+    required this.reveal,
+    required this.onRefresh,
+    super.key,
+  });
+
+  final CafeListState state;
+  final ScrollController controller;
+  final RevealTracker reveal;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final reloading = state.isReloading;
+
+    return Stack(
+      children: [
+        AnimatedOpacity(
+          duration: AppMotion.fast,
+          opacity: reloading ? 0.45 : 1,
+          child: IgnorePointer(
+            ignoring: reloading,
+            child: RefreshIndicator(
+              color: AppColors.accent,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              onRefresh: onRefresh,
+              child: ListView.separated(
+                controller: controller,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: _ExploreScreenState._listPadding,
+                itemCount: state.cafes.length +
+                    (state.status == ListStatus.loadingMore ? 1 : 0),
+                separatorBuilder: (_, __) => const Gap.xxl(),
+                itemBuilder: (context, index) {
+                  if (index >= state.cafes.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(AppSpacing.xl),
+                      child: Center(
+                        child:
+                            CircularProgressIndicator(color: AppColors.accent),
+                      ),
+                    );
+                  }
+
+                  final cafe = state.cafes[index];
+                  // Only the first screenful of each new result set staggers
+                  // in, and only once: a row recycled by scrolling back up is
+                  // shown as it was.
+                  return FadeSlideIn(
+                    index: index,
+                    animate: reveal.shouldAnimate(cafe.id, index),
+                    child: CafeCard(
+                      cafe: cafe,
+                      onTap: () =>
+                          context.push(Routes.cafe(cafe.slug), extra: cafe),
+                      onFavoriteTap: () => toggleFavorite(context, cafe),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: AppSpacing.page,
+          right: AppSpacing.page,
+          // Built only while loading: an indeterminate indicator animates
+          // forever, and at opacity zero it would still repaint every frame.
+          child: AnimatedSwitcher(
+            duration: AppMotion.fast,
+            child: reloading
+                ? const ClipRRect(
+                    borderRadius: AppRadius.pillR,
+                    child: LinearProgressIndicator(
+                      minHeight: 3,
+                      color: AppColors.accent,
+                      backgroundColor: Colors.transparent,
+                    ),
+                  )
+                : const SizedBox(height: 3),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Filter chips in one scrollable row above the results.
@@ -326,7 +415,10 @@ class _Chip extends StatelessWidget {
         button: true,
         selected: selected,
         child: GestureDetector(
-          onTap: onTap,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
           behavior: HitTestBehavior.opaque,
           // The colour crossfade tells you the tap landed before the new
           // results arrive, which on a slow connection is most of a second.
