@@ -21,6 +21,9 @@ import '../../features/home/presentation/widgets/app_shell.dart';
 import '../../features/map/presentation/screens/map_screen.dart';
 import '../../features/menu/presentation/screens/menu_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/profile/presentation/screens/change_password_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/profile/presentation/screens/help_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/reservations/presentation/screens/book_table_screen.dart';
 import '../../features/reservations/presentation/screens/my_bookings_screen.dart';
@@ -40,6 +43,10 @@ abstract final class Routes {
   static const profile = '/profile';
 
   static const bookings = '/bookings';
+
+  static const editProfile = '/settings/profile';
+  static const changePassword = '/settings/password';
+  static const help = '/help';
 
   /// Explore, opened with a filter already applied.
   ///
@@ -108,7 +115,12 @@ GoRouter createRouter({
       };
 
       // Browsing is open to guests; only these routes require an account.
-      const protected = {Routes.favorites, Routes.bookings};
+      const protected = {
+        Routes.favorites,
+        Routes.bookings,
+        Routes.editProfile,
+        Routes.changePassword,
+      };
       final needsAuth = protected.contains(path) ||
           path.endsWith('/book') ||
           path.endsWith('/review');
@@ -263,6 +275,22 @@ GoRouter createRouter({
         path: Routes.bookings,
         parentNavigatorKey: _rootKey,
         builder: (context, state) => const MyBookingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.editProfile,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: Routes.changePassword,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      // Open to guests: someone who cannot sign in is exactly who needs help.
+      GoRoute(
+        path: Routes.help,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => const HelpScreen(),
       ),
     ],
   );
