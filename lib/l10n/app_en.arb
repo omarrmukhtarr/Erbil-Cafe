@@ -223,10 +223,11 @@
     }
   },
   "reviewVisibleToEveryone": "Your rating goes live straight away and everyone will see it.",
-  "dataAttribution": "Café locations © OpenStreetMap contributors, ODbL.",
+  "dataAttribution": "Café data © OpenStreetMap contributors (ODbL) and Overture Maps Foundation (CDLA Permissive 2.0, Apache 2.0).",
   "preferences": "Preferences",
   "contactAndLinks": "Contact & links",
   "website": "Website",
+  "facebook": "Facebook",
   "whatsapp": "WhatsApp",
   "instagram": "Instagram",
   "address": "Address",

@@ -114,6 +114,7 @@ class CafeDetail extends Equatable {
     this.phone,
     this.whatsapp,
     this.instagram,
+    this.facebook,
     this.website,
   });
 
@@ -122,6 +123,7 @@ class CafeDetail extends Equatable {
         phone: json['phone'] as String?,
         whatsapp: json['whatsapp'] as String?,
         instagram: json['instagram'] as String?,
+        facebook: json['facebook'] as String?,
         website: json['website'] as String?,
         capacity: json['capacity'] as int? ?? 0,
         images: (json['images'] as List<dynamic>? ?? [])
@@ -136,6 +138,10 @@ class CafeDetail extends Equatable {
   final String? phone;
   final String? whatsapp;
   final String? instagram;
+
+  /// The café's Facebook page. For most of Erbil it is kept more current than
+  /// any website — it is where the hours and photos actually are.
+  final String? facebook;
   final String? website;
   final int capacity;
   final List<CafeImage> images;

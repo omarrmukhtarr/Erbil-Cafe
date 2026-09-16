@@ -161,6 +161,7 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
       (detail.cafe.address.isNotEmpty) ||
       (detail.website?.isNotEmpty ?? false) ||
       (detail.instagram?.isNotEmpty ?? false) ||
+      (detail.facebook?.isNotEmpty ?? false) ||
       (detail.whatsapp?.isNotEmpty ?? false) ||
       detail.capacity > 0;
 
@@ -911,6 +912,13 @@ class _ContactCard extends StatelessWidget {
               onTap: () =>
                   onOpen('https://instagram.com/${detail.instagram}'),
             ),
+          if (detail.facebook?.isNotEmpty ?? false)
+            _ContactRow(
+              icon: Icons.facebook,
+              label: l10n.facebook,
+              value: _facebookLabel(detail.facebook!, cafe.name),
+              onTap: () => onOpen(detail.facebook!),
+            ),
           if (detail.whatsapp?.isNotEmpty ?? false)
             _ContactRow(
               icon: Icons.chat_bubble_outline,
@@ -930,6 +938,16 @@ class _ContactCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// The page's name when the URL carries one; most imported pages are a
+  /// bare numeric id, which means nothing to read, so those show the café's
+  /// own name instead.
+  static String _facebookLabel(String url, String cafeName) {
+    final path = _prettyUrl(url).replaceFirst(RegExp(r'^facebook\.com/'), '');
+    return RegExp(r'^\d+$').hasMatch(path) || path.contains('profile.php')
+        ? cafeName
+        : path;
   }
 
   /// `https://www.barbera.krd/` reads as `barbera.krd`.
