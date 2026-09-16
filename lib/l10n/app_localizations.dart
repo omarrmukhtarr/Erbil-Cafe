@@ -1233,6 +1233,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete my account'**
   String get deleteAccountAction;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get optional;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile has been saved.'**
+  String get profileSaved;
+
+  /// No description provided for @emailCannotChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is how you sign in, so it cannot be changed here. Contact support if you need to change it.'**
+  String get emailCannotChange;
+
+  /// No description provided for @phoneChangeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing your number means it will need to be verified again.'**
+  String get phoneChangeNote;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed. Other devices have been signed out.'**
+  String get passwordChanged;
+
+  /// No description provided for @passwordChangeExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'After changing it, every other phone signed in to your account will need the new password.'**
+  String get passwordChangeExplain;
+
+  /// No description provided for @newPasswordSameAsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password different from your current one.'**
+  String get newPasswordSameAsOld;
+
+  /// No description provided for @helpAndSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & support'**
+  String get helpAndSupport;
+
+  /// No description provided for @helpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & FAQ'**
+  String get helpCenter;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get contactSupport;
+
+  /// No description provided for @reportProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get reportProblem;
+
+  /// No description provided for @reportProblemSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem report'**
+  String get reportProblemSubject;
+
+  /// No description provided for @noEmailApp.
+  ///
+  /// In en, this message translates to:
+  /// **'No email app is set up. Write to us at {address} — it has been copied.'**
+  String noEmailApp(String address);
+
+  /// No description provided for @legal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get legal;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of service'**
+  String get termsOfService;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @openSourceLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source licences'**
+  String get openSourceLicenses;
+
+  /// No description provided for @couldNotOpenPage.
+  ///
+  /// In en, this message translates to:
+  /// **'That page could not be opened.'**
+  String get couldNotOpenPage;
+
+  /// No description provided for @storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get storage;
+
+  /// No description provided for @clearCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear cached photos and data'**
+  String get clearCache;
+
+  /// No description provided for @clearCacheSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frees space on your phone. Photos download again as you browse.'**
+  String get clearCacheSubtitle;
+
+  /// No description provided for @cacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached photos and data cleared.'**
+  String get cacheCleared;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @faqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently asked questions'**
+  String get faqTitle;
+
+  /// No description provided for @faqFindQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I find a café?'**
+  String get faqFindQ;
+
+  /// No description provided for @faqFindA.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Explore to search by name in Kurdish, Arabic or English, and narrow the list with the chips — open now, price, what the café offers, or its area. The Map tab shows every café; tap a number to zoom into that part of town.'**
+  String get faqFindA;
+
+  /// No description provided for @faqOpenNowQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Why does a café show as closed when it is open?'**
+  String get faqOpenNowQ;
+
+  /// No description provided for @faqOpenNowA.
+  ///
+  /// In en, this message translates to:
+  /// **'“Open now” is worked out from the café\'s opening hours. Many cafés have not listed their hours yet, and a café with no hours cannot be shown as open. If you know a café\'s hours, report them and we will add them.'**
+  String get faqOpenNowA;
+
+  /// No description provided for @faqSaveQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I save a café?'**
+  String get faqSaveQ;
+
+  /// No description provided for @faqSaveA.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart on its card or at the top of its page. Saved cafés are in the Saved tab. Saving needs an account, so your list follows you to a new phone.'**
+  String get faqSaveA;
+
+  /// No description provided for @faqBookQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How does booking a table work?'**
+  String get faqBookQ;
+
+  /// No description provided for @faqBookA.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date, a time and how many people on the café\'s page and send the request. The café confirms or declines it, and you are notified either way. Your requests and their status are in My bookings.'**
+  String get faqBookA;
+
+  /// No description provided for @faqCancelQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I cancel a booking?'**
+  String get faqCancelQ;
+
+  /// No description provided for @faqCancelA.
+  ///
+  /// In en, this message translates to:
+  /// **'Open My bookings from your profile and tap Cancel booking on a request that is still pending or confirmed. It shows as cancelled on the café\'s side at once.'**
+  String get faqCancelA;
+
+  /// No description provided for @faqRateQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do ratings and reviews work?'**
+  String get faqRateQ;
+
+  /// No description provided for @faqRateA.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the stars on a café\'s page to rate it, and add a written review if you like. You have one review per café; rating again replaces it. Reviews appear straight away, and ones that break the rules are removed.'**
+  String get faqRateA;
+
+  /// No description provided for @faqWrongInfoQ.
+  ///
+  /// In en, this message translates to:
+  /// **'A café\'s details are wrong or missing. What can I do?'**
+  String get faqWrongInfoQ;
+
+  /// No description provided for @faqWrongInfoA.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Report a problem and tell us the café\'s name and what should change — hours, phone number, location or photos. Café owners can also manage their own page.'**
+  String get faqWrongInfoA;
+
+  /// No description provided for @faqLanguageQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I change the language?'**
+  String get faqLanguageQ;
+
+  /// No description provided for @faqLanguageA.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose it under Preferences in your profile. Café names and descriptions switch too, wherever the café has a translation.'**
+  String get faqLanguageA;
+
+  /// No description provided for @faqDeleteQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I delete my account?'**
+  String get faqDeleteQ;
+
+  /// No description provided for @faqDeleteA.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to the bottom of your profile and tap Delete my account. Your personal details are erased and your bookings cancelled; your reviews stay on the café as “Deleted user”.'**
+  String get faqDeleteA;
+
+  /// No description provided for @stillNeedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Still need help?'**
+  String get stillNeedHelp;
+
+  /// No description provided for @stillNeedHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to us and a person will answer, usually within a day.'**
+  String get stillNeedHelpBody;
 }
 
 class _AppLocalizationsDelegate
