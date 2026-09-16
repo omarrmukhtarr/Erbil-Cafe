@@ -1,6 +1,7 @@
 import 'package:erbilcafe/core/widgets/cafe_card.dart';
 import 'package:erbilcafe/features/cafes/data/models/cafe.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/pump_app.dart';
@@ -119,6 +120,16 @@ void main() {
       );
 
       expect(find.text('H'), findsOneWidget);
+    });
+
+    testWidgets('skips punctuation when deriving initials', (tester) async {
+      await tester.pumpApp(
+        Scaffold(
+          body: CafeCard(cafe: buildCafe(name: 'N & Lemon Cafe'), onTap: () {}),
+        ),
+      );
+
+      expect(find.text('NL'), findsOneWidget);
     });
 
     testWidgets('derives initials from a non-Latin name', (tester) async {
@@ -257,6 +268,102 @@ void main() {
       await tester.tap(find.text('Barbera Cafe'));
       await tester.pump();
       expect(cardTaps, 1);
+    });
+
+    group('corner badges sit in the corners', () {
+      // The heart and the rating each shared a row with a Flexible badge and
+      // a Spacer. Equal flex split the free space in half, so both stopped
+      // in the middle of it — the heart floated left of the edge on every
+      // card, and the rating did too whenever the café was featured.
+      Future<void> pumpCard(
+        WidgetTester tester, {
+        required bool featured,
+        required bool compact,
+        Locale locale = const Locale('en'),
+      }) async {
+        await tester.pumpApp(
+          Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: compact ? 272 : 358,
+                child: CafeCard(
+                  cafe: buildCafe(featured: featured),
+                  compact: compact,
+                  onTap: () {},
+                  onFavoriteTap: () {},
+                ),
+              ),
+            ),
+          ),
+          locale: locale,
+        );
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+
+      /// The card's photo, the box both badges are positioned in.
+      Rect photo(WidgetTester tester) => tester.getRect(
+            find.descendant(
+              of: find.byType(CafeCard),
+              matching: find.byType(Stack),
+            ).first,
+          );
+
+      Rect heart(WidgetTester tester) =>
+          tester.getRect(find.byIcon(Icons.favorite_border));
+
+      Rect rating(WidgetTester tester) => tester.getRect(
+            find.ancestor(of: find.text('4.7'), matching: find.byType(Container)).first,
+          );
+
+      for (final compact in [false, true]) {
+        for (final featured in [true, false]) {
+          testWidgets(
+              '${compact ? 'compact' : 'full'} card, '
+              '${featured ? 'featured' : 'not featured'}', (tester) async {
+            await pumpCard(tester, featured: featured, compact: compact);
+
+            final edge = photo(tester).right - 12; // AppSpacing.md inset
+            // The heart icon is centred in a 36pt button.
+            expect(heart(tester).center.dx, closeTo(edge - 18, 0.5));
+            expect(rating(tester).right, closeTo(edge, 0.5));
+            tester.expectNoOverflow();
+          });
+        }
+      }
+
+      testWidgets('the review count shares the average\'s baseline',
+          (tester) async {
+        await pumpCard(tester, featured: false, compact: true);
+
+        // Measured with a painter over the paragraph's own text: a render
+        // box refuses baseline queries outside a layout pass.
+        double baseline(String text) {
+          final paragraph = tester.renderObject<RenderParagraph>(find.text(text));
+          final painter = TextPainter(
+            text: paragraph.text,
+            textDirection: TextDirection.ltr,
+            textScaler: paragraph.textScaler,
+          )..layout();
+          addTearDown(painter.dispose);
+          return paragraph.localToGlobal(Offset.zero).dy +
+              painter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+        }
+
+        expect(baseline('(12)'), closeTo(baseline('4.7'), 0.5));
+      });
+
+      testWidgets('mirror to the left edge in Kurdish', (tester) async {
+        await pumpCard(
+          tester,
+          featured: true,
+          compact: false,
+          locale: const Locale('ku'),
+        );
+
+        final edge = photo(tester).left + 12;
+        expect(heart(tester).center.dx, closeTo(edge + 18, 0.5));
+        tester.expectNoOverflow();
+      });
     });
   });
 }
