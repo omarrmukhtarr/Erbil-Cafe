@@ -3,7 +3,7 @@ import Flutter
 import GoogleMaps
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   /// Whether a Maps key was supplied at build time.
   ///
   /// Dart asks before it builds a map. Without this the Google Maps SDK raises
@@ -28,22 +28,27 @@ import GoogleMaps
         + "to Secrets.xcconfig and set MAPS_API_KEY. The Map tab will show a fallback.")
     }
 
-    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
 
-    if let controller = window?.rootViewController as? FlutterViewController {
-      FlutterMethodChannel(
-        name: "erbilcafe/platform_config",
-        binaryMessenger: controller.binaryMessenger
-      ).setMethodCallHandler { [weak self] call, result in
-        switch call.method {
-        case "mapsConfigured":
-          result(self?.mapsConfigured ?? false)
-        default:
-          result(FlutterMethodNotImplemented)
-        }
+  /// Plugins and channels are registered here, not in didFinishLaunching.
+  ///
+  /// Under the UIScene lifecycle (required from iOS 27) the window and its
+  /// root view controller don't exist yet at launch, so the engine hands us
+  /// its registries once it's up.
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    FlutterMethodChannel(
+      name: "erbilcafe/platform_config",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    ).setMethodCallHandler { [weak self] call, result in
+      switch call.method {
+      case "mapsConfigured":
+        result(self?.mapsConfigured ?? false)
+      default:
+        result(FlutterMethodNotImplemented)
       }
     }
-
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
