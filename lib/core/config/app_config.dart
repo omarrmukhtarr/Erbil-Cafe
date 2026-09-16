@@ -30,6 +30,27 @@ abstract final class AppConfig {
         : 'http://127.0.0.1:3100/api/v1';
   }
 
+  static const _webUrlOverride = String.fromEnvironment('WEB_URL');
+
+  /// Where the public web pages live — terms, privacy, account deletion.
+  ///
+  /// They are served by the dashboard, so the app links to them rather than
+  /// carrying a second copy of legal text that could drift. Locally that is
+  /// the dashboard on 3101; a release build must pass `WEB_URL` once hosting
+  /// is decided.
+  static String get webUrl {
+    if (_webUrlOverride.isNotEmpty) return _webUrlOverride;
+    return defaultTargetPlatform == TargetPlatform.android
+        ? 'http://10.0.2.2:3101'
+        : 'http://127.0.0.1:3101';
+  }
+
+  static String get termsUrl => '$webUrl/terms';
+  static String get privacyUrl => '$webUrl/privacy';
+
+  /// The address the published privacy policy and terms already give.
+  static const supportEmail = 'support@erbilcafe.app';
+
   /// Only used by the web build; the native SDKs read the key from their own
   /// platform config, which is not committed.
   static const mapsApiKey = String.fromEnvironment('MAPS_API_KEY');

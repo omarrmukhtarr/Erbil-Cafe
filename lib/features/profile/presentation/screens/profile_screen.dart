@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +8,9 @@ import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/config/app_config.dart';
+import '../../../../core/network/response_cache.dart';
+import '../../../../core/utils/support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/error/failure.dart';
 import '../../../auth/data/models/user.dart';
@@ -60,6 +64,54 @@ class ProfileScreen extends StatelessWidget {
 
               const Gap.xxl(),
               const _ThemePicker(),
+
+              const Gap.section(),
+              const _Divider(),
+              const Gap.xl(),
+
+              _SectionTitle(l10n.helpAndSupport),
+              const Gap.sm(),
+              _Tile(
+                icon: Icons.help_outline_rounded,
+                label: l10n.helpCenter,
+                onTap: () => context.push(Routes.help),
+              ),
+              _Tile(
+                icon: Icons.mail_outline_rounded,
+                label: l10n.contactSupport,
+                onTap: () => Support.contactSupport(context),
+              ),
+              _Tile(
+                icon: Icons.flag_outlined,
+                label: l10n.reportProblem,
+                onTap: () => Support.reportProblem(context),
+              ),
+
+              const Gap.xl(),
+              _SectionTitle(l10n.legal),
+              const Gap.sm(),
+              _Tile(
+                icon: Icons.description_outlined,
+                label: l10n.termsOfService,
+                external: true,
+                onTap: () => Support.openPage(context, AppConfig.termsUrl),
+              ),
+              _Tile(
+                icon: Icons.privacy_tip_outlined,
+                label: l10n.privacyPolicy,
+                external: true,
+                onTap: () => Support.openPage(context, AppConfig.privacyUrl),
+              ),
+              _Tile(
+                icon: Icons.code_rounded,
+                label: l10n.openSourceLicenses,
+                onTap: () => _showLicences(context),
+              ),
+
+              const Gap.xl(),
+              _SectionTitle(l10n.storage),
+              const Gap.sm(),
+              const _ClearCacheTile(),
 
               const Gap.section(),
               const _Divider(),
@@ -161,6 +213,18 @@ class _Account extends StatelessWidget {
         ],
 
         const Gap.xl(),
+        _Tile(
+          icon: Icons.edit_outlined,
+          label: l10n.editProfile,
+          onTap: () => context.push(Routes.editProfile),
+        ),
+        // A phone-only account has no password to change.
+        if (user.email != null)
+          _Tile(
+            icon: Icons.lock_outline_rounded,
+            label: l10n.changePassword,
+            onTap: () => context.push(Routes.changePassword),
+          ),
         _Tile(
           icon: Icons.event_seat_outlined,
           label: l10n.myBookings,
@@ -291,14 +355,25 @@ class _About extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '${l10n.appName} · v2.0.0\n${l10n.appTagline}',
-          style: theme.textTheme.bodySmall,
+        // The installed build, not a number typed into the source that
+        // nobody remembers to change.
+        FutureBuilder<String>(
+          future: Support.version(),
+          builder: (context, snapshot) {
+            final title = [
+              l10n.appName,
+              if (snapshot.hasData) l10n.appVersion(snapshot.data!),
+            ].join(' · ');
+            return Text(
+              '$title\n${l10n.appTagline}',
+              style: theme.textTheme.bodySmall,
+            );
+          },
         ),
         const Gap.md(),
-        // Much of the café catalogue is imported from OpenStreetMap, whose
-        // ODbL licence requires this credit wherever the data is shown. It is
-        // a condition of using the data, not a courtesy.
+        // Much of the café catalogue is imported from OpenStreetMap and
+        // Overture Maps, whose licences require this credit wherever the data
+        // is shown. It is a condition of using the data, not a courtesy.
         Text(l10n.dataAttribution, style: theme.textTheme.labelSmall),
       ],
     );
@@ -383,16 +458,29 @@ class _Stat extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.icon, required this.label, required this.onTap});
+  const _Tile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
+    this.external = false,
+    this.busy = false,
+  });
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final String? subtitle;
+  final VoidCallback? onTap;
+
+  /// Leads out of the app, so it says so rather than promising a screen.
+  final bool external;
+
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: onTap,
+      onTap: busy ? null : onTap,
       contentPadding: EdgeInsets.zero,
       leading: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
@@ -403,9 +491,79 @@ class _Tile extends StatelessWidget {
         child: Icon(icon, size: 20, color: AppColors.accent),
       ),
       title: Text(label),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.onCreamMuted),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
+      trailing: busy
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(
+              external ? Icons.north_east_rounded : Icons.chevron_right,
+              size: external ? 18 : 24,
+              color: AppColors.onCreamMuted,
+            ),
     );
   }
+}
+
+/// Empties the photo cache and the catalogue cache.
+///
+/// Photos are the bulk of what the app keeps on the phone, and "the app is
+/// taking space" is a reason people delete apps. Nothing here is lost: photos
+/// download again as they are shown.
+class _ClearCacheTile extends StatefulWidget {
+  const _ClearCacheTile();
+
+  @override
+  State<_ClearCacheTile> createState() => _ClearCacheTileState();
+}
+
+class _ClearCacheTileState extends State<_ClearCacheTile> {
+  bool _busy = false;
+
+  Future<void> _clear() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() => _busy = true);
+    await DefaultCacheManager().emptyCache();
+    PaintingBinding.instance.imageCache
+      ..clear()
+      ..clearLiveImages();
+    ResponseCache.shared.clear();
+
+    if (!mounted) return;
+    setState(() => _busy = false);
+    messenger.showSnackBar(SnackBar(content: Text(l10n.cacheCleared)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return _Tile(
+      icon: Icons.cleaning_services_outlined,
+      label: l10n.clearCache,
+      subtitle: l10n.clearCacheSubtitle,
+      busy: _busy,
+      onTap: _clear,
+    );
+  }
+}
+
+/// Flutter's own licence page, with the app's name and version on it.
+Future<void> _showLicences(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final version = await Support.version();
+  if (!context.mounted) return;
+
+  showLicensePage(
+    context: context,
+    applicationName: l10n.appName,
+    applicationVersion: version,
+  );
 }
 
 /// A radio group rendered as pills, matching the app's chip style.
