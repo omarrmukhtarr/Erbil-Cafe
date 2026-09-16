@@ -633,4 +633,157 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteAccountAction => 'احذف حسابي';
+
+  @override
+  String get account => 'الحساب';
+
+  @override
+  String get optional => 'اختياري';
+
+  @override
+  String get profileSaved => 'تم حفظ ملفك الشخصي.';
+
+  @override
+  String get emailCannotChange =>
+      'بريدك الإلكتروني هو وسيلة تسجيل دخولك، لذلك لا يمكن تغييره هنا. تواصل مع الدعم إذا احتجت إلى تغييره.';
+
+  @override
+  String get phoneChangeNote =>
+      'تغيير رقمك يعني أنه سيحتاج إلى التحقق منه مرة أخرى.';
+
+  @override
+  String get passwordChanged =>
+      'تم تغيير كلمة المرور. تم تسجيل الخروج من الأجهزة الأخرى.';
+
+  @override
+  String get passwordChangeExplain =>
+      'بعد تغييرها، ستحتاج كل الهواتف الأخرى المسجلة في حسابك إلى كلمة المرور الجديدة.';
+
+  @override
+  String get newPasswordSameAsOld => 'اختر كلمة مرور مختلفة عن كلمتك الحالية.';
+
+  @override
+  String get helpAndSupport => 'المساعدة والدعم';
+
+  @override
+  String get helpCenter => 'المساعدة والأسئلة الشائعة';
+
+  @override
+  String get contactSupport => 'تواصل مع الدعم';
+
+  @override
+  String get reportProblem => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get reportProblemSubject => 'بلاغ عن مشكلة';
+
+  @override
+  String noEmailApp(String address) {
+    return 'لا يوجد تطبيق بريد مُعدّ. راسلنا على $address — تم نسخ العنوان.';
+  }
+
+  @override
+  String get legal => 'قانوني';
+
+  @override
+  String get termsOfService => 'شروط الخدمة';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get openSourceLicenses => 'تراخيص البرمجيات مفتوحة المصدر';
+
+  @override
+  String get couldNotOpenPage => 'تعذّر فتح تلك الصفحة.';
+
+  @override
+  String get storage => 'التخزين';
+
+  @override
+  String get clearCache => 'مسح الصور والبيانات المخزنة مؤقتًا';
+
+  @override
+  String get clearCacheSubtitle =>
+      'يحرّر مساحة على هاتفك. ستُحمَّل الصور من جديد أثناء التصفح.';
+
+  @override
+  String get cacheCleared => 'تم مسح الصور والبيانات المخزنة مؤقتًا.';
+
+  @override
+  String appVersion(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get faqTitle => 'الأسئلة الشائعة';
+
+  @override
+  String get faqFindQ => 'كيف أجد مقهى؟';
+
+  @override
+  String get faqFindA =>
+      'استخدم «استكشاف» للبحث بالاسم بالكردية أو العربية أو الإنجليزية، وضيّق القائمة بالأزرار — مفتوح الآن، السعر، ما يقدمه المقهى، أو منطقته. يعرض تبويب الخريطة كل المقاهي؛ اضغط على رقم لتكبير ذلك الجزء من المدينة.';
+
+  @override
+  String get faqOpenNowQ => 'لماذا يظهر مقهى مغلقًا وهو مفتوح؟';
+
+  @override
+  String get faqOpenNowA =>
+      'تُحسب حالة «مفتوح الآن» من ساعات عمل المقهى. كثير من المقاهي لم تُدرج ساعاتها بعد، والمقهى الذي لا ساعات له لا يمكن إظهاره مفتوحًا. إذا كنت تعرف ساعات مقهى، أبلغنا بها وسنضيفها.';
+
+  @override
+  String get faqSaveQ => 'كيف أحفظ مقهى؟';
+
+  @override
+  String get faqSaveA =>
+      'اضغط على القلب في بطاقته أو أعلى صفحته. المقاهي المحفوظة في تبويب «المحفوظة». الحفظ يحتاج إلى حساب، لذلك تنتقل قائمتك معك إلى هاتف جديد.';
+
+  @override
+  String get faqBookQ => 'كيف يعمل حجز طاولة؟';
+
+  @override
+  String get faqBookA =>
+      'اختر التاريخ والوقت وعدد الأشخاص في صفحة المقهى وأرسل الطلب. يؤكد المقهى الطلب أو يرفضه، وستصلك إشعارات في الحالتين. طلباتك وحالتها في «حجوزاتي».';
+
+  @override
+  String get faqCancelQ => 'كيف ألغي حجزًا؟';
+
+  @override
+  String get faqCancelA =>
+      'افتح «حجوزاتي» من ملفك الشخصي واضغط «إلغاء الحجز» على طلب ما زال قيد الانتظار أو مؤكدًا. يظهر ملغى لدى المقهى فورًا.';
+
+  @override
+  String get faqRateQ => 'كيف تعمل التقييمات والمراجعات؟';
+
+  @override
+  String get faqRateA =>
+      'اضغط على النجوم في صفحة المقهى لتقييمه، وأضف مراجعة مكتوبة إن شئت. لك مراجعة واحدة لكل مقهى؛ التقييم مرة أخرى يستبدلها. تظهر المراجعات فورًا، وتُحذف المخالفة للقواعد.';
+
+  @override
+  String get faqWrongInfoQ => 'بيانات مقهى خاطئة أو ناقصة. ماذا أفعل؟';
+
+  @override
+  String get faqWrongInfoA =>
+      'استخدم «الإبلاغ عن مشكلة» وأخبرنا باسم المقهى وما يجب تغييره — الساعات أو رقم الهاتف أو الموقع أو الصور. يمكن لأصحاب المقاهي أيضًا إدارة صفحاتهم.';
+
+  @override
+  String get faqLanguageQ => 'كيف أغيّر اللغة؟';
+
+  @override
+  String get faqLanguageA =>
+      'اخترها من «التفضيلات» في ملفك الشخصي. تتغير أسماء المقاهي وأوصافها أيضًا حيثما توفرت ترجمة.';
+
+  @override
+  String get faqDeleteQ => 'كيف أحذف حسابي؟';
+
+  @override
+  String get faqDeleteA =>
+      'مرّر إلى أسفل ملفك الشخصي واضغط «احذف حسابي». تُمحى بياناتك الشخصية وتُلغى حجوزاتك؛ وتبقى مراجعاتك على المقهى باسم «مستخدم محذوف».';
+
+  @override
+  String get stillNeedHelp => 'ما زلت بحاجة إلى مساعدة؟';
+
+  @override
+  String get stillNeedHelpBody => 'راسلنا وسيرد عليك شخص، عادةً خلال يوم.';
 }
