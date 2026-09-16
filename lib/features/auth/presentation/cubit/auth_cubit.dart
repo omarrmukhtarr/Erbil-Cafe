@@ -158,6 +158,45 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// Changes the password and keeps this phone signed in.
+  ///
+  /// The API revokes *every* refresh token when a password changes — that is
+  /// how other devices get signed out — and that includes this one. Left
+  /// alone, the app would carry on for up to fifteen minutes on its access
+  /// token and then drop the user to sign-in for no reason they could see. So
+  /// it signs straight back in with the new password.
+  ///
+  /// Throws the [Failure] on a wrong current password, so the form can say so.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = state.user;
+    if (user == null) return;
+
+    await _repository.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+
+    final email = user.email;
+    if (email == null) {
+      // A phone-only account has no password sign-in to renew with.
+      await logout();
+      return;
+    }
+
+    try {
+      final renewed = await _repository.login(email: email, password: newPassword);
+      if (isClosed) return;
+      emit(AuthState(status: AuthStatus.authenticated, user: renewed));
+    } on Failure {
+      // The password did change; only the renewal failed. Signing in again is
+      // the honest next step.
+      await logout();
+    }
+  }
+
   Future<bool> updateProfile({String? name, String? phone, String? locale}) async {
     // Guests reach this through the language picker on the profile tab, which
     // is open to them on purpose. There is no account to write the choice to,
