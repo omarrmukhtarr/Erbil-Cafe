@@ -71,7 +71,6 @@ class CafeCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _Photo(cafe: cafe, compact: compact, onFavoriteTap: onFavoriteTap),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
@@ -104,9 +103,7 @@ class CafeCard extends StatelessWidget {
                   ],
                 ),
                 const Gap(6),
-
                 _MetaRow(cafe: cafe, l10n: l10n),
-
                 if (!compact && cafe.description.isNotEmpty) ...[
                   const Gap.sm(),
                   Text(
@@ -120,33 +117,12 @@ class CafeCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-
                 if (cafe.amenities.isNotEmpty) ...[
                   const Gap.md(),
-                  if (compact)
-                    // One measured row — never a clipped pill, and never a
-                    // second line that would grow the tile past the carousel's
-                    // fixed height.
-                    AmenityStrip(amenities: cafe.amenities)
-                  else
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: [
-                        for (final amenity in cafe.amenities.take(4))
-                          Pill(
-                            label: amenity.name,
-                            background: AppColors.cardDarkAlt,
-                            foreground: AppColors.onCardMuted,
-                          ),
-                        if (cafe.amenities.length > 4)
-                          Pill(
-                            label: '+${cafe.amenities.length - 4}',
-                            background: AppColors.cardDarkAlt,
-                            foreground: AppColors.onCardMuted,
-                          ),
-                      ],
-                    ),
+                  // One measured row on every card — never a clipped pill,
+                  // and never a `+3` stranded on a line of its own, which is
+                  // what the wrapping version left under a long amenity list.
+                  AmenityStrip(amenities: cafe.amenities),
                 ],
               ],
             ),
@@ -199,16 +175,25 @@ class _Photo extends StatelessWidget {
           right: AppSpacing.md,
           child: Row(
             children: [
-              if (cafe.isFeatured)
-                Flexible(
-                  child: Pill(
-                    label: l10n.featured,
-                    background: AppColors.cream,
-                    foreground: AppColors.onCream,
-                    icon: Icons.star_rounded,
-                  ),
+              // The left badge takes whatever the right one leaves and hugs
+              // the start of it. It used to be a Flexible followed by a
+              // Spacer: equal flex split the spare width in half, so the badge
+              // on the right stopped in the middle of the row instead of the
+              // corner whenever the left one was narrower than that half.
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: cafe.isFeatured
+                      ? Pill(
+                          label: l10n.featured,
+                          background: AppColors.cream,
+                          foreground: AppColors.onCream,
+                          icon: Icons.star_rounded,
+                        )
+                      : const SizedBox.shrink(),
                 ),
-              const Spacer(),
+              ),
+              const HGap.sm(),
               _RatingBadge(
                 rating: cafe.ratingAvg,
                 reviewCount: cafe.reviewCount,
@@ -225,19 +210,23 @@ class _Photo extends StatelessWidget {
           right: AppSpacing.md,
           child: Row(
             children: [
-              Flexible(
-                child: _OpenBadge(
-                  isOpen: cafe.isOpenNow,
-                  label: cafe.isOpenNow ? l10n.openNow : l10n.closed,
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: _OpenBadge(
+                    isOpen: cafe.isOpenNow,
+                    label: cafe.isOpenNow ? l10n.openNow : l10n.closed,
+                  ),
                 ),
               ),
-              const Spacer(),
-              if (onFavoriteTap != null)
+              if (onFavoriteTap != null) ...[
+                const HGap.sm(),
                 _FavoriteButton(
                   isFavorited: cafe.isFavorited,
                   onTap: onFavoriteTap!,
                   label: l10n.favorites,
                 ),
+              ],
             ],
           ),
         ),
@@ -305,7 +294,9 @@ class _CafeImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url == null) return _NoPhoto(name: name, reason: _NoPhotoReason.missing);
+    if (url == null) {
+      return _NoPhoto(name: name, reason: _NoPhotoReason.missing);
+    }
 
     // Decode at roughly the size it is drawn at, whatever the source turns
     // out to be. Without this a café whose cover has no thumbnail — an
@@ -360,11 +351,18 @@ class _NoPhoto extends StatelessWidget {
   }
 
   String get _initials {
-    final words =
-        name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    // Only words that start with a letter or digit, in any script: "N & Lemon
+    // Cafe" read as "N&" when the ampersand counted as a word.
+    final words = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) =>
+            w.isNotEmpty && RegExp(r'^[\p{L}\p{N}]', unicode: true).hasMatch(w))
+        .toList();
     if (words.isEmpty) return '?';
     if (words.length == 1) return words.first.characters.first.toUpperCase();
-    return (words[0].characters.first + words[1].characters.first).toUpperCase();
+    return (words[0].characters.first + words[1].characters.first)
+        .toUpperCase();
   }
 
   @override
@@ -464,24 +462,33 @@ class _RatingBadge extends StatelessWidget {
         children: [
           const Icon(Icons.star_rounded, size: 14, color: AppColors.accent),
           const HGap(3),
-          Text(
-            rating.toStringAsFixed(1),
-            style: const TextStyle(
-              color: AppColors.cream,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
-          ),
-          const HGap(3),
-          Text(
-            '($reviewCount)',
-            style: TextStyle(
-              color: AppColors.cream.withValues(alpha: 0.6),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
+          // The average and the count share a baseline. Centred, the smaller
+          // count rode up like a superscript next to the average.
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                rating.toStringAsFixed(1),
+                style: const TextStyle(
+                  color: AppColors.cream,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
+              ),
+              const HGap(3),
+              Text(
+                '($reviewCount)',
+                style: TextStyle(
+                  color: AppColors.cream.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -707,7 +714,8 @@ class Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(icon == null ? 10 : 7, 5, 10, 5),
-      decoration: BoxDecoration(color: background, borderRadius: AppRadius.pillR),
+      decoration:
+          BoxDecoration(color: background, borderRadius: AppRadius.pillR),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
