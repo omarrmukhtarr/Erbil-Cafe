@@ -633,4 +633,159 @@ class AppLocalizationsKu extends AppLocalizations {
 
   @override
   String get deleteAccountAction => 'هەژمارەکەم بسڕەوە';
+
+  @override
+  String get account => 'هەژمار';
+
+  @override
+  String get optional => 'ئارەزوومەندانە';
+
+  @override
+  String get profileSaved => 'پرۆفایلەکەت پاشەکەوت کرا.';
+
+  @override
+  String get emailCannotChange =>
+      'ئیمەیڵەکەت ڕێگای چوونەژوورەوەتە، بۆیە لێرە ناگۆڕدرێت. ئەگەر پێویستت بە گۆڕینی هەیە پەیوەندی بە پشتگیرییەوە بکە.';
+
+  @override
+  String get phoneChangeNote =>
+      'گۆڕینی ژمارەکەت واتە دەبێت دووبارە پشتڕاست بکرێتەوە.';
+
+  @override
+  String get passwordChanged =>
+      'وشەی نهێنی گۆڕدرا. ئامێرەکانی تر لە هەژمارەکە دەرکران.';
+
+  @override
+  String get passwordChangeExplain =>
+      'دوای گۆڕینی، هەموو مۆبایلەکانی تر کە بە هەژمارەکەت چوونەتە ژوورەوە پێویستیان بە وشەی نهێنی نوێ دەبێت.';
+
+  @override
+  String get newPasswordSameAsOld =>
+      'وشەی نهێنییەک هەڵبژێرە جیاواز لە ئەوەی ئێستا.';
+
+  @override
+  String get helpAndSupport => 'یارمەتی و پشتگیری';
+
+  @override
+  String get helpCenter => 'یارمەتی و پرسیارە باوەکان';
+
+  @override
+  String get contactSupport => 'پەیوەندی بە پشتگیری';
+
+  @override
+  String get reportProblem => 'ڕاپۆرتکردنی کێشەیەک';
+
+  @override
+  String get reportProblemSubject => 'ڕاپۆرتی کێشە';
+
+  @override
+  String noEmailApp(String address) {
+    return 'هیچ ئەپێکی ئیمەیڵ ڕێکنەخراوە. بۆمان بنووسە لە $address — کۆپی کرا.';
+  }
+
+  @override
+  String get legal => 'یاسایی';
+
+  @override
+  String get termsOfService => 'مەرجەکانی بەکارهێنان';
+
+  @override
+  String get privacyPolicy => 'سیاسەتی تایبەتمەندی';
+
+  @override
+  String get openSourceLicenses => 'مۆڵەتەکانی سەرچاوەی کراوە';
+
+  @override
+  String get couldNotOpenPage => 'ئەو پەڕەیە نەکرایەوە.';
+
+  @override
+  String get storage => 'بیرگە';
+
+  @override
+  String get clearCache => 'سڕینەوەی وێنە و داتای هەڵگیراو';
+
+  @override
+  String get clearCacheSubtitle =>
+      'شوێن لە مۆبایلەکەت ئازاد دەکات. وێنەکان لە کاتی گەڕاندا دووبارە دادەبەزن.';
+
+  @override
+  String get cacheCleared => 'وێنە و داتای هەڵگیراو سڕانەوە.';
+
+  @override
+  String appVersion(String version) {
+    return 'وەشانی $version';
+  }
+
+  @override
+  String get faqTitle => 'پرسیارە باوەکان';
+
+  @override
+  String get faqFindQ => 'چۆن کافێیەک بدۆزمەوە؟';
+
+  @override
+  String get faqFindA =>
+      'لە «گەڕان» بە ناو بە کوردی، عەرەبی یان ئینگلیزی بگەڕێ، و لیستەکە بە دوگمە بچووکەکان کورت بکەرەوە — ئێستا کراوەیە، نرخ، ئەوەی کافێکە پێشکەشی دەکات، یان ناوچەکەی. بەشی «نەخشە» هەموو کافێکان پیشان دەدات؛ کرتە لە ژمارەیەک بکە بۆ نزیکبوونەوە لەو بەشەی شار.';
+
+  @override
+  String get faqOpenNowQ => 'بۆچی کافێیەک داخراو پیشان دەدرێت کاتێک کراوەیە؟';
+
+  @override
+  String get faqOpenNowA =>
+      '«ئێستا کراوەیە» لە کاتژمێرەکانی کارکردنی کافێکەوە دیاری دەکرێت. زۆر کافێ هێشتا کاتژمێرەکانیان تۆمار نەکردووە، و کافێیەک بێ کاتژمێر ناتوانرێت کراوە پیشان بدرێت. ئەگەر کاتژمێرەکانی کافێیەک دەزانیت، ڕاپۆرتی بکە و زیادی دەکەین.';
+
+  @override
+  String get faqSaveQ => 'چۆن کافێیەک پاشەکەوت بکەم؟';
+
+  @override
+  String get faqSaveA =>
+      'کرتە لە دڵەکە بکە لەسەر کارتەکەی یان لە سەرەوەی پەڕەکەی. کافێ پاشەکەوتکراوەکان لە بەشی «پاشەکەوتکراو»ن. پاشەکەوتکردن پێویستی بە هەژمار هەیە، بۆیە لیستەکەت لەگەڵت دێت بۆ مۆبایلێکی نوێ.';
+
+  @override
+  String get faqBookQ => 'حیجزکردنی مێز چۆن کار دەکات؟';
+
+  @override
+  String get faqBookA =>
+      'لە پەڕەی کافێکە بەروار، کات و ژمارەی کەسەکان هەڵبژێرە و داواکارییەکە بنێرە. کافێکە پشتڕاستی دەکاتەوە یان ڕەتی دەکاتەوە، و لە هەردوو حاڵەتدا ئاگادار دەکرێیتەوە. داواکارییەکانت و دۆخیان لە «حیجزەکانی من»دان.';
+
+  @override
+  String get faqCancelQ => 'چۆن حیجزێک هەڵبوەشێنمەوە؟';
+
+  @override
+  String get faqCancelA =>
+      'لە پرۆفایلەکەتەوە «حیجزەکانی من» بکەرەوە و کرتە لە «هەڵوەشاندنەوەی حیجز» بکە لەسەر داواکارییەک کە هێشتا چاوەڕوانە یان پشتڕاستکراوەتەوە. یەکسەر لای کافێکە وەک هەڵوەشاوە دەردەکەوێت.';
+
+  @override
+  String get faqRateQ => 'هەڵسەنگاندن و پێداچوونەوەکان چۆن کار دەکەن؟';
+
+  @override
+  String get faqRateA =>
+      'کرتە لە ئەستێرەکان بکە لە پەڕەی کافێیەک بۆ هەڵسەنگاندنی، و ئەگەر ویستت پێداچوونەوەیەکی نووسراو زیاد بکە. بۆ هەر کافێیەک یەک پێداچوونەوەت هەیە؛ هەڵسەنگاندنی دووبارە جێگەی دەگرێتەوە. پێداچوونەوەکان یەکسەر دەردەکەون، و ئەوانەی یاساکان دەشکێنن لادەبرێن.';
+
+  @override
+  String get faqWrongInfoQ => 'زانیارییەکانی کافێیەک هەڵەن یان نین. چی بکەم؟';
+
+  @override
+  String get faqWrongInfoA =>
+      '«ڕاپۆرتکردنی کێشەیەک» بەکاربهێنە و ناوی کافێکە و ئەوەی دەبێت بگۆڕدرێت پێمان بڵێ — کاتژمێرەکان، ژمارەی مۆبایل، شوێن یان وێنەکان. خاوەن کافێکانیش دەتوانن پەڕەی خۆیان بەڕێوە ببەن.';
+
+  @override
+  String get faqLanguageQ => 'چۆن زمان بگۆڕم؟';
+
+  @override
+  String get faqLanguageA =>
+      'لە «هەڵبژاردەکان» لە پرۆفایلەکەت هەڵیبژێرە. ناو و وەسفی کافێکانیش دەگۆڕێن، لە هەر شوێنێک کافێکە وەرگێڕانی هەبێت.';
+
+  @override
+  String get faqDeleteQ => 'چۆن هەژمارەکەم بسڕمەوە؟';
+
+  @override
+  String get faqDeleteA =>
+      'بڕۆ بۆ خوارەوەی پرۆفایلەکەت و کرتە لە «هەژمارەکەم بسڕەوە» بکە. زانیارییە کەسییەکانت دەسڕدرێنەوە و حیجزەکانت هەڵدەوەشێنەوە؛ پێداچوونەوەکانت بە ناوی «بەکارهێنەری سڕاوە» لەسەر کافێکە دەمێننەوە.';
+
+  @override
+  String get stillNeedHelp => 'هێشتا پێویستت بە یارمەتییە؟';
+
+  @override
+  String get stillNeedHelpBody =>
+      'بۆمان بنووسە و کەسێک وەڵامت دەداتەوە، زۆربەی کات لە ماوەی ڕۆژێکدا.';
 }

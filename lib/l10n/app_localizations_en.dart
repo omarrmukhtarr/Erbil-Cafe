@@ -634,4 +634,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountAction => 'Delete my account';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get optional => 'optional';
+
+  @override
+  String get profileSaved => 'Your profile has been saved.';
+
+  @override
+  String get emailCannotChange =>
+      'Your email is how you sign in, so it cannot be changed here. Contact support if you need to change it.';
+
+  @override
+  String get phoneChangeNote =>
+      'Changing your number means it will need to be verified again.';
+
+  @override
+  String get passwordChanged =>
+      'Password changed. Other devices have been signed out.';
+
+  @override
+  String get passwordChangeExplain =>
+      'After changing it, every other phone signed in to your account will need the new password.';
+
+  @override
+  String get newPasswordSameAsOld =>
+      'Choose a password different from your current one.';
+
+  @override
+  String get helpAndSupport => 'Help & support';
+
+  @override
+  String get helpCenter => 'Help & FAQ';
+
+  @override
+  String get contactSupport => 'Contact support';
+
+  @override
+  String get reportProblem => 'Report a problem';
+
+  @override
+  String get reportProblemSubject => 'Problem report';
+
+  @override
+  String noEmailApp(String address) {
+    return 'No email app is set up. Write to us at $address — it has been copied.';
+  }
+
+  @override
+  String get legal => 'Legal';
+
+  @override
+  String get termsOfService => 'Terms of service';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get openSourceLicenses => 'Open-source licences';
+
+  @override
+  String get couldNotOpenPage => 'That page could not be opened.';
+
+  @override
+  String get storage => 'Storage';
+
+  @override
+  String get clearCache => 'Clear cached photos and data';
+
+  @override
+  String get clearCacheSubtitle =>
+      'Frees space on your phone. Photos download again as you browse.';
+
+  @override
+  String get cacheCleared => 'Cached photos and data cleared.';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get faqTitle => 'Frequently asked questions';
+
+  @override
+  String get faqFindQ => 'How do I find a café?';
+
+  @override
+  String get faqFindA =>
+      'Use Explore to search by name in Kurdish, Arabic or English, and narrow the list with the chips — open now, price, what the café offers, or its area. The Map tab shows every café; tap a number to zoom into that part of town.';
+
+  @override
+  String get faqOpenNowQ => 'Why does a café show as closed when it is open?';
+
+  @override
+  String get faqOpenNowA =>
+      '“Open now” is worked out from the café\'s opening hours. Many cafés have not listed their hours yet, and a café with no hours cannot be shown as open. If you know a café\'s hours, report them and we will add them.';
+
+  @override
+  String get faqSaveQ => 'How do I save a café?';
+
+  @override
+  String get faqSaveA =>
+      'Tap the heart on its card or at the top of its page. Saved cafés are in the Saved tab. Saving needs an account, so your list follows you to a new phone.';
+
+  @override
+  String get faqBookQ => 'How does booking a table work?';
+
+  @override
+  String get faqBookA =>
+      'Choose a date, a time and how many people on the café\'s page and send the request. The café confirms or declines it, and you are notified either way. Your requests and their status are in My bookings.';
+
+  @override
+  String get faqCancelQ => 'How do I cancel a booking?';
+
+  @override
+  String get faqCancelA =>
+      'Open My bookings from your profile and tap Cancel booking on a request that is still pending or confirmed. It shows as cancelled on the café\'s side at once.';
+
+  @override
+  String get faqRateQ => 'How do ratings and reviews work?';
+
+  @override
+  String get faqRateA =>
+      'Tap the stars on a café\'s page to rate it, and add a written review if you like. You have one review per café; rating again replaces it. Reviews appear straight away, and ones that break the rules are removed.';
+
+  @override
+  String get faqWrongInfoQ =>
+      'A café\'s details are wrong or missing. What can I do?';
+
+  @override
+  String get faqWrongInfoA =>
+      'Use Report a problem and tell us the café\'s name and what should change — hours, phone number, location or photos. Café owners can also manage their own page.';
+
+  @override
+  String get faqLanguageQ => 'How do I change the language?';
+
+  @override
+  String get faqLanguageA =>
+      'Choose it under Preferences in your profile. Café names and descriptions switch too, wherever the café has a translation.';
+
+  @override
+  String get faqDeleteQ => 'How do I delete my account?';
+
+  @override
+  String get faqDeleteA =>
+      'Scroll to the bottom of your profile and tap Delete my account. Your personal details are erased and your bookings cancelled; your reviews stay on the café as “Deleted user”.';
+
+  @override
+  String get stillNeedHelp => 'Still need help?';
+
+  @override
+  String get stillNeedHelpBody =>
+      'Write to us and a person will answer, usually within a day.';
 }
