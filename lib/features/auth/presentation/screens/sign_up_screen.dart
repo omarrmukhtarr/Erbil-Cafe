@@ -116,7 +116,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   textInputAction: TextInputAction.next,
                   autofillHints: const [AutofillHints.telephoneNumber],
                   decoration: InputDecoration(
-                    labelText: '${l10n.phoneNumber} (optional)',
+                    labelText: '${l10n.phoneNumber} (${l10n.optional})',
                     hintText: '+9647501234567',
                     prefixIcon: const Icon(Icons.phone_outlined),
                   ),

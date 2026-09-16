@@ -41,6 +41,10 @@ dependencies:
   google_maps_flutter: ^2.18.0   # <2.18 sent newLatLngZoom for a bounds update and crashed iOS
   geolocator: ^13.0.2
   url_launcher: ^6.3.1
+  # Both already in the lockfile through other packages; used directly by
+  # settings for the version line and "clear cached photos".
+  package_info_plus: 9.0.1
+  flutter_cache_manager: 3.4.1
 
   # UI
   cached_network_image: ^3.4.1
