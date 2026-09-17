@@ -1,3 +1,6 @@
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter/widgets.dart';
+import 'package:erbilcafe/l10n/app_localizations.dart';
 import 'package:erbilcafe/core/utils/formatters.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,34 +23,47 @@ void main() {
     });
   });
 
-  group('relative', () {
-    test('describes recent times', () {
-      final now = DateTime.now();
-      expect(Formatters.relative(now), 'just now');
+  group('ago', () {
+    // In the app, flutter_localizations loads date symbols; a unit test has
+    // to ask for them itself.
+    setUpAll(initializeDateFormatting);
+    final en = lookupAppLocalizations(const Locale('en'));
+    final ar = lookupAppLocalizations(const Locale('ar'));
+    final now = DateTime(2026, 9, 17, 12);
+
+    test('describes recent times in words', () {
+      expect(Formatters.ago(now, en, now: now), 'Just now');
       expect(
-        Formatters.relative(now.subtract(const Duration(minutes: 5))),
-        '5m ago',
+        Formatters.ago(now.subtract(const Duration(minutes: 5)), en, now: now),
+        '5 minutes ago',
       );
       expect(
-        Formatters.relative(now.subtract(const Duration(hours: 3))),
-        '3h ago',
+        Formatters.ago(now.subtract(const Duration(hours: 1)), en, now: now),
+        '1 hour ago',
       );
       expect(
-        Formatters.relative(now.subtract(const Duration(days: 2))),
-        '2d ago',
+        Formatters.ago(now.subtract(const Duration(days: 1)), en, now: now),
+        'Yesterday',
       );
     });
 
-    test('rolls up to months and years', () {
-      final now = DateTime.now();
+    test('switches to a date after a week', () {
       expect(
-        Formatters.relative(now.subtract(const Duration(days: 60))),
-        '2mo ago',
+        Formatters.ago(DateTime(2026, 8, 1), en, now: now),
+        'Aug 1, 2026',
       );
+    });
+
+    test('speaks the reader\'s language', () {
+      expect(Formatters.ago(now, ar, now: now), 'الآن');
+      final ku = lookupAppLocalizations(const Locale('ku'));
       expect(
-        Formatters.relative(now.subtract(const Duration(days: 400))),
-        '1y ago',
+        Formatters.ago(now.subtract(const Duration(days: 3)), ku, now: now),
+        '3 ڕۆژ لەمەوبەر',
       );
+      // No Kurdish date symbols in intl: falls back rather than throwing.
+      expect(() => Formatters.ago(DateTime(2026, 1, 1), ku, now: now),
+          returnsNormally);
     });
   });
 }

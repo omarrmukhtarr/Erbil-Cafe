@@ -790,4 +790,170 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get stillNeedHelpBody =>
       'Write to us and a person will answer, usually within a day.';
+
+  @override
+  String get nearMe => 'Near me';
+
+  @override
+  String get nearYou => 'Near you';
+
+  @override
+  String get nearYouSubtitle => 'The closest cafés, nearest first';
+
+  @override
+  String get locationPromptTitle => 'Find cafés near you';
+
+  @override
+  String get locationPromptBody =>
+      'Allow location to see the closest cafés and how far away each one is.';
+
+  @override
+  String get useMyLocation => 'Use my location';
+
+  @override
+  String get locationDeniedBody =>
+      'Location access is turned off for ErbilCafe. Turn it on in Settings to see cafés near you.';
+
+  @override
+  String get locationServiceOffBody =>
+      'Location services are off on this phone. Turn them on to see cafés near you.';
+
+  @override
+  String get locationUnavailable =>
+      'Your location could not be found. Try again in a moment.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get locating => 'Finding your location…';
+
+  @override
+  String noCafesNearby(int km) {
+    return 'No cafés within $km km of you yet.';
+  }
+
+  @override
+  String get sortName => 'Name A–Z';
+
+  @override
+  String get myLocation => 'My location';
+
+  @override
+  String get noNotificationsBody =>
+      'Booking updates, replies to your reviews and news from cafés will appear here.';
+
+  @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String timeMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes ago',
+      one: '1 minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: 'Yesterday',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shareCafeMessage(String name, String url) {
+    return '$name on ErbilCafe\n$url';
+  }
+
+  @override
+  String get reportWrongInfo =>
+      'Something wrong with this café\'s details? Tell us';
+
+  @override
+  String wrongInfoSubject(String name) {
+    return 'Wrong details: $name';
+  }
+
+  @override
+  String get myReviews => 'My reviews';
+
+  @override
+  String get noMyReviews => 'No reviews yet';
+
+  @override
+  String get noMyReviewsBody =>
+      'Rate a café from its page and your reviews will be collected here.';
+
+  @override
+  String get deleteReviewConfirm => 'Delete this review?';
+
+  @override
+  String get deleteReviewExplain =>
+      'It is removed from the café\'s page and no longer counts towards its rating.';
+
+  @override
+  String get reviewDeleted => 'Review deleted.';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get updateReview => 'Update review';
+
+  @override
+  String get forgotPasswordBody =>
+      'Enter your email and we will send you a code to choose a new password.';
+
+  @override
+  String get sendCode => 'Send code';
+
+  @override
+  String get resetPasswordTitle => 'Choose a new password';
+
+  @override
+  String get verificationCode => '6-digit code';
+
+  @override
+  String get codeIncomplete => 'Enter all 6 digits of the code.';
+
+  @override
+  String get passwordResetDone =>
+      'Your password has been changed. You are signed in.';
+
+  @override
+  String devCodeHint(String code) {
+    return 'Development build — code: $code';
+  }
+
+  @override
+  String get verifyEmail => 'Verify your email';
+
+  @override
+  String get verifyEmailBody =>
+      'Confirming your email makes sure booking updates and password resets reach you.';
+
+  @override
+  String get emailVerifiedDone => 'Your email is verified.';
+
+  @override
+  String get emailNotVerified => 'Email not verified';
 }
