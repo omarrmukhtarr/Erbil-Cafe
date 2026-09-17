@@ -174,6 +174,77 @@ class RevealTracker {
   void reset() => _seen.clear();
 }
 
+/// [AnimatedSwitcher], made safe to flip quickly.
+///
+/// A plain `AnimatedSwitcher` keeps the outgoing child alive until its fade
+/// ends, keyed by the child's own key. Flip A → B → A → B inside that window —
+/// tapping the map's location button twice, double-tapping a heart, a list that
+/// reloads in under 280 ms — and two live children end up with the same key.
+/// That is an illegal tree: the app froze and then showed a red
+/// `_dependents.isEmpty` screen. `test/app/switcher_crash_test.dart` pins it.
+///
+/// Here every real change gets a fresh generation number as its key, so an
+/// incoming child can never share a key with one still leaving. Outgoing
+/// children also have their Heroes switched off: a café card fading out and
+/// its replacement fading in are two Heroes with one tag, and a navigation
+/// in that moment threw "multiple heroes share the same tag".
+class SafeSwitcher extends StatefulWidget {
+  const SafeSwitcher({
+    required this.child,
+    this.duration = AppMotion.medium,
+    this.switchInCurve = AppMotion.standard,
+    this.switchOutCurve = AppMotion.standard,
+    this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
+    this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
+    super.key,
+  });
+
+  /// Swapped whenever its key or type changes, exactly as [AnimatedSwitcher]
+  /// decides.
+  final Widget child;
+  final Duration duration;
+  final Curve switchInCurve;
+  final Curve switchOutCurve;
+  final AnimatedSwitcherTransitionBuilder transitionBuilder;
+  final AnimatedSwitcherLayoutBuilder layoutBuilder;
+
+  @override
+  State<SafeSwitcher> createState() => _SafeSwitcherState();
+}
+
+class _SafeSwitcherState extends State<SafeSwitcher> {
+  int _generation = 0;
+
+  @override
+  void didUpdateWidget(SafeSwitcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!Widget.canUpdate(oldWidget.child, widget.child)) _generation++;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: widget.duration,
+      switchInCurve: widget.switchInCurve,
+      switchOutCurve: widget.switchOutCurve,
+      transitionBuilder: widget.transitionBuilder,
+      // Every child is wrapped the same way, current or outgoing, so becoming
+      // outgoing only flips `enabled` rather than rebuilding the subtree.
+      layoutBuilder: (current, previous) => widget.layoutBuilder(
+        current == null ? null : HeroMode(key: current.key, enabled: true, child: current),
+        [
+          for (final child in previous)
+            HeroMode(key: child.key, enabled: false, child: child),
+        ],
+      ),
+      child: KeyedSubtree(
+        key: ValueKey<int>(_generation),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 /// Crossfades between a loading state and the content that replaces it.
 ///
 /// Skeletons and content used to swap between two frames, so a section
@@ -196,10 +267,8 @@ class FadeSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
+    return SafeSwitcher(
       duration: duration,
-      switchInCurve: AppMotion.standard,
-      switchOutCurve: AppMotion.standard,
       layoutBuilder: (current, previous) => Stack(
         alignment: alignment,
         children: [...previous, if (current != null) current],
@@ -222,7 +291,7 @@ class PopSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
+    return SafeSwitcher(
       duration: AppMotion.medium,
       switchInCurve: AppMotion.spring,
       switchOutCurve: Curves.easeIn,
