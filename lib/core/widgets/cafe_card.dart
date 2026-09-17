@@ -255,26 +255,36 @@ class _MetaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     const muted = TextStyle(color: AppColors.onCardMuted, fontSize: 13);
 
+    final area = cafe.area?.trim();
+    final parts = [
+      if (area != null && area.isNotEmpty) area,
+      if (cafe.distanceKm != null)
+        l10n.distanceAway(cafe.distanceKm!.toStringAsFixed(1)),
+    ];
+
+    // Many imported cafés have no area. Joining with a separator only
+    // between parts that exist avoids a row that reads "· 0.1 km away".
+    if (parts.isEmpty) return const SizedBox(height: 18);
+
     return Row(
       children: [
-        const Icon(Icons.location_on_outlined,
-            size: 14, color: AppColors.onCardMuted),
-        const HGap(4),
-        Flexible(
-          child: Text(
-            cafe.area ?? '',
-            style: muted,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+        Icon(
+          cafe.distanceKm != null && (area == null || area.isEmpty)
+              ? Icons.near_me_outlined
+              : Icons.location_on_outlined,
+          size: 14,
+          color: AppColors.onCardMuted,
         ),
-        if (cafe.distanceKm != null) ...[
-          const HGap.sm(),
-          const Text('·', style: muted),
-          const HGap.sm(),
+        const HGap(4),
+        for (final (index, part) in parts.indexed) ...[
+          if (index > 0) ...[
+            const HGap.sm(),
+            const Text('·', style: muted),
+            const HGap.sm(),
+          ],
           Flexible(
             child: Text(
-              l10n.distanceAway(cafe.distanceKm!.toStringAsFixed(1)),
+              part,
               style: muted,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

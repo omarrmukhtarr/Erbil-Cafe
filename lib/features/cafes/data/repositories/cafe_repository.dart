@@ -35,13 +35,17 @@ class CafeQuery {
   final int limit;
   final String? cursor;
 
+  /// Sorting by distance from the phone — the "Near me" chip.
+  bool get isNearMe => sort == 'distance' && lat != null && lng != null;
+
   bool get hasFilters =>
       (search?.isNotEmpty ?? false) ||
       area != null ||
       priceRange != null ||
       amenities.isNotEmpty ||
       minRating != null ||
-      openNow == true;
+      openNow == true ||
+      isNearMe;
 
   CafeQuery copyWith({
     String? search,
@@ -52,8 +56,9 @@ class CafeQuery {
     Object? openNow = _unset,
     String? sort,
     String? cursor,
-    double? lat,
-    double? lng,
+    Object? lat = _unset,
+    Object? lng = _unset,
+    Object? radiusKm = _unset,
   }) =>
       CafeQuery(
         search: search ?? this.search,
@@ -65,9 +70,9 @@ class CafeQuery {
         minRating: minRating == _unset ? this.minRating : minRating as double?,
         openNow: openNow == _unset ? this.openNow : openNow as bool?,
         featured: featured,
-        lat: lat ?? this.lat,
-        lng: lng ?? this.lng,
-        radiusKm: radiusKm,
+        lat: lat == _unset ? this.lat : lat as double?,
+        lng: lng == _unset ? this.lng : lng as double?,
+        radiusKm: radiusKm == _unset ? this.radiusKm : radiusKm as double?,
         sort: sort ?? this.sort,
         limit: limit,
         cursor: cursor,

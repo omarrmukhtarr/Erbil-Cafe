@@ -14,6 +14,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/utils/auth_guard.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/support.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../core/widgets/cafe_card.dart';
@@ -203,7 +204,7 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                   Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: IconButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => _leave(context),
                       icon: const Icon(Icons.arrow_back),
                     ),
                   ),
@@ -220,7 +221,7 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
 
           // Opened from a link: nothing to draw yet but the page's shape.
           if (cafe == null) {
-            return _PageSkeleton(onBack: () => context.pop());
+            return _PageSkeleton(onBack: () => _leave(context));
           }
 
           final myReview = _myReview(state);
@@ -240,7 +241,7 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                 surfaceTintColor: Colors.transparent,
                 leading: _CircleButton(
                   icon: Icons.arrow_back,
-                  onTap: () => context.pop(),
+                  onTap: () => _leave(context),
                   semanticLabel: l10n.close,
                 ),
                 actions: [
@@ -253,6 +254,19 @@ class _CafeDetailScreenState extends State<CafeDetailScreen> {
                     // Saving works from the card's copy too; the page does not
                     // have to finish loading before the heart does anything.
                     onTap: () => toggleFavorite(context, cafe),
+                  ),
+                  Builder(
+                    // Its own context, so the share sheet anchors to this
+                    // button on an iPad rather than to the whole page.
+                    builder: (buttonContext) => _CircleButton(
+                      icon: Icons.ios_share_rounded,
+                      semanticLabel: l10n.share,
+                      onTap: () => Support.shareCafe(
+                        buttonContext,
+                        name: cafe.name,
+                        slug: cafe.slug,
+                      ),
+                    ),
                   ),
                   const HGap.sm(),
                 ],
@@ -597,6 +611,23 @@ class _DetailSections extends StatelessWidget {
           const Gap.md(),
           _OpeningHours(hours: detail.openingHours),
         ],
+
+        // Most cafés came from an import and nobody has checked them yet.
+        // Whoever is looking at the page is best placed to spot what is
+        // wrong, so the way to say so sits right under the details.
+        const Gap.xl(),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton.icon(
+            onPressed: () => Support.reportCafe(
+              context,
+              name: cafe.name,
+              slug: cafe.slug,
+            ),
+            icon: const Icon(Icons.edit_note_rounded, size: 20),
+            label: Text(l10n.reportWrongInfo),
+          ),
+        ),
       ],
     );
   }
@@ -1496,7 +1527,7 @@ class _ReviewTile extends StatelessWidget {
                           ?.copyWith(color: AppColors.onCard),
                     ),
                     Text(
-                      Formatters.relative(review.createdAt),
+                      Formatters.ago(review.createdAt, l10n),
                       style: const TextStyle(
                           color: AppColors.onCardMuted, fontSize: 11.5),
                     ),
@@ -1608,5 +1639,17 @@ class _CircleButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Back, or home when there is nothing to go back to.
+///
+/// A café opened from a shared link or a notification is the only page on the
+/// stack, and popping it would leave nothing on screen.
+void _leave(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(Routes.home);
   }
 }
