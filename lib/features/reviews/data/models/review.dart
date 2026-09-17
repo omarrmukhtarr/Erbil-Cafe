@@ -12,6 +12,7 @@ class Review extends Equatable {
     this.authorAvatar,
     this.reply,
     this.status,
+    this.cafe,
   });
 
   factory Review.fromJson(Map<String, dynamic> json) {
@@ -29,6 +30,9 @@ class Review extends Equatable {
       authorAvatar: user['avatarUrl'] as String?,
       reply: reply == null ? null : ReviewReply.fromJson(reply),
       status: json['status'] as String?,
+      cafe: json['cafe'] == null
+          ? null
+          : ReviewCafe.fromJson(json['cafe'] as Map<String, dynamic>),
     );
   }
 
@@ -46,10 +50,33 @@ class Review extends Equatable {
   /// counted toward the café's average.
   final String? status;
 
+  /// The café reviewed. Only on the caller's own reviews, where the list is
+  /// not already on that café's page.
+  final ReviewCafe? cafe;
+
   bool get isPending => status == 'PENDING';
 
   @override
   List<Object?> get props => [id, rating, comment, status];
+}
+
+class ReviewCafe extends Equatable {
+  const ReviewCafe({required this.id, required this.slug, required this.name, this.coverImage});
+
+  factory ReviewCafe.fromJson(Map<String, dynamic> json) => ReviewCafe(
+        id: json['id'] as String,
+        slug: json['slug'] as String,
+        name: json['name'] as String? ?? '',
+        coverImage: json['coverImage'] as String?,
+      );
+
+  final String id;
+  final String slug;
+  final String name;
+  final String? coverImage;
+
+  @override
+  List<Object?> get props => [id];
 }
 
 class ReviewReply extends Equatable {
