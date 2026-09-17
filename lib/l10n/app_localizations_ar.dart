@@ -786,4 +786,173 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stillNeedHelpBody => 'راسلنا وسيرد عليك شخص، عادةً خلال يوم.';
+
+  @override
+  String get nearMe => 'بالقرب مني';
+
+  @override
+  String get nearYou => 'بالقرب منك';
+
+  @override
+  String get nearYouSubtitle => 'أقرب المقاهي، الأقرب أولًا';
+
+  @override
+  String get locationPromptTitle => 'اعثر على مقاهٍ بالقرب منك';
+
+  @override
+  String get locationPromptBody =>
+      'اسمح بالوصول إلى الموقع لترى أقرب المقاهي وبُعد كل منها.';
+
+  @override
+  String get useMyLocation => 'استخدم موقعي';
+
+  @override
+  String get locationDeniedBody =>
+      'الوصول إلى الموقع مغلق لتطبيق ErbilCafe. فعّله من الإعدادات لترى المقاهي القريبة منك.';
+
+  @override
+  String get locationServiceOffBody =>
+      'خدمات الموقع مغلقة على هذا الهاتف. فعّلها لترى المقاهي القريبة منك.';
+
+  @override
+  String get locationUnavailable =>
+      'تعذّر تحديد موقعك. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get locating => 'جارٍ تحديد موقعك…';
+
+  @override
+  String noCafesNearby(int km) {
+    return 'لا توجد مقاهٍ ضمن $km كم منك بعد.';
+  }
+
+  @override
+  String get sortName => 'الاسم (أ–ي)';
+
+  @override
+  String get myLocation => 'موقعي';
+
+  @override
+  String get noNotificationsBody =>
+      'ستظهر هنا تحديثات الحجوزات والردود على مراجعاتك وأخبار المقاهي.';
+
+  @override
+  String get timeJustNow => 'الآن';
+
+  @override
+  String timeMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'منذ $count دقيقة',
+      few: 'منذ $count دقائق',
+      two: 'منذ دقيقتين',
+      one: 'منذ دقيقة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'منذ $count ساعة',
+      few: 'منذ $count ساعات',
+      two: 'منذ ساعتين',
+      one: 'منذ ساعة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'منذ $count يومًا',
+      few: 'منذ $count أيام',
+      two: 'منذ يومين',
+      one: 'أمس',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shareCafeMessage(String name, String url) {
+    return '$name على ErbilCafe\n$url';
+  }
+
+  @override
+  String get reportWrongInfo => 'هل هناك خطأ في بيانات هذا المقهى؟ أخبرنا';
+
+  @override
+  String wrongInfoSubject(String name) {
+    return 'بيانات خاطئة: $name';
+  }
+
+  @override
+  String get myReviews => 'مراجعاتي';
+
+  @override
+  String get noMyReviews => 'لا توجد مراجعات بعد';
+
+  @override
+  String get noMyReviewsBody => 'قيّم مقهى من صفحته وستُجمع مراجعاتك هنا.';
+
+  @override
+  String get deleteReviewConfirm => 'حذف هذه المراجعة؟';
+
+  @override
+  String get deleteReviewExplain =>
+      'ستُزال من صفحة المقهى ولن تُحتسب في تقييمه بعد الآن.';
+
+  @override
+  String get reviewDeleted => 'تم حذف المراجعة.';
+
+  @override
+  String get edit => 'تعديل';
+
+  @override
+  String get updateReview => 'تحديث المراجعة';
+
+  @override
+  String get forgotPasswordBody =>
+      'أدخل بريدك الإلكتروني وسنرسل لك رمزًا لاختيار كلمة مرور جديدة.';
+
+  @override
+  String get sendCode => 'إرسال الرمز';
+
+  @override
+  String get resetPasswordTitle => 'اختر كلمة مرور جديدة';
+
+  @override
+  String get verificationCode => 'الرمز المكوّن من 6 أرقام';
+
+  @override
+  String get codeIncomplete => 'أدخل أرقام الرمز الستة كلها.';
+
+  @override
+  String get passwordResetDone => 'تم تغيير كلمة المرور وتسجيل دخولك.';
+
+  @override
+  String devCodeHint(String code) {
+    return 'نسخة التطوير — الرمز: $code';
+  }
+
+  @override
+  String get verifyEmail => 'تأكيد بريدك الإلكتروني';
+
+  @override
+  String get verifyEmailBody =>
+      'تأكيد بريدك يضمن وصول تحديثات الحجوزات ورسائل إعادة تعيين كلمة المرور إليك.';
+
+  @override
+  String get emailVerifiedDone => 'تم تأكيد بريدك الإلكتروني.';
+
+  @override
+  String get emailNotVerified => 'البريد غير مؤكد';
 }

@@ -788,4 +788,169 @@ class AppLocalizationsKu extends AppLocalizations {
   @override
   String get stillNeedHelpBody =>
       'بۆمان بنووسە و کەسێک وەڵامت دەداتەوە، زۆربەی کات لە ماوەی ڕۆژێکدا.';
+
+  @override
+  String get nearMe => 'نزیکی من';
+
+  @override
+  String get nearYou => 'نزیک تۆ';
+
+  @override
+  String get nearYouSubtitle => 'نزیکترین کافێکان، نزیکترین یەکەم';
+
+  @override
+  String get locationPromptTitle => 'کافێی نزیک خۆت بدۆزەرەوە';
+
+  @override
+  String get locationPromptBody =>
+      'ڕێگە بە شوێن بدە بۆ بینینی نزیکترین کافێکان و دووری هەر یەکێکیان.';
+
+  @override
+  String get useMyLocation => 'شوێنەکەم بەکاربهێنە';
+
+  @override
+  String get locationDeniedBody =>
+      'دەستگەیشتن بە شوێن بۆ ErbilCafe کوژاوەتەوە. لە ڕێکخستنەکان هەڵیبکە بۆ بینینی کافێی نزیک خۆت.';
+
+  @override
+  String get locationServiceOffBody =>
+      'خزمەتگوزاری شوێن لەم مۆبایلە کوژاوەتەوە. هەڵیبکە بۆ بینینی کافێی نزیک خۆت.';
+
+  @override
+  String get locationUnavailable =>
+      'شوێنەکەت نەدۆزرایەوە. دوای کەمێک دووبارە هەوڵ بدەرەوە.';
+
+  @override
+  String get openSettings => 'کردنەوەی ڕێکخستنەکان';
+
+  @override
+  String get locating => 'دۆزینەوەی شوێنەکەت…';
+
+  @override
+  String noCafesNearby(int km) {
+    return 'هێشتا هیچ کافێیەک لە ماوەی $km کم لە تۆوە نییە.';
+  }
+
+  @override
+  String get sortName => 'ناو (ئەلفوبێ)';
+
+  @override
+  String get myLocation => 'شوێنەکەم';
+
+  @override
+  String get noNotificationsBody =>
+      'نوێکاری حیجزەکان، وەڵامی پێداچوونەوەکانت و هەواڵی کافێکان لێرە دەردەکەون.';
+
+  @override
+  String get timeJustNow => 'ئێستا';
+
+  @override
+  String timeMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count خولەک لەمەوبەر',
+      one: '1 خولەک لەمەوبەر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count کاتژمێر لەمەوبەر',
+      one: '1 کاتژمێر لەمەوبەر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ڕۆژ لەمەوبەر',
+      one: 'دوێنێ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shareCafeMessage(String name, String url) {
+    return '$name لە ErbilCafe\n$url';
+  }
+
+  @override
+  String get reportWrongInfo =>
+      'هەڵەیەک لە زانیارییەکانی ئەم کافێیەدا هەیە؟ پێمان بڵێ';
+
+  @override
+  String wrongInfoSubject(String name) {
+    return 'زانیاری هەڵە: $name';
+  }
+
+  @override
+  String get myReviews => 'پێداچوونەوەکانم';
+
+  @override
+  String get noMyReviews => 'هێشتا هیچ پێداچوونەوەیەک نییە';
+
+  @override
+  String get noMyReviewsBody =>
+      'کافێیەک لە پەڕەکەیەوە هەڵبسەنگێنە و پێداچوونەوەکانت لێرە کۆ دەکرێنەوە.';
+
+  @override
+  String get deleteReviewConfirm => 'ئەم پێداچوونەوەیە بسڕدرێتەوە؟';
+
+  @override
+  String get deleteReviewExplain =>
+      'لە پەڕەی کافێکە لادەبرێت و چیتر لە هەڵسەنگاندنەکەیدا ناژمێردرێت.';
+
+  @override
+  String get reviewDeleted => 'پێداچوونەوەکە سڕایەوە.';
+
+  @override
+  String get edit => 'دەستکاری';
+
+  @override
+  String get updateReview => 'نوێکردنەوەی پێداچوونەوە';
+
+  @override
+  String get forgotPasswordBody =>
+      'ئیمەیڵەکەت بنووسە و کۆدێکت بۆ دەنێرین بۆ هەڵبژاردنی وشەی نهێنیی نوێ.';
+
+  @override
+  String get sendCode => 'ناردنی کۆد';
+
+  @override
+  String get resetPasswordTitle => 'وشەی نهێنیی نوێ هەڵبژێرە';
+
+  @override
+  String get verificationCode => 'کۆدی ٦ ژمارەیی';
+
+  @override
+  String get codeIncomplete => 'هەر ٦ ژمارەی کۆدەکە بنووسە.';
+
+  @override
+  String get passwordResetDone => 'وشەی نهێنییەکەت گۆڕدرا. چوویتە ژوورەوە.';
+
+  @override
+  String devCodeHint(String code) {
+    return 'وەشانی گەشەپێدان — کۆد: $code';
+  }
+
+  @override
+  String get verifyEmail => 'ئیمەیڵەکەت پشتڕاست بکەرەوە';
+
+  @override
+  String get verifyEmailBody =>
+      'پشتڕاستکردنەوەی ئیمەیڵەکەت دڵنیا دەکاتەوە کە نوێکاری حیجز و گۆڕینی وشەی نهێنی دەگەنە دەستت.';
+
+  @override
+  String get emailVerifiedDone => 'ئیمەیڵەکەت پشتڕاست کرایەوە.';
+
+  @override
+  String get emailNotVerified => 'ئیمەیڵ پشتڕاست نەکراوەتەوە';
 }
