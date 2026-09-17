@@ -1503,6 +1503,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write to us and a person will answer, usually within a day.'**
   String get stillNeedHelpBody;
+
+  /// No description provided for @nearMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Near me'**
+  String get nearMe;
+
+  /// No description provided for @nearYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Near you'**
+  String get nearYou;
+
+  /// No description provided for @nearYouSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The closest cafés, nearest first'**
+  String get nearYouSubtitle;
+
+  /// No description provided for @locationPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find cafés near you'**
+  String get locationPromptTitle;
+
+  /// No description provided for @locationPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location to see the closest cafés and how far away each one is.'**
+  String get locationPromptBody;
+
+  /// No description provided for @useMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get useMyLocation;
+
+  /// No description provided for @locationDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access is turned off for ErbilCafe. Turn it on in Settings to see cafés near you.'**
+  String get locationDeniedBody;
+
+  /// No description provided for @locationServiceOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are off on this phone. Turn them on to see cafés near you.'**
+  String get locationServiceOffBody;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location could not be found. Try again in a moment.'**
+  String get locationUnavailable;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @locating.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your location…'**
+  String get locating;
+
+  /// No description provided for @noCafesNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'No cafés within {km} km of you yet.'**
+  String noCafesNearby(int km);
+
+  /// No description provided for @sortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name A–Z'**
+  String get sortName;
+
+  /// No description provided for @myLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'My location'**
+  String get myLocation;
+
+  /// No description provided for @noNotificationsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking updates, replies to your reviews and news from cafés will appear here.'**
+  String get noNotificationsBody;
+
+  /// No description provided for @timeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeJustNow;
+
+  /// No description provided for @timeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute ago} other{{count} minutes ago}}'**
+  String timeMinutesAgo(int count);
+
+  /// No description provided for @timeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
+  String timeHoursAgo(int count);
+
+  /// No description provided for @timeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Yesterday} other{{count} days ago}}'**
+  String timeDaysAgo(int count);
+
+  /// No description provided for @shareCafeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} on ErbilCafe\n{url}'**
+  String shareCafeMessage(String name, String url);
+
+  /// No description provided for @reportWrongInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Something wrong with this café\'s details? Tell us'**
+  String get reportWrongInfo;
+
+  /// No description provided for @wrongInfoSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong details: {name}'**
+  String wrongInfoSubject(String name);
+
+  /// No description provided for @myReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'My reviews'**
+  String get myReviews;
+
+  /// No description provided for @noMyReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get noMyReviews;
+
+  /// No description provided for @noMyReviewsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate a café from its page and your reviews will be collected here.'**
+  String get noMyReviewsBody;
+
+  /// No description provided for @deleteReviewConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this review?'**
+  String get deleteReviewConfirm;
+
+  /// No description provided for @deleteReviewExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'It is removed from the café\'s page and no longer counts towards its rating.'**
+  String get deleteReviewExplain;
+
+  /// No description provided for @reviewDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review deleted.'**
+  String get reviewDeleted;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @updateReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Update review'**
+  String get updateReview;
+
+  /// No description provided for @forgotPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we will send you a code to choose a new password.'**
+  String get forgotPasswordBody;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCode;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get verificationCode;
+
+  /// No description provided for @codeIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter all 6 digits of the code.'**
+  String get codeIncomplete;
+
+  /// No description provided for @passwordResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed. You are signed in.'**
+  String get passwordResetDone;
+
+  /// No description provided for @devCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Development build — code: {code}'**
+  String devCodeHint(String code);
+
+  /// No description provided for @verifyEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyEmail;
+
+  /// No description provided for @verifyEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming your email makes sure booking updates and password resets reach you.'**
+  String get verifyEmailBody;
+
+  /// No description provided for @emailVerifiedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is verified.'**
+  String get emailVerifiedDone;
+
+  /// No description provided for @emailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Email not verified'**
+  String get emailNotVerified;
 }
 
 class _AppLocalizationsDelegate
