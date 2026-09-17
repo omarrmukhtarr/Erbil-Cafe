@@ -94,7 +94,8 @@ void main() {
   ///
   /// The row scrolls horizontally on a phone, and dragging it to reach a chip
   /// would be testing the ListView rather than the toggles.
-  const wide = Size(1100.0, 844.0);
+  // Grew from 1100 when Near me and Sort joined the front of the row.
+  const wide = Size(1500.0, 844.0);
 
   Future<void> pumpExplore(WidgetTester tester,
       {String? initialAmenity}) async {
