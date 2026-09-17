@@ -212,6 +212,17 @@ class _Account extends StatelessWidget {
           ),
         ],
 
+        // Nudged here rather than blocking anything: an unverified email still
+        // signs in, it just may not receive a reset code.
+        if (user.email != null && !user.emailVerified) ...[
+          const Gap.xl(),
+          _Tile(
+            icon: Icons.mark_email_unread_outlined,
+            label: l10n.verifyEmail,
+            subtitle: l10n.emailNotVerified,
+            onTap: () => context.push(Routes.verifyEmail),
+          ),
+        ],
         const Gap.xl(),
         _Tile(
           icon: Icons.edit_outlined,
@@ -229,6 +240,16 @@ class _Account extends StatelessWidget {
           icon: Icons.event_seat_outlined,
           label: l10n.myBookings,
           onTap: () => context.push(Routes.bookings),
+        ),
+        _Tile(
+          icon: Icons.rate_review_outlined,
+          label: l10n.myReviews,
+          onTap: () => context.push(Routes.myReviews),
+        ),
+        _Tile(
+          icon: Icons.notifications_none_rounded,
+          label: l10n.notifications,
+          onTap: () => context.push(Routes.notifications),
         ),
         _Tile(
           icon: Icons.favorite_border,
