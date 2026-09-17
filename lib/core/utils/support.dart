@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -30,6 +31,43 @@ abstract final class Support {
 
   static Future<void> contactSupport(BuildContext context) =>
       _email(context, subject: AppLocalizations.of(context).appName);
+
+  /// A correction for one café, with the café named in the subject and its
+  /// page linked in the body, so nobody has to ask which one.
+  static Future<void> reportCafe(
+    BuildContext context, {
+    required String name,
+    required String slug,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    return _email(
+      context,
+      subject: l10n.wrongInfoSubject(name),
+      body: '\n\n\n—\n${AppConfig.cafePageUrl(slug)}',
+    );
+  }
+
+  /// The system share sheet for a café.
+  ///
+  /// [origin] is the button's box: an iPad anchors the share popover to it,
+  /// and without one the sheet cannot open there at all.
+  static Future<void> shareCafe(
+    BuildContext context, {
+    required String name,
+    required String slug,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final box = context.findRenderObject() as RenderBox?;
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: l10n.shareCafeMessage(name, AppConfig.cafePageUrl(slug)),
+        subject: name,
+        sharePositionOrigin:
+            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      ),
+    );
+  }
 
   /// A support email with what we need to reproduce a problem already filled
   /// in underneath — version, platform, language — so nobody has to be asked
