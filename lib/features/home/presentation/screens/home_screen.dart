@@ -17,9 +17,11 @@ import '../../../cafes/data/repositories/cafe_repository.dart';
 import '../../../cafes/presentation/cubit/cafe_list_cubit.dart';
 import '../../../favorites/presentation/toggle_favorite.dart';
 import '../../../menu/data/models/menu.dart';
+import '../../../notifications/presentation/notification_bell.dart';
 import '../../../menu/data/repositories/menu_repository.dart';
 import '../widgets/area_strip.dart';
 import '../widgets/category_strip.dart';
+import '../widgets/nearby_section.dart';
 import '../widgets/popular_tile.dart';
 
 /// The Home tab.
@@ -48,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<AreaCount>> _areas;
 
   final _popularReveal = RevealTracker();
+  final _nearby = GlobalKey<NearbySectionState>();
 
   @override
   void initState() {
@@ -81,7 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _categories = cafes.amenities();
       _areas = cafes.areas();
     });
-    await Future.wait([_featured.load(), _openNow.load()]);
+    await Future.wait([
+      _featured.load(),
+      _openNow.load(),
+      if (_nearby.currentState != null) _nearby.currentState!.refresh(),
+    ]);
   }
 
   @override
@@ -117,12 +124,19 @@ class _HomeScreenState extends State<HomeScreen> {
                               !snapshot.hasData,
                       onOpenNow: () =>
                           context.go(Routes.exploreWith(openNow: true)),
+                      onNearMe: () =>
+                          context.go(Routes.exploreWith(nearMe: true)),
                       onCategory: (key) =>
                           context.go(Routes.exploreWith(amenity: key)),
                     ),
                   ),
                 ),
               ),
+
+              // ─── Near you ─────────────────────────────────────────
+              // Before Featured: a café two streets away is a better answer to
+              // "where should I go" than a good one across town.
+              SliverToBoxAdapter(child: NearbySection(key: _nearby)),
 
               // ─── Featured cafés ───────────────────────────────────
               SliverToBoxAdapter(
@@ -295,6 +309,8 @@ class _Greeting extends StatelessWidget {
               ],
             ),
           ),
+          const HGap.sm(),
+          const NotificationBell(),
           const HGap.sm(),
           _RoundAction(
             icon: Icons.search,

@@ -35,7 +35,9 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  final _listKey = GlobalKey<AnimatedListState>();
+  /// Replaced on every load, for the reason in `MyReviewsScreen`: a pull to
+  /// refresh after the last card folded away left the list stuck at zero.
+  var _listKey = GlobalKey<AnimatedListState>();
   final _reveal = RevealTracker();
 
   List<Cafe>? _cafes;
@@ -61,6 +63,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       if (!mounted) return;
       _reveal.reset();
       setState(() {
+        _listKey = GlobalKey<AnimatedListState>();
         _cafes = [...page.items];
         _failure = null;
       });

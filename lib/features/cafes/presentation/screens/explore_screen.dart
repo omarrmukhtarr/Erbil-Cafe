@@ -9,6 +9,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/location/location_service.dart';
 import '../../../../core/widgets/app_states.dart';
 import '../../../../core/widgets/cafe_card.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -27,6 +28,7 @@ class ExploreScreen extends StatefulWidget {
     this.initialAmenity,
     this.initialArea,
     this.initialOpenNow = false,
+    this.initialNearMe = false,
     this.initialSort,
     super.key,
   });
@@ -36,6 +38,9 @@ class ExploreScreen extends StatefulWidget {
   final String? initialAmenity;
   final String? initialArea;
   final bool initialOpenNow;
+
+  /// Arrived from Home's "Near you" — sort by distance straight away.
+  final bool initialNearMe;
   final String? initialSort;
 
   @override
@@ -47,6 +52,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
   final _reveal = RevealTracker();
+
+  /// Waiting on the location for the Near me chip.
+  bool _locating = false;
 
   @override
   void initState() {
@@ -63,6 +71,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         ),
       )
       ..loadFilterOptions();
+
+    if (widget.initialNearMe) _toggleNearMe();
 
     _scrollController.addListener(() {
       // Prefetch before the bottom so scrolling stays smooth.
@@ -87,6 +97,96 @@ class _ExploreScreenState extends State<ExploreScreen> {
     _reveal.reset();
     if (_scrollController.hasClients && _scrollController.offset > 0) {
       _scrollController.jumpTo(0);
+    }
+  }
+
+  /// Turns distance sorting on — asking for location if it has to — or off.
+  Future<void> _toggleNearMe() async {
+    if (_cubit.state.query.isNearMe) {
+      _cubit.setNearMe(null);
+      return;
+    }
+
+    setState(() => _locating = true);
+    final (access, where) = await LocationService.instance.locate();
+    if (!mounted) return;
+    setState(() => _locating = false);
+
+    if (where != null) {
+      HapticFeedback.selectionClick();
+      _cubit.setNearMe(where);
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context);
+    final blocked = access == LocationAccess.deniedForever ||
+        access == LocationAccess.serviceOff;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(switch (access) {
+          LocationAccess.deniedForever => l10n.locationDeniedBody,
+          LocationAccess.serviceOff => l10n.locationServiceOffBody,
+          LocationAccess.notDetermined => l10n.locationPromptBody,
+          _ => l10n.locationUnavailable,
+        }),
+        action: blocked
+            ? SnackBarAction(
+                label: l10n.openSettings,
+                onPressed: () => LocationService.instance.openSettingsFor(access),
+              )
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _pickSort() async {
+    final l10n = AppLocalizations.of(context);
+    final query = _cubit.state.query;
+    final current = query.isNearMe ? 'distance' : query.sort;
+
+    final options = [
+      ('rating', l10n.sortRating, Icons.star_rounded),
+      ('distance', l10n.sortDistance, Icons.near_me_rounded),
+      ('reviews', l10n.sortReviews, Icons.forum_outlined),
+      ('newest', l10n.sortNewest, Icons.fiber_new_outlined),
+      ('name', l10n.sortName, Icons.sort_by_alpha_rounded),
+    ];
+
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.page, 0, AppSpacing.page, AppSpacing.sm),
+              child: Text(l10n.sortBy, style: Theme.of(context).textTheme.titleLarge),
+            ),
+            for (final (value, label, icon) in options)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+                leading: Icon(icon, color: AppColors.accent),
+                title: Text(label),
+                trailing: value == current
+                    ? const Icon(Icons.check_rounded, color: AppColors.accent)
+                    : null,
+                onTap: () => Navigator.of(context).pop(value),
+              ),
+            const Gap.md(),
+          ],
+        ),
+      ),
+    );
+
+    if (chosen == null || chosen == current || !mounted) return;
+    if (chosen == 'distance') {
+      await _toggleNearMe();
+    } else {
+      _cubit.setSort(chosen);
     }
   }
 
@@ -153,8 +253,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   previous.query != current.query ||
                   previous.areas != current.areas ||
                   previous.amenityOptions != current.amenityOptions,
-              builder: (context, state) =>
-                  _FilterBar(cubit: _cubit, state: state),
+              builder: (context, state) => _FilterBar(
+                cubit: _cubit,
+                state: state,
+                locating: _locating,
+                onNearMe: _toggleNearMe,
+                onSort: _pickSort,
+              ),
             ),
             const Gap.md(),
             Expanded(
@@ -326,10 +431,19 @@ class _Results extends StatelessWidget {
 /// single "Clear" chip leads the row while anything is applied, which also
 /// makes the applied state visible without reading every chip.
 class _FilterBar extends StatelessWidget {
-  const _FilterBar({required this.cubit, required this.state});
+  const _FilterBar({
+    required this.cubit,
+    required this.state,
+    required this.locating,
+    required this.onNearMe,
+    required this.onSort,
+  });
 
   final CafeListCubit cubit;
   final CafeListState state;
+  final bool locating;
+  final VoidCallback onNearMe;
+  final VoidCallback onSort;
 
   @override
   Widget build(BuildContext context) {
@@ -354,6 +468,34 @@ class _FilterBar extends StatelessWidget {
             ),
             const HGap.sm(),
           ],
+          // Near me leads the row: where you are is the first thing that
+          // decides which café you will actually go to.
+          _Chip(
+            label: l10n.nearMe,
+            icon: locating ? null : Icons.near_me_rounded,
+            leading: locating
+                ? const SizedBox.square(
+                    dimension: 12,
+                    child: CircularProgressIndicator(strokeWidth: 1.6),
+                  )
+                : null,
+            selected: query.isNearMe,
+            onTap: onNearMe,
+          ),
+          const HGap.sm(),
+          _Chip(
+            label: switch (query.isNearMe ? 'distance' : query.sort) {
+              'distance' => l10n.sortDistance,
+              'reviews' => l10n.sortReviews,
+              'newest' => l10n.sortNewest,
+              'name' => l10n.sortName,
+              _ => l10n.sortRating,
+            },
+            icon: Icons.swap_vert_rounded,
+            selected: false,
+            onTap: onSort,
+          ),
+          const HGap.sm(),
           _Chip(
             label: l10n.openNow,
             selected: query.openNow == true,
@@ -396,12 +538,16 @@ class _Chip extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.icon,
+    this.leading,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
   final IconData? icon;
+
+  /// Shown in place of [icon] — a spinner while the chip waits on something.
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -445,7 +591,10 @@ class _Chip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (icon != null) ...[
+                if (leading != null) ...[
+                  leading!,
+                  const HGap(5),
+                ] else if (icon != null) ...[
                   Icon(icon, size: 14, color: ink),
                   const HGap(5),
                 ],
@@ -464,7 +613,7 @@ class _Chip extends StatelessWidget {
                     duration: AppMotion.fast,
                     curve: AppMotion.standard,
                     alignment: AlignmentDirectional.centerStart,
-                    widthFactor: selected && icon == null ? 1 : 0,
+                    widthFactor: selected ? 1 : 0,
                     child: const Padding(
                       padding: EdgeInsetsDirectional.only(start: 5),
                       child: Icon(Icons.check_rounded,
