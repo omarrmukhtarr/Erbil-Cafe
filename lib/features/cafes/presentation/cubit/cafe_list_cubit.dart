@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/error/failure.dart';
+import '../../../../core/location/location_service.dart';
 import '../../../favorites/data/favorite_sync.dart';
 import '../../data/models/cafe.dart';
 import '../../data/repositories/cafe_repository.dart';
@@ -206,6 +207,29 @@ class CafeListCubit extends Cubit<CafeListState> {
       load(query: state.query.copyWith(sort: sort, cursor: null));
 
   void clearFilters() => load(query: const CafeQuery());
+
+  /// How far "Near me" looks. Erbil is about thirty kilometres across, so this
+  /// takes in the whole city and simply puts the closest cafés first.
+  static const nearMeRadiusKm = 40.0;
+
+  /// Sorts by distance from [location], or back to top rated when null.
+  void setNearMe(UserLocation? location) => load(
+        query: location == null
+            ? state.query.copyWith(
+                lat: null,
+                lng: null,
+                radiusKm: null,
+                sort: 'rating',
+                cursor: null,
+              )
+            : state.query.copyWith(
+                lat: location.lat,
+                lng: location.lng,
+                radiusKm: nearMeRadiusKm,
+                sort: 'distance',
+                cursor: null,
+              ),
+      );
 
   /// Loads the two lists the filter chips are built from, in one pass.
   ///

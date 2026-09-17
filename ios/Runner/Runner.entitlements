@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyLists-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Lets the app receive push notifications. Xcode switches this to
+	     "production" when archiving for the App Store. -->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
+</plist>
