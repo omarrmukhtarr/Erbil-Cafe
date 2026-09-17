@@ -46,6 +46,15 @@ abstract final class AppConfig {
   }
 
   static String get termsUrl => '$webUrl/terms';
+
+  /// A café's public page — what a shared link opens. It shows the café in any
+  /// browser and offers to open it in the app, so a link sent to someone
+  /// without ErbilCafe still leads somewhere.
+  static String cafePageUrl(String slug) => '$webUrl/c/$slug';
+
+  /// Opens a café inside the app: `erbilcafe://app/cafe/<slug>`. The host is
+  /// fixed so the path is exactly the router's own `/cafe/<slug>`.
+  static String cafeAppLink(String slug) => 'erbilcafe://app/cafe/$slug';
   static String get privacyUrl => '$webUrl/privacy';
 
   /// The address the published privacy policy and terms already give.

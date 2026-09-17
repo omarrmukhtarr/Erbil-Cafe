@@ -57,8 +57,21 @@ class AppUser extends Equatable {
         if (stats != null) 'stats': stats!.toJson(),
       };
 
+  // Everything the UI shows. Leaving out the verification flags and stats made
+  // a refreshed profile compare equal to the stale one, so the state never
+  // changed and "verify your email" stayed up after verifying.
   @override
-  List<Object?> get props => [id, name, email, avatarUrl, locale];
+  List<Object?> get props => [
+        id,
+        name,
+        email,
+        phone,
+        avatarUrl,
+        locale,
+        emailVerified,
+        phoneVerified,
+        stats,
+      ];
 }
 
 class UserStats extends Equatable {
