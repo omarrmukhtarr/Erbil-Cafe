@@ -143,6 +143,36 @@ void main() {
       expect(find.text('هێشتا وێنە نییە'), findsOneWidget);
     });
 
+    testWidgets('a café with no area shows its distance without a stray dot',
+        (tester) async {
+      await tester.pumpApp(
+        Scaffold(
+          body: CafeCard(
+            cafe: Cafe(
+              id: 'c2',
+              slug: 'de-baron',
+              name: 'De Baron',
+              description: '',
+              address: '',
+              lat: 36.19,
+              lng: 44.01,
+              priceRange: PriceRange.moderate,
+              ratingAvg: 0,
+              reviewCount: 0,
+              isFeatured: false,
+              isOpenNow: false,
+              amenities: const [],
+              distanceKm: 0.1,
+            ),
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(find.text('0.1 km away'), findsOneWidget);
+      expect(find.text('·'), findsNothing);
+    });
+
     testWidgets('shows distance only when the query supplied coordinates',
         (tester) async {
       await tester.pumpApp(
