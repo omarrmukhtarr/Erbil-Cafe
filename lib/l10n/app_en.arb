@@ -310,5 +310,98 @@
   "faqDeleteQ": "How do I delete my account?",
   "faqDeleteA": "Scroll to the bottom of your profile and tap Delete my account. Your personal details are erased and your bookings cancelled; your reviews stay on the café as “Deleted user”.",
   "stillNeedHelp": "Still need help?",
-  "stillNeedHelpBody": "Write to us and a person will answer, usually within a day."
+  "stillNeedHelpBody": "Write to us and a person will answer, usually within a day.",
+  "nearMe": "Near me",
+  "nearYou": "Near you",
+  "nearYouSubtitle": "The closest cafés, nearest first",
+  "locationPromptTitle": "Find cafés near you",
+  "locationPromptBody": "Allow location to see the closest cafés and how far away each one is.",
+  "useMyLocation": "Use my location",
+  "locationDeniedBody": "Location access is turned off for ErbilCafe. Turn it on in Settings to see cafés near you.",
+  "locationServiceOffBody": "Location services are off on this phone. Turn them on to see cafés near you.",
+  "locationUnavailable": "Your location could not be found. Try again in a moment.",
+  "openSettings": "Open Settings",
+  "locating": "Finding your location…",
+  "noCafesNearby": "No cafés within {km} km of you yet.",
+  "@noCafesNearby": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "sortName": "Name A–Z",
+  "myLocation": "My location",
+  "noNotificationsBody": "Booking updates, replies to your reviews and news from cafés will appear here.",
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, =1{Yesterday} other{{count} days ago}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCafeMessage": "{name} on ErbilCafe\n{url}",
+  "@shareCafeMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "reportWrongInfo": "Something wrong with this café's details? Tell us",
+  "wrongInfoSubject": "Wrong details: {name}",
+  "@wrongInfoSubject": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myReviews": "My reviews",
+  "noMyReviews": "No reviews yet",
+  "noMyReviewsBody": "Rate a café from its page and your reviews will be collected here.",
+  "deleteReviewConfirm": "Delete this review?",
+  "deleteReviewExplain": "It is removed from the café's page and no longer counts towards its rating.",
+  "reviewDeleted": "Review deleted.",
+  "edit": "Edit",
+  "updateReview": "Update review",
+  "forgotPasswordBody": "Enter your email and we will send you a code to choose a new password.",
+  "sendCode": "Send code",
+  "resetPasswordTitle": "Choose a new password",
+  "verificationCode": "6-digit code",
+  "codeIncomplete": "Enter all 6 digits of the code.",
+  "passwordResetDone": "Your password has been changed. You are signed in.",
+  "devCodeHint": "Development build — code: {code}",
+  "@devCodeHint": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyEmail": "Verify your email",
+  "verifyEmailBody": "Confirming your email makes sure booking updates and password resets reach you.",
+  "emailVerifiedDone": "Your email is verified.",
+  "emailNotVerified": "Email not verified"
 }

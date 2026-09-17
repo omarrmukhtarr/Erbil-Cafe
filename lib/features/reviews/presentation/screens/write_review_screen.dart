@@ -9,12 +9,18 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../cafes/data/repositories/cafe_repository.dart';
+import '../../data/models/review.dart';
 import '../../data/repositories/review_repository.dart';
 
-/// Write a review.
+/// Write a review, or change the one already written.
 ///
-/// Pops `true` when a review was submitted, so the café page knows to reload
-/// its list and rating breakdown.
+/// The API allows one review per person per café, so this screen used to fail
+/// with a conflict for anyone opening it a second time. It now looks for the
+/// existing review first and, if there is one, opens with it filled in and
+/// saves as an edit.
+///
+/// Pops `true` when a review was saved, so the café page knows to reload its
+/// list and rating breakdown.
 class WriteReviewScreen extends StatefulWidget {
   const WriteReviewScreen({required this.slug, super.key});
 
@@ -29,6 +35,39 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
   double _rating = 5;
   bool _submitting = false;
 
+  /// The café's id, needed to create a review; the route only has the slug.
+  String? _cafeId;
+
+  /// The user's existing review of this café, when there is one.
+  Review? _existing;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefill();
+  }
+
+  Future<void> _prefill() async {
+    try {
+      final cafe = await sl<CafeRepository>().detail(widget.slug);
+      final mine = await sl<ReviewRepository>().mine(cafeId: cafe.cafe.id);
+      if (!mounted) return;
+      setState(() {
+        _cafeId = cafe.cafe.id;
+        _existing = mine.items.isEmpty ? null : mine.items.first;
+        if (_existing != null) {
+          _rating = _existing!.rating.toDouble();
+          _comment.text = _existing!.comment ?? '';
+        }
+      });
+    } on Failure {
+      // Submitting tries again and reports the problem then.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   @override
   void dispose() {
     _comment.dispose();
@@ -39,14 +78,20 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     setState(() => _submitting = true);
 
     try {
-      // The route carries a slug, but creating a review needs the café's id.
-      final cafe = await sl<CafeRepository>().detail(widget.slug);
+      final comment = _comment.text.trim().isEmpty ? null : _comment.text.trim();
+      final existing = _existing;
 
-      final review = await sl<ReviewRepository>().create(
-        cafe.cafe.id,
-        rating: _rating.round(),
-        comment: _comment.text.trim().isEmpty ? null : _comment.text.trim(),
-      );
+      final Review review;
+      if (existing != null) {
+        review = await sl<ReviewRepository>()
+            .update(existing.id, rating: _rating.round(), comment: comment);
+      } else {
+        // The route carries a slug, but creating a review needs the café's id.
+        final cafeId =
+            _cafeId ?? (await sl<CafeRepository>().detail(widget.slug)).cafe.id;
+        review = await sl<ReviewRepository>()
+            .create(cafeId, rating: _rating.round(), comment: comment);
+      }
 
       if (!mounted) return;
 
@@ -76,7 +121,9 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.writeReview)),
+      appBar: AppBar(
+        title: Text(_existing == null ? l10n.writeReview : l10n.editReview),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.page),
         child: Column(
@@ -88,6 +135,9 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                 textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.lg),
             Center(
+              // Rebuilt once the existing review is known: the bar only reads
+              // its initial rating when it is first built.
+              key: ValueKey(_existing?.id),
               child: RatingBar.builder(
                 initialRating: _rating,
                 minRating: 1,
@@ -140,7 +190,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             const SizedBox(height: AppSpacing.xxl),
 
             ElevatedButton(
-              onPressed: _submitting ? null : _submit,
+              onPressed: _submitting || _loading ? null : _submit,
               child: _submitting
                   ? const SizedBox(
                       height: 20,
@@ -150,7 +200,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : Text(l10n.submitReview),
+                  : Text(_existing == null ? l10n.submitReview : l10n.updateReview),
             ),
           ],
         ),

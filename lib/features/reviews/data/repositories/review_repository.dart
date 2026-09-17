@@ -66,10 +66,16 @@ class ReviewRepository {
   Future<void> delete(String reviewId) => _api.delete<void>('/reviews/$reviewId');
 
   /// The caller's own reviews, including any still awaiting moderation.
-  Future<Paginated<Review>> mine({String? cursor}) async {
+  ///
+  /// With [cafeId], only the review of that café — there is at most one.
+  Future<Paginated<Review>> mine({String? cursor, String? cafeId}) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/reviews/mine',
-      query: {'limit': 20, if (cursor != null) 'cursor': cursor},
+      query: {
+        'limit': 20,
+        if (cursor != null) 'cursor': cursor,
+        if (cafeId != null) 'cafeId': cafeId,
+      },
     );
     return Paginated.fromJson(json, Review.fromJson);
   }
