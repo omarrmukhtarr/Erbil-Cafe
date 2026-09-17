@@ -122,7 +122,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           borderRadius: AppRadius.pillR,
                         ),
                       ),
-                      child: AnimatedSwitcher(
+                      child: SafeSwitcher(
                         duration: AppMotion.fast,
                         transitionBuilder: (child, animation) =>
                             FadeTransition(

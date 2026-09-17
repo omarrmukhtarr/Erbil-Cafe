@@ -433,7 +433,7 @@ class _MapScreenState extends State<MapScreen> {
                       child: AnimatedSize(
                         duration: AppMotion.fast,
                         curve: AppMotion.standard,
-                        child: AnimatedSwitcher(
+                        child: SafeSwitcher(
                           duration: AppMotion.fast,
                           child: _pins != null
                               ? Text(
@@ -501,7 +501,7 @@ class _MapScreenState extends State<MapScreen> {
                       child: SizedBox.square(
                         dimension: 48,
                         child: Center(
-                          child: AnimatedSwitcher(
+                          child: SafeSwitcher(
                             duration: AppMotion.fast,
                             child: _locating
                                 ? const SizedBox.square(
@@ -551,7 +551,7 @@ class _MapScreenState extends State<MapScreen> {
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             // Crossfades when a different pin is tapped while
                             // the card is already up.
-                            child: AnimatedSwitcher(
+                            child: SafeSwitcher(
                               duration: AppMotion.fast,
                               child: _CafeRow(
                                 key: ValueKey(shown.id),
