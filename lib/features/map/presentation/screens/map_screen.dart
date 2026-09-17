@@ -14,6 +14,7 @@ import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_radius.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/location/location_service.dart';
 import '../../../../core/platform/platform_config.dart';
 import '../../../../core/storage/app_preferences.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -73,6 +74,12 @@ class _MapScreenState extends State<MapScreen> {
   /// awaiting bitmaps, and the older one finishing last used to put back a
   /// stale set of pins.
   int _rebuildGeneration = 0;
+
+  /// Whether the blue dot is on. It needs permission, so it stays off until
+  /// location is known to be allowed — asking at the moment the map opens
+  /// would spend the one permission dialog on someone who only wanted to look.
+  bool _showMyLocation = false;
+  bool _locating = false;
   late MapTheme _theme;
   double _zoom = _erbil.zoom;
 
@@ -89,6 +96,53 @@ class _MapScreenState extends State<MapScreen> {
     _theme = MapTheme.fromName(sl<AppPreferences>().mapTheme);
     _mapsAvailable = PlatformConfig.mapsConfigured();
     _loadPins();
+    LocationService.instance.access().then((access) {
+      if (mounted && access == LocationAccess.granted) {
+        setState(() => _showMyLocation = true);
+      }
+    });
+  }
+
+  /// Centres the map on the phone, asking for permission if it has to.
+  Future<void> _goToMyLocation() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() => _locating = true);
+    final (access, where) = await LocationService.instance.locate();
+    if (!mounted) return;
+    setState(() => _locating = false);
+
+    if (where == null) {
+      final blocked = access == LocationAccess.deniedForever ||
+          access == LocationAccess.serviceOff;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(switch (access) {
+            LocationAccess.deniedForever => l10n.locationDeniedBody,
+            LocationAccess.serviceOff => l10n.locationServiceOffBody,
+            LocationAccess.notDetermined => l10n.locationPromptBody,
+            _ => l10n.locationUnavailable,
+          }),
+          action: blocked
+              ? SnackBarAction(
+                  label: l10n.openSettings,
+                  onPressed: () =>
+                      LocationService.instance.openSettingsFor(access),
+                )
+              : null,
+        ),
+      );
+      return;
+    }
+
+    HapticFeedback.selectionClick();
+    setState(() => _showMyLocation = true);
+    // Street level: close enough that the nearest cafés separate from their
+    // clusters, far enough to still see a few blocks around.
+    await _controller?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(where.lat, where.lng), 15.5),
+    );
   }
 
   Future<void> _loadPins() async {
@@ -344,6 +398,9 @@ class _MapScreenState extends State<MapScreen> {
               GoogleMap(
                 initialCameraPosition: _erbil,
                 style: _theme.style,
+                myLocationEnabled: _showMyLocation,
+                // Google's own button sits in a corner the tab bar covers and
+                // cannot ask for permission; ours does both.
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
@@ -420,6 +477,51 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+
+              AnimatedPositioned(
+                duration: AppMotion.medium,
+                curve: AppMotion.standard,
+                right: AppSpacing.page,
+                // Rides above the café card when one is open.
+                bottom: AppSpacing.bottomBarClearance +
+                    (_selected != null ? 112 : AppSpacing.md),
+                child: Semantics(
+                  button: true,
+                  label: l10n.myLocation,
+                  child: Material(
+                    color: _theme.isDark ? AppColors.cardDark : AppColors.cream,
+                    shape: const CircleBorder(),
+                    elevation: 4,
+                    shadowColor: AppColors.shadow.withValues(alpha: 0.4),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: _locating ? null : _goToMyLocation,
+                      child: SizedBox.square(
+                        dimension: 48,
+                        child: Center(
+                          child: AnimatedSwitcher(
+                            duration: AppMotion.fast,
+                            child: _locating
+                                ? const SizedBox.square(
+                                    key: ValueKey('locating'),
+                                    dimension: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.accent,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.my_location_rounded,
+                                    key: ValueKey('icon'),
+                                    color: AppColors.accent,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
 

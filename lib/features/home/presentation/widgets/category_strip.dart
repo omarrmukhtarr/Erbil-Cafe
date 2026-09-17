@@ -22,6 +22,7 @@ class CategoryStrip extends StatelessWidget {
     required this.categories,
     required this.onCategory,
     required this.onOpenNow,
+    this.onNearMe,
     this.loading = false,
     super.key,
   });
@@ -29,6 +30,9 @@ class CategoryStrip extends StatelessWidget {
   final List<AmenityCount> categories;
   final void Function(String key) onCategory;
   final VoidCallback onOpenNow;
+
+  /// Explore sorted by distance. Null hides the tile.
+  final VoidCallback? onNearMe;
   final bool loading;
 
   static const height = 118.0;
@@ -56,6 +60,9 @@ class CategoryStrip extends StatelessWidget {
         _ => Icons.local_cafe_rounded,
       };
 
+  /// Tiles before the amenity categories: Open now, and Near me when offered.
+  int get _leading => onNearMe == null ? 1 : 2;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -78,7 +85,7 @@ class CategoryStrip extends StatelessWidget {
         ),
         // Open-now leads: it is the one filter whose answer changes hour to
         // hour, and the one most likely to be what a person means by "café".
-        itemCount: categories.length + 1,
+        itemCount: categories.length + _leading,
         separatorBuilder: (_, __) => const HGap.md(),
         itemBuilder: (context, index) {
           if (index == 0) {
@@ -90,7 +97,16 @@ class CategoryStrip extends StatelessWidget {
             );
           }
 
-          final category = categories[index - 1];
+          if (index == 1 && onNearMe != null) {
+            return _Category(
+              label: l10n.nearMe,
+              icon: Icons.near_me_rounded,
+              onTap: onNearMe!,
+              highlighted: true,
+            );
+          }
+
+          final category = categories[index - _leading];
           return _Category(
             label: category.name,
             icon: iconFor(category.key),
