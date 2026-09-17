@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../../core/network/api_client.dart';
 
@@ -128,8 +130,12 @@ class PushService {
   ///
   /// [onOpen] receives the notification's `data` payload — `{ reservationId,
   /// cafeId }` — so the caller can route to whatever it refers to.
+  ///
+  /// [onReceive] runs for every push that arrives while the app is open, so
+  /// the inbox badge can move without waiting for the next foreground.
   Future<void> listen({
     required void Function(Map<String, dynamic> data) onOpen,
+    VoidCallback? onReceive,
     String? locale,
   }) async {
     await init();
@@ -137,6 +143,21 @@ class PushService {
     _onOpen = onOpen;
 
     try {
+      // A push that arrives while the app is on screen is not shown by either
+      // platform unless asked. iOS can be told to show its own banner; Android
+      // cannot, so a local notification stands in for it there.
+      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      if (Platform.isAndroid) await _setUpAndroidBanner();
+
+      FirebaseMessaging.onMessage.listen((message) {
+        onReceive?.call();
+        if (Platform.isAndroid) _showAndroidBanner(message);
+      });
+
       // Tapped while the app was in the background.
       FirebaseMessaging.onMessageOpenedApp.listen(_handleOpen);
 
@@ -152,6 +173,65 @@ class PushService {
       });
     } catch (error) {
       debugPrint('Could not listen for notifications: $error');
+    }
+  }
+
+  final _local = FlutterLocalNotificationsPlugin();
+
+  /// The channel booking updates arrive on. High importance, because a café
+  /// confirming a table for tonight is not something to find tomorrow.
+  static const _channel = AndroidNotificationChannel(
+    'bookings',
+    'Bookings and updates',
+    description: 'Booking confirmations, reminders and replies to your reviews.',
+    importance: Importance.high,
+  );
+
+  Future<void> _setUpAndroidBanner() async {
+    await _local.initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      ),
+      onDidReceiveNotificationResponse: (response) {
+        final payload = response.payload;
+        final handler = _onOpen;
+        if (payload == null || handler == null) return;
+        try {
+          handler((jsonDecode(payload) as Map).cast<String, dynamic>());
+        } catch (_) {
+          // A payload from an older build; opening the app is enough.
+        }
+      },
+    );
+
+    await _local
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
+  }
+
+  Future<void> _showAndroidBanner(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    try {
+      await _local.show(
+        message.messageId.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channel.id,
+            _channel.name,
+            channelDescription: _channel.description,
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+        ),
+        payload: jsonEncode(message.data),
+      );
+    } catch (error) {
+      debugPrint('Could not show a foreground notification: $error');
     }
   }
 

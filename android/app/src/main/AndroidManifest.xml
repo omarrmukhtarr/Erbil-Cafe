@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Stated here rather than left to plugins to merge in: a release build
+         that cannot reach the network is not a café app. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- "Near me". Coarse is enough to sort cafés; fine lets the map's blue
+         dot sit on the right side of the street. Asked for only when used. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
    <!-- Injected from local.properties at build time -->
     <application
         android:label="ErbilCafe"
@@ -23,6 +30,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- erbilcafe://app/cafe/<slug> — the "Open in the app" button on
+                 a café's shared web page. The router handles the path. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="erbilcafe" android:host="app"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
