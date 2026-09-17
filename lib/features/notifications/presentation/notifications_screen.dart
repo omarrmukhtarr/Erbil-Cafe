@@ -213,7 +213,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       appBar: AppBar(
         title: Text(l10n.notifications),
         actions: [
-          AnimatedSwitcher(
+          SafeSwitcher(
             duration: AppMotion.fast,
             child: hasUnread
                 ? TextButton(

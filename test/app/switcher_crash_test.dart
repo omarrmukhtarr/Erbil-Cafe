@@ -12,6 +12,47 @@ void main() {
   Widget host(bool on, Widget Function(bool) build) =>
       MaterialApp(home: Scaffold(body: Center(child: build(on))));
 
+  /// Flips the state [times] times, [gap] apart — faster than the animation.
+  Future<void> flicker(WidgetTester tester, Widget Function(bool) app, {int times = 5, int gap = 16}) async {
+    var on = true;
+    await tester.pumpWidget(app(on));
+    for (var i = 0; i < times; i++) {
+      on = !on;
+      await tester.pumpWidget(app(on));
+      await tester.pump(Duration(milliseconds: gap));
+    }
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('FadeSwitcher survives flickering between states', (tester) async {
+    await flicker(
+      tester,
+      (on) => host(
+        on,
+        (on) => FadeSwitcher(
+          child: on
+              ? const Text('A', key: ValueKey('a'))
+              : const Text('B', key: ValueKey('b')),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('PopSwitcher survives tapping a heart several times fast', (tester) async {
+    await flicker(
+      tester,
+      (on) => host(
+        on,
+        (on) => PopSwitcher(
+          child: Icon(on ? Icons.favorite : Icons.favorite_border, key: ValueKey(on)),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('FadeSwitcher survives A → B → A inside one transition', (tester) async {
     Widget child(bool on) => FadeSwitcher(
           child: on
