@@ -225,7 +225,7 @@ class _PhotoViewerState extends State<PhotoViewer>
                           color: Colors.black.withValues(alpha: 0.45),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: AnimatedSwitcher(
+                        child: SafeSwitcher(
                           duration: AppMotion.fast,
                           child: Text(
                             '${_index + 1} / $total',
@@ -250,7 +250,7 @@ class _PhotoViewerState extends State<PhotoViewer>
                 bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xl,
                 child: _FadeWithDrag(
                   drag: _drag,
-                  child: AnimatedSwitcher(
+                  child: SafeSwitcher(
                     duration: AppMotion.fast,
                     child: Text(
                       widget.photos[_index].caption!,

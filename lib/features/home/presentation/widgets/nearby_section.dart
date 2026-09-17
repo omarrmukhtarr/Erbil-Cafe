@@ -265,7 +265,7 @@ class _Prompt extends StatelessWidget {
                         height: 1.45),
                   ),
                   const Gap.md(),
-                  AnimatedSwitcher(
+                  SafeSwitcher(
                     duration: AppMotion.fast,
                     child: locating
                         ? Row(
