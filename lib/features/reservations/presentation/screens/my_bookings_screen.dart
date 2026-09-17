@@ -137,7 +137,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                 animate: _reveal.shouldAnimate(bookings[index].id, index),
                 // A status that changes — pending to confirmed, or cancelled
                 // from here — crossfades rather than snapping.
-                child: AnimatedSwitcher(
+                child: SafeSwitcher(
                   duration: AppMotion.medium,
                   child: _BookingCard(
                     key: ValueKey(

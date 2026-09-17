@@ -229,7 +229,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       prefixIcon: const Icon(Icons.search, size: 20),
                       suffixIcon: ValueListenableBuilder<TextEditingValue>(
                         valueListenable: _searchController,
-                        builder: (context, value, _) => AnimatedSwitcher(
+                        builder: (context, value, _) => SafeSwitcher(
                           duration: AppMotion.fast,
                           transitionBuilder: (child, animation) =>
                               ScaleTransition(scale: animation, child: child),
@@ -404,7 +404,7 @@ class _Results extends StatelessWidget {
           right: AppSpacing.page,
           // Built only while loading: an indeterminate indicator animates
           // forever, and at opacity zero it would still repaint every frame.
-          child: AnimatedSwitcher(
+          child: SafeSwitcher(
             duration: AppMotion.fast,
             child: reloading
                 ? const ClipRRect(
