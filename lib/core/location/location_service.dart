@@ -95,17 +95,24 @@ class LocationService {
         return (LocationAccess.granted, _last);
       }
 
-      // Last known first: it is instant, and on a phone that has been in the
-      // same café for an hour it is as good as a new fix.
-      final position = await Geolocator.getLastKnownPosition() ??
-          await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-              // City-block accuracy is plenty to sort cafés, and it arrives
-              // in a fraction of the time a GPS-grade fix takes indoors.
-              accuracy: LocationAccuracy.medium,
-              timeLimit: Duration(seconds: 12),
-            ),
-          );
+      // The system's last known fix is instant, but it is only trusted when it
+      // is recent: it can be hours old and on the other side of the city — or,
+      // on a simulator, a point someone set by hand and cleared since. An old
+      // fix made "Near me" confidently sort by the wrong place.
+      final last = await Geolocator.getLastKnownPosition();
+      final lastIsFresh = last != null &&
+          DateTime.now().difference(last.timestamp).abs() < _fresh;
+
+      final position = lastIsFresh
+          ? last
+          : await Geolocator.getCurrentPosition(
+              locationSettings: const LocationSettings(
+                // City-block accuracy is plenty to sort cafés, and it arrives
+                // in a fraction of the time a GPS-grade fix takes indoors.
+                accuracy: LocationAccuracy.medium,
+                timeLimit: Duration(seconds: 12),
+              ),
+            );
 
       _last = UserLocation(position.latitude, position.longitude);
       _lastAt = DateTime.now();
