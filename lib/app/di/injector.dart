@@ -15,7 +15,9 @@ import '../../features/cafes/data/repositories/cafe_repository.dart';
 import '../../features/favorites/data/favorites_repository.dart';
 import '../../features/menu/data/repositories/menu_repository.dart';
 import '../../features/reservations/data/repositories/reservation_repository.dart';
+import '../../features/notifications/data/notification_repository.dart';
 import '../../features/notifications/data/push_service.dart';
+import '../../features/notifications/data/unread_notifications.dart';
 import '../../features/reviews/data/repositories/review_repository.dart';
 import '../router/app_router.dart';
 
@@ -69,7 +71,10 @@ Future<void> setupInjector() async {
     ..registerSingleton<ReviewRepository>(ReviewRepository(apiClient))
     ..registerSingleton<FavoritesRepository>(FavoritesRepository(apiClient))
     ..registerSingleton<ReservationRepository>(ReservationRepository(apiClient))
+    ..registerSingleton<NotificationRepository>(NotificationRepository(apiClient))
     ..registerSingleton<PushService>(PushService(apiClient));
+
+  UnreadNotifications.instance.attach(sl<NotificationRepository>());
 
   // ─── Session ────────────────────────────────────────────────────────
   sl.registerSingleton<AuthCubit>(AuthCubit(sl<AuthRepository>()));

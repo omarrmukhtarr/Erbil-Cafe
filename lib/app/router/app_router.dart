@@ -10,6 +10,7 @@ import '../../core/storage/app_preferences.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../features/cafes/data/models/cafe.dart';
@@ -20,13 +21,16 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/home/presentation/widgets/app_shell.dart';
 import '../../features/map/presentation/screens/map_screen.dart';
 import '../../features/menu/presentation/screens/menu_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/change_password_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/help_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/verify_email_screen.dart';
 import '../../features/reservations/presentation/screens/book_table_screen.dart';
 import '../../features/reservations/presentation/screens/my_bookings_screen.dart';
+import '../../features/reviews/presentation/screens/my_reviews_screen.dart';
 import '../../features/reviews/presentation/screens/write_review_screen.dart';
 
 abstract final class Routes {
@@ -35,6 +39,7 @@ abstract final class Routes {
   static const signUp = '/sign-up';
   static const otp = '/otp';
   static const forgotPassword = '/forgot-password';
+  static const resetPassword = '/reset-password';
 
   static const home = '/';
   static const explore = '/explore';
@@ -47,6 +52,9 @@ abstract final class Routes {
   static const editProfile = '/settings/profile';
   static const changePassword = '/settings/password';
   static const help = '/help';
+  static const notifications = '/notifications';
+  static const myReviews = '/settings/reviews';
+  static const verifyEmail = '/settings/verify-email';
 
   /// Explore, opened with a filter already applied.
   ///
@@ -57,12 +65,14 @@ abstract final class Routes {
     String? amenity,
     String? area,
     bool openNow = false,
+    bool nearMe = false,
     String? sort,
   }) {
     final params = <String, String>{
       if (amenity != null) 'amenity': amenity,
       if (area != null) 'area': area,
       if (openNow) 'openNow': '1',
+      if (nearMe) 'near': '1',
       if (sort != null) 'sort': sort,
     };
     if (params.isEmpty) return explore;
@@ -112,6 +122,7 @@ GoRouter createRouter({
         Routes.signUp,
         Routes.otp,
         Routes.forgotPassword,
+        Routes.resetPassword,
       };
 
       // Browsing is open to guests; only these routes require an account.
@@ -120,6 +131,9 @@ GoRouter createRouter({
         Routes.bookings,
         Routes.editProfile,
         Routes.changePassword,
+        Routes.notifications,
+        Routes.myReviews,
+        Routes.verifyEmail,
       };
       final needsAuth = protected.contains(path) ||
           path.endsWith('/book') ||
@@ -165,6 +179,16 @@ GoRouter createRouter({
         path: Routes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+      GoRoute(
+        path: Routes.resetPassword,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? const {};
+          return ResetPasswordScreen(
+            email: extra['email'] as String? ?? '',
+            devCode: extra['devCode'] as String?,
+          );
+        },
+      ),
 
       // ─── Tabs ─────────────────────────────────────────────────────
       //
@@ -206,6 +230,7 @@ GoRouter createRouter({
                     initialAmenity: params['amenity'],
                     initialArea: params['area'],
                     initialOpenNow: params['openNow'] == '1',
+                    initialNearMe: params['near'] == '1',
                     initialSort: params['sort'],
                   );
                 },
@@ -285,6 +310,21 @@ GoRouter createRouter({
         path: Routes.changePassword,
         parentNavigatorKey: _rootKey,
         builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: Routes.verifyEmail,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => const VerifyEmailScreen(),
+      ),
+      GoRoute(
+        path: Routes.myReviews,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => const MyReviewsScreen(),
+      ),
+      GoRoute(
+        path: Routes.notifications,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => const NotificationsScreen(),
       ),
       // Open to guests: someone who cannot sign in is exactly who needs help.
       GoRoute(

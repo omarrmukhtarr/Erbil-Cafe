@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,8 +12,9 @@ import '../l10n/kurdish_material_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/notifications/data/push_service.dart';
+import '../features/notifications/data/unread_notifications.dart';
+import '../features/notifications/presentation/notification_target.dart';
 import 'di/injector.dart';
-import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
 class ErbilCafeApp extends StatefulWidget {
@@ -21,7 +24,7 @@ class ErbilCafeApp extends StatefulWidget {
   State<ErbilCafeApp> createState() => _ErbilCafeAppState();
 }
 
-class _ErbilCafeAppState extends State<ErbilCafeApp> {
+class _ErbilCafeAppState extends State<ErbilCafeApp> with WidgetsBindingObserver {
   late final _prefs = sl<AppPreferences>();
   late final _authCubit = sl<AuthCubit>();
   late final _router = sl<GoRouter>();
@@ -29,9 +32,18 @@ class _ErbilCafeAppState extends State<ErbilCafeApp> {
   late Locale? _locale = _prefs.locale;
   late ThemeMode _themeMode = _prefs.themeMode;
 
+  StreamSubscription<AuthState>? _session;
+
   @override
   void initState() {
     super.initState();
+
+    // The bell's count: fetched when someone is signed in, cleared when they
+    // are not, and refreshed each time the app comes back to the foreground —
+    // which is when a booking answered in the meantime should show.
+    WidgetsBinding.instance.addObserver(this);
+    _syncUnread(_authCubit.state);
+    _session = _authCubit.stream.listen(_syncUnread);
 
     // Wired here rather than in `main` because a tapped notification has to
     // navigate, and the router only exists once the app is up. A notification
@@ -39,8 +51,31 @@ class _ErbilCafeAppState extends State<ErbilCafeApp> {
     // nothing is lost by waiting for this frame.
     sl<PushService>().listen(
       onOpen: _openFromNotification,
+      onReceive: UnreadNotifications.instance.refresh,
       locale: _locale?.languageCode,
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _session?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _authCubit.state.isAuthenticated) {
+      UnreadNotifications.instance.refresh();
+    }
+  }
+
+  void _syncUnread(AuthState state) {
+    if (state.isAuthenticated) {
+      UnreadNotifications.instance.refresh();
+    } else if (state.status == AuthStatus.guest) {
+      UnreadNotifications.instance.clear();
+    }
   }
 
   /// Routes a tapped notification to whatever it is about.
@@ -50,13 +85,9 @@ class _ErbilCafeAppState extends State<ErbilCafeApp> {
   /// no single-booking screen — and a list where the booking is visible is a
   /// better answer than a dead link.
   void _openFromNotification(Map<String, dynamic> data) {
-    final cafeSlug = data['cafeSlug'] as String?;
-
-    if (data['reservationId'] != null) {
-      _router.go(Routes.bookings);
-    } else if (cafeSlug != null && cafeSlug.isNotEmpty) {
-      _router.go(Routes.cafe(cafeSlug));
-    }
+    UnreadNotifications.instance.refresh();
+    final route = routeForNotification(data);
+    if (route != null) _router.go(route);
   }
 
   Future<void> _setLocale(Locale? locale) async {

@@ -41,8 +41,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       if (!mounted) return;
       context.push(
-        Routes.otp,
-        extra: {'identifier': identifier, 'devCode': devCode},
+        Routes.resetPassword,
+        extra: {'email': identifier, 'devCode': devCode},
       );
     } on Failure catch (f) {
       if (!mounted) return;
@@ -72,7 +72,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Text(l10n.forgotPassword, style: theme.textTheme.headlineMedium),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'We will send a code to reset your password.',
+                  l10n.forgotPasswordBody,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: AppColors.onCreamMuted),
                 ),
@@ -89,7 +89,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 const SizedBox(height: AppSpacing.xxl),
                 ElevatedButton(
                   onPressed: _submitting ? null : _submit,
-                  child: Text(l10n.resendCode),
+                  child: _submitting
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(l10n.sendCode),
                 ),
               ],
             ),
