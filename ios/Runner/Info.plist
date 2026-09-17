@@ -60,7 +60,7 @@
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<true/>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>This app needs access to location when open.</string>
+		<string>ErbilCafe uses your location to show the cafés closest to you and how far away each one is.</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
   		<string>https</string>
@@ -70,6 +70,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Push notifications that carry data can wake the app briefly. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
